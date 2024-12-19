@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import { Feed } from "@/components/Feed";
 import { ProfileCard } from "@/components/ProfileCard";
+import { Users, UserPlus, FileText, Download } from "lucide-react";
 
 const Index = () => {
   return (
@@ -17,19 +18,31 @@ const Index = () => {
             
             <div className="grid grid-cols-4 gap-4 mb-8">
               <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold mb-1 text-emerald-500">143</div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-5 h-5 text-emerald-500" />
+                  <div className="text-3xl font-semibold text-emerald-500">143</div>
+                </div>
                 <div className="text-sm text-gray-500">Aktiva Lärare</div>
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold mb-1 text-purple-500">14</div>
+                <div className="flex items-center gap-2 mb-3">
+                  <UserPlus className="w-5 h-5 text-purple-500" />
+                  <div className="text-3xl font-semibold text-purple-500">14</div>
+                </div>
                 <div className="text-sm text-gray-500">Nya lärare</div>
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold mb-1 text-orange-500">27</div>
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="w-5 h-5 text-orange-500" />
+                  <div className="text-3xl font-semibold text-orange-500">27</div>
+                </div>
                 <div className="text-sm text-gray-500">Material delade</div>
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold mb-1 text-pink-500">398</div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Download className="w-5 h-5 text-pink-500" />
+                  <div className="text-3xl font-semibold text-pink-500">398</div>
+                </div>
                 <div className="text-sm text-gray-500">Material nedladdade</div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { MessageSquare, ThumbsUp } from "lucide-react";
+import { MessageSquare, ThumbsUp, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -86,11 +86,15 @@ export function Feed() {
                 className="w-8 h-8 rounded-full object-cover"
               />
               <div className="flex-1">
-                <Textarea
-                  placeholder="Kommentera här..."
-                  className="mb-2 resize-none"
-                />
-                <Button size="sm">Skicka</Button>
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Kommentera här..."
+                    className="resize-none"
+                  />
+                  <Button size="icon" className="h-[80px]">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

@@ -1,0 +1,45 @@
+import { Eye, Users } from "lucide-react";
+
+export function ProfileCard() {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-sage-200 h-32"></div>
+      <div className="p-6 -mt-16">
+        <div className="mb-4">
+          <img
+            src="/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png"
+            alt="Profile"
+            className="w-24 h-24 rounded-full border-4 border-white mx-auto object-cover"
+          />
+        </div>
+        
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-semibold">Elmer Almer Ershagen</h2>
+          <p className="text-sm text-gray-500">Lärare på NTI Helsingborg</p>
+        </div>
+
+        <p className="text-sm text-gray-600 text-center mb-6">
+          Hej, jag heter Elmer, jag lär ut programmering på NTI och försöker
+          alltid hitta nya sätt att undervisa.
+        </p>
+
+        <div className="flex justify-center gap-6">
+          <div className="text-center">
+            <div className="flex items-center gap-1 text-gray-600 mb-1">
+              <Users className="w-4 h-4" />
+              <span className="font-semibold">5</span>
+            </div>
+            <p className="text-xs text-gray-500">Nedladdningar</p>
+          </div>
+          <div className="text-center">
+            <div className="flex items-center gap-1 text-gray-600 mb-1">
+              <Eye className="w-4 h-4" />
+              <span className="font-semibold">12</span>
+            </div>
+            <p className="text-xs text-gray-500">Profilvisningar</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

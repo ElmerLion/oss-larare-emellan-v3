@@ -7,7 +7,7 @@ const posts = [
     id: 1,
     author: {
       name: "Elmer Almer Ershagen",
-      avatar: "/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png",
+      avatar: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
       timeAgo: "5 min sen",
     },
     content: "Hej allihopa! Jag är en nyexaminerad lärare som vill lära mig så mycket som möjligt och dela med mig av mina kunskaper och jag hoppas kunna göra det här!",
@@ -18,7 +18,7 @@ const posts = [
     id: 2,
     author: {
       name: "Amanda Gunnarsson Nial",
-      avatar: "/placeholder.svg",
+      avatar: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
       timeAgo: "20 min sen",
     },
     content: "Hej! Jag har precis haft en lektion där jag försökte få mina elever att ha roligt med matten. De uppskattade det mycket. Jag delar materialet nedanför!",
@@ -81,7 +81,7 @@ export function Feed() {
           <div className="pt-4 border-t border-gray-100">
             <div className="flex gap-3">
               <img
-                src="/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png"
+                src="/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
                 alt="Your avatar"
                 className="w-8 h-8 rounded-full object-cover"
               />
@@ -89,9 +89,9 @@ export function Feed() {
                 <div className="flex gap-2">
                   <Textarea
                     placeholder="Kommentera här..."
-                    className="resize-none"
+                    className="resize-none h-10"
                   />
-                  <Button size="icon" className="h-[80px]">
+                  <Button size="icon" className="h-10 bg-sage-500 hover:bg-sage-600">
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>

@@ -7,7 +7,7 @@ export function ProfileCard() {
       <div className="p-6 -mt-16">
         <div className="mb-4">
           <img
-            src="/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png"
+            src="/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
             alt="Profile"
             className="w-24 h-24 rounded-full border-4 border-white mx-auto object-cover"
           />
@@ -26,14 +26,14 @@ export function ProfileCard() {
         <div className="flex justify-center gap-6">
           <div className="text-center">
             <div className="flex items-center gap-1 text-gray-600 mb-1">
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 text-[#F97316]" />
               <span className="font-semibold">5</span>
             </div>
             <p className="text-xs text-gray-500">Nedladdningar</p>
           </div>
           <div className="text-center">
             <div className="flex items-center gap-1 text-gray-600 mb-1">
-              <Eye className="w-4 h-4" />
+              <Eye className="w-4 h-4 text-[#FEC6A1]" />
               <span className="font-semibold">12</span>
             </div>
             <p className="text-xs text-gray-500">Profilvisningar</p>

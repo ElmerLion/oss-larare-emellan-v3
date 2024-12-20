@@ -1,8 +1,9 @@
-import { Search } from "lucide-react";
+import { Search, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface Message {
   id: number;
@@ -55,15 +56,24 @@ const messages: Message[] = [
 
 export default function Kontakter() {
   const [selectedContact, setSelectedContact] = useState<Message>(messages[2]); // Default to Sofia Persson
+  const [newMessage, setNewMessage] = useState("");
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      // Here you would typically send the message to your backend
+      console.log("Sending message:", newMessage);
+      setNewMessage("");
+    }
+  };
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-[#F6F6F7]">
       <AppSidebar />
       
       {/* Main content with left margin for sidebar */}
-      <div className="flex flex-1 ml-64">
+      <div className="flex flex-1 ml-64 p-6 gap-6">
         {/* Left side - Contact list */}
-        <div className="w-1/3 border-r">
+        <div className="w-[400px] bg-white rounded-lg shadow-sm">
           <div className="p-4">
             <h1 className="text-2xl font-semibold mb-4">Kontakter</h1>
             <h2 className="text-sm text-gray-600 mb-4">Dina senaste meddelanden</h2>
@@ -116,7 +126,7 @@ export default function Kontakter() {
         </div>
 
         {/* Right side - Chat window */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 bg-white rounded-lg shadow-sm flex flex-col">
           {/* Chat header */}
           <div className="p-4 border-b flex items-center gap-3">
             <img
@@ -142,7 +152,22 @@ export default function Kontakter() {
 
           {/* Chat input */}
           <div className="p-4 border-t">
-            <Input placeholder="Skriv ett meddelande..." className="bg-gray-50" />
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Skriv ett meddelande..." 
+                className="bg-gray-50"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <Button 
+                onClick={handleSendMessage}
+                size="icon"
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

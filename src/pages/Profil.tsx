@@ -1,9 +1,10 @@
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
-import { ProfileCard } from "@/components/ProfileCard";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Eye, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 interface UploadedMaterial {
   title: string;
@@ -32,6 +33,27 @@ const uploadedMaterials: UploadedMaterial[] = [
   }
 ];
 
+const recommendedConnections = [
+  {
+    name: "Anna Andersson",
+    role: "Matematiklärare",
+    school: "Stockholms Gymnasium",
+    image: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
+  },
+  {
+    name: "Erik Svensson",
+    role: "Fysiklärare",
+    school: "Uppsala Skola",
+    image: "/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png"
+  },
+  {
+    name: "Maria Larsson",
+    role: "Kemilärare",
+    school: "Malmö Gymnasium",
+    image: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+  }
+];
+
 export default function Profil() {
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
@@ -42,12 +64,33 @@ export default function Profil() {
         <div className="p-6 mt-16">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="grid grid-cols-3 gap-6">
-              <div className="col-span-1">
-                <ProfileCard />
-              </div>
-              
-              <div className="col-span-2 space-y-6">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="col-span-2">
+                {/* Profile Header */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                  <div className="flex items-center gap-6">
+                    <img
+                      src="/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+                      alt="Profile"
+                      className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                    />
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-semibold">Elmer Almer Ershagen</h2>
+                      <p className="text-gray-500">Lärare på NTI Helsingborg</p>
+                      <div className="flex gap-6 mt-4">
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4 text-[#F97316]" />
+                          <span className="text-gray-600">5 Nedladdningar</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4 text-[#FEC6A1]" />
+                          <span className="text-gray-600">12 Profilvisningar</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                   <h2 className="text-xl font-semibold mb-4">Om Mig</h2>
                   <div className="space-y-6">
                     <div>
@@ -65,7 +108,7 @@ export default function Profil() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Arbetslivserfarenhet</h2>
                     <Button variant="outline" size="sm">
@@ -133,6 +176,30 @@ export default function Profil() {
                     </div>
                   </ScrollArea>
                 </div>
+              </div>
+
+              {/* Recommended Connections */}
+              <div className="col-span-1">
+                <Card className="p-6">
+                  <h2 className="text-xl font-semibold mb-4">Rekommenderade Kontakter</h2>
+                  <div className="space-y-4">
+                    {recommendedConnections.map((connection, index) => (
+                      <div key={index} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={connection.image} alt={connection.name} />
+                        </Avatar>
+                        <div className="flex-1">
+                          <h3 className="font-medium">{connection.name}</h3>
+                          <p className="text-sm text-gray-500">{connection.role}</p>
+                          <p className="text-xs text-gray-400">{connection.school}</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Följ
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
               </div>
             </div>
           </div>

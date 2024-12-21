@@ -1,10 +1,10 @@
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AboutSection } from "@/components/profile/AboutSection";
+import { ExperienceSection } from "@/components/profile/ExperienceSection";
+import { UploadedMaterials } from "@/components/profile/UploadedMaterials";
 import { RecommendedContacts } from "@/components/profile/RecommendedContacts";
 
 const uploadedMaterials = [
@@ -82,74 +82,9 @@ export default function Profil() {
                   contribution="Positiv energi, relevanta diskussioner och massvis med material inom programmering."
                 />
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Arbetslivserfarenhet</h2>
-                    <Button variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Lägg till erfarenhet
-                    </Button>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mt-2"></div>
-                      <div>
-                        <div className="text-gray-600">2020-Nu</div>
-                        <div className="font-medium">Svenska-lärare</div>
-                        <div className="text-gray-600">Springfieldskolan</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ExperienceSection />
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold">Uppladdade Material</h2>
-                    <Button variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Ladda upp material
-                    </Button>
-                  </div>
-                  
-                  <ScrollArea className="h-[400px]">
-                    <div className="grid grid-cols-2 gap-6">
-                      {uploadedMaterials.map((material, index) => (
-                        <div
-                          key={index}
-                          className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 relative group"
-                        >
-                          <h3 className="text-lg font-semibold mb-2">{material.title}</h3>
-                          <p className="text-gray-600 text-sm mb-4">{material.description}</p>
-                          
-                          <div className="flex flex-wrap gap-2">
-                            {material.tags.map((tag, tagIndex) => (
-                              <div key={tagIndex} className="flex gap-2">
-                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
-                                  {tag.subject}
-                                </span>
-                                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
-                                  {tag.level}
-                                </span>
-                                <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                                  {tag.difficulty}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                          
-                          <div className="flex gap-2 mt-4">
-                            <Button variant="secondary" className="w-full bg-sage-100 hover:bg-sage-200">
-                              Se mer
-                            </Button>
-                            <Button variant="secondary" className="w-full bg-sage-100 hover:bg-sage-200">
-                              Ladda ner
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
+                <UploadedMaterials materials={uploadedMaterials} />
               </div>
 
               <div className="col-span-1">

@@ -1,4 +1,5 @@
 import { Eye, Users } from "lucide-react";
+import { Button } from "./ui/button";
 
 export function ProfileCard() {
   return (
@@ -7,15 +8,18 @@ export function ProfileCard() {
       <div className="p-6 -mt-16">
         <div className="mb-4">
           <img
-            src="/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+            src="/lovable-uploads/144055b7-14c4-4338-bad3-b07c15415914.png"
             alt="Profile"
             className="w-24 h-24 rounded-full border-4 border-white mx-auto object-cover"
           />
         </div>
         
-        <div className="text-center mb-4">
+        <div className="text-center mb-2">
           <h2 className="text-xl font-semibold">Elmer Almer Ershagen</h2>
-          <p className="text-sm text-gray-500">Lärare på NTI Helsingborg</p>
+          <p className="text-sm text-gray-500 mb-3">Lärare på NTI Helsingborg</p>
+          <Button variant="outline" size="sm" className="mb-4">
+            Lägg till som kontakt
+          </Button>
         </div>
 
         <p className="text-sm text-gray-600 text-center mb-6">

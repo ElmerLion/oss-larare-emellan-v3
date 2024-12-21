@@ -29,31 +29,31 @@ const recommendedContacts = [
     name: "Amanda Gunnarsson Nial",
     role: "Lärare",
     school: "Affärsgymnasiet",
-    image: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
+    image: "/lovable-uploads/23886c31-4d07-445c-bf13-eee4b2127d40.png"
   },
   {
     name: "Erik Svensson",
     role: "Lärare",
     school: "Affärsgymnasiet",
-    image: "/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png"
+    image: "/lovable-uploads/e7d324d6-19e4-4218-97a3-91fd2b88597c.png"
   },
   {
     name: "Maria Larsson",
     role: "Lärare",
     school: "Affärsgymnasiet",
-    image: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+    image: "/lovable-uploads/360aff04-e122-43cf-87b2-bad362e840e6.png"
   },
   {
     name: "Johan Andersson",
     role: "Lärare",
     school: "Affärsgymnasiet",
-    image: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
+    image: "/lovable-uploads/528dd7e5-5612-42d0-975c-7bbf91b02672.png"
   },
   {
     name: "Lisa Bergman",
     role: "Lärare",
     school: "Affärsgymnasiet",
-    image: "/lovable-uploads/7a5590cb-c66c-4fa4-8aa2-47b052f53e9f.png"
+    image: "/lovable-uploads/e8c5fbf6-ba45-4f5a-99ee-66dbc7fd22d1.png"
   }
 ];
 

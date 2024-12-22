@@ -12,7 +12,7 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ name, role, followers, reviews, imageUrl }: ProfileHeaderProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-      <div className="flex items-center gap-6">
+      <div className="flex items-start gap-6">
         <img
           src={imageUrl}
           alt={name}
@@ -30,7 +30,7 @@ export function ProfileHeader({ name, role, followers, reviews, imageUrl }: Prof
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2">
           <Button variant="default" className="bg-sage-400 hover:bg-sage-500">
             <MessageCircle className="w-4 h-4 mr-2" />
             Meddela

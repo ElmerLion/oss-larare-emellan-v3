@@ -15,22 +15,22 @@ interface RecommendedContactsProps {
 
 export function RecommendedContacts({ contacts }: RecommendedContactsProps) {
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-4">Lärare vi tror du velat lära känna</h2>
-      <div className="space-y-4">
+    <Card className="p-4">
+      <h2 className="text-lg font-semibold mb-3">Lärare vi tror du velat lära känna</h2>
+      <div className="space-y-3">
         {contacts.map((contact, index) => (
-          <div key={index} className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
-            <Avatar className="h-12 w-12 mb-2">
+          <div key={index} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <Avatar className="h-10 w-10">
               <AvatarImage src={contact.image} alt={contact.name} />
             </Avatar>
-            <div className="text-center mb-3">
-              <h3 className="font-medium">{contact.name}</h3>
-              <p className="text-sm text-gray-500">{contact.role}</p>
+            <div className="flex-1">
+              <h3 className="font-medium text-sm">{contact.name}</h3>
+              <p className="text-xs text-gray-500">{contact.role}</p>
               <p className="text-xs text-gray-400">{contact.school}</p>
+              <Button variant="outline" size="sm" className="mt-2 text-xs">
+                Lägg till som kontakt
+              </Button>
             </div>
-            <Button variant="outline" size="sm" className="whitespace-nowrap">
-              Lägg till som kontakt
-            </Button>
           </div>
         ))}
       </div>

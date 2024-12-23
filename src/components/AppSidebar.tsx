@@ -17,7 +17,7 @@ export function AppSidebar() {
     <div className="w-64 bg-white border-r border-gray-200 h-screen p-4 fixed left-0 top-0">
       <div className="flex items-center gap-2 mb-8">
         <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center text-white font-bold">
-          OLE
+          <img src="/images/OLELogga.png" alt="OLE Logo" className="w-full h-full object-contain" />
         </div>
         <span className="text-sm text-gray-600">Oss Lärare Emellan</span>
       </div>

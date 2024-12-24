@@ -1,11 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 export function FilterSidebar() {
   return (
-    <div className="w-64 bg-[#F6F6F7] p-6 border-r border-gray-200">
+    <div className="w-64 bg-white p-6 border-r border-gray-200 ml-[255px]">
       {/* Search Bar */}
       <div className="mb-6">
+        <Search className="absolute left-[291px] bottom-[851px] -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
           placeholder="Vad letar du efter?"
           className="bg-white pl-10 text-sm"

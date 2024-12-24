@@ -82,7 +82,7 @@ export default function Resurser() {
       <AppSidebar />
       <FilterSidebar />
 
-      <div className="flex-1 ml-64 p-6">
+      <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-semibold">Resurser</h1>

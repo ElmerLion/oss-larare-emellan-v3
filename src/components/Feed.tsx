@@ -18,7 +18,7 @@ const posts = [
     id: 2,
     author: {
       name: "Amanda Gunnarsson Nial",
-      avatar: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
+      avatar: "/lovable-uploads/360aff04-e122-43cf-87b2-bad362e840e6.png",
       timeAgo: "20 min sen",
     },
     content: "Hej! Jag har precis haft en lektion där jag försökte få mina elever att ha roligt med matten. De uppskattade det mycket. Jag delar materialet nedanför!",
@@ -89,7 +89,8 @@ export function Feed() {
                 <div className="flex gap-2">
                   <Textarea
                     placeholder="Kommentera här..."
-                    className="resize-none h-10"
+                    style={{ height: '40px', minHeight: '0', boxSizing: 'border-box' }}
+                    className="resize-none"
                   />
                   <Button size="icon" className="h-10 bg-sage-500 hover:bg-sage-600">
                     <Send className="h-4 w-4" />

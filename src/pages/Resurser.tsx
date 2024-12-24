@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
+import { FilterSidebar } from "@/components/FilterSidebar";
 
 interface Resource {
   title: string;
@@ -77,8 +78,10 @@ const resources: Resource[] = [
 export default function Resurser() {
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
+
       <AppSidebar />
-      
+      <FilterSidebar />
+
       <div className="flex-1 ml-64 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">

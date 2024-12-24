@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 interface Message {
   id: number;
   sender: string;
+  title: string;
   message: string;
   timestamp: string;
   unread?: number;
@@ -18,39 +19,44 @@ const messages: Message[] = [
   {
     id: 1,
     sender: "Elmer Almer Ershagen",
+    title: "Lärare på Tycho Brahe Helsingborg",
     message: "Såg att du var en mattelärare...",
     timestamp: "18 Dec 16:12",
-    unread: 2,
-    avatar: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+    unread: 3,
+    avatar: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
   },
   {
     id: 2,
     sender: "Fredrik Andersson",
+    title: "Lärare på NTI Helsingborg",
     message: "Har du testat detta AI-verktyget?",
     timestamp: "18 Dec 14:12",
     unread: 1,
-    avatar: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+    avatar: "/lovable-uploads/528dd7e5-5612-42d0-975c-7bbf91b02672.png"
   },
   {
     id: 3,
-    sender: "Sofia Persson",
+    sender: "Amanda Gunnarsson Nial",
+    title: "Lärare på Affärsgymnasiet",
     message: "Har du någon erfarenhet i...",
     timestamp: "17 Dec 16:45",
-    avatar: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+    avatar: "/lovable-uploads/360aff04-e122-43cf-87b2-bad362e840e6.png"
   },
   {
     id: 4,
     sender: "Emmie Nilsson",
+    title: "Lärare på Högastensskolan",
     message: "Jag brukar använda den här, du...",
     timestamp: "15 Dec 19:42",
-    avatar: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+    avatar: "/lovable-uploads/e8c5fbf6-ba45-4f5a-99ee-66dbc7fd22d1.png"
   },
   {
     id: 5,
     sender: "Anna Bergström",
+    title: "Lärare på Bårslövs Skola",
     message: "Jobbar du med årskus 7...",
     timestamp: "15 Dec 16:17",
-    avatar: "/lovable-uploads/ac1ea747-7ba9-4d55-a96a-87f6e8210f7e.png"
+    avatar: "/lovable-uploads/23886c31-4d07-445c-bf13-eee4b2127d40.png"
   }
 ];
 
@@ -136,7 +142,7 @@ export default function Kontakter() {
             />
             <div>
               <h3 className="font-medium">{selectedContact.sender}</h3>
-              <p className="text-sm text-gray-600">Lärare på Affärsgymnasiet</p>
+              <p className="text-sm text-gray-600">{selectedContact.title}</p>
             </div>
           </div>
 

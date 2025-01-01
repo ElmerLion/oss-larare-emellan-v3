@@ -1,10 +1,46 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
+import { ProfileCompletion } from "@/components/auth/ProfileCompletion";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [showProfileCompletion, setShowProfileCompletion] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      
+      if (session) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, school')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.full_name && profile?.school) {
+          navigate('/');
+        } else {
+          setShowProfileCompletion(true);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  if (showProfileCompletion) {
+    return <ProfileCompletion />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

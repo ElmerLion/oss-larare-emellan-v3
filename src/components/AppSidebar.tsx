@@ -1,6 +1,9 @@
-import { Home, User, Users, Book, Settings, LogOut } from "lucide-react";
+import { Home, User, Users, Book, Settings, LogOut, LogIn, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { Session } from "@supabase/supabase-js";
 
 const menuItems = [
   { icon: Home, label: "Hem", path: "/" },
@@ -12,6 +15,27 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen p-4 fixed left-0 top-0">
@@ -38,11 +62,33 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="absolute bottom-8 left-4 right-4">
-        <button className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 transition-colors w-full">
-          <LogOut className="w-5 h-5" />
-          <span>Logga ut</span>
-        </button>
+      <div className="absolute bottom-8 left-4 right-4 space-y-2">
+        {session ? (
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 transition-colors w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Logga ut</span>
+          </button>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+            >
+              <LogIn className="w-5 h-5" />
+              <span>Logga in</span>
+            </Link>
+            <Link
+              to="/login"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+            >
+              <UserPlus className="w-5 h-5" />
+              <span>Registrera</span>
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );

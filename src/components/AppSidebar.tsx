@@ -4,6 +4,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const menuItems = [
   { icon: Home, label: "Hem", path: "/" },
@@ -33,8 +34,19 @@ export function AppSidebar() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+        toast.error("Ett fel uppstod vid utloggning");
+        return;
+      }
+      navigate("/login");
+      toast.success("Du har loggats ut");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Ett fel uppstod vid utloggning");
+    }
   };
 
   return (

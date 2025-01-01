@@ -26,7 +26,7 @@ const uploadedMaterials = [
 
 const recommendedContacts = [
   {
-    name: "Amanda Gunnarsson Nial",
+    name: "Maria Larsson",
     role: "Lärare",
     school: "Affärsgymnasiet",
     image: "/lovable-uploads/23886c31-4d07-445c-bf13-eee4b2127d40.png"
@@ -38,7 +38,7 @@ const recommendedContacts = [
     image: "/lovable-uploads/e7d324d6-19e4-4218-97a3-91fd2b88597c.png"
   },
   {
-    name: "Maria Larsson",
+    name: "Amanda Gunnarsson Nial",
     role: "Lärare",
     school: "Affärsgymnasiet",
     image: "/lovable-uploads/360aff04-e122-43cf-87b2-bad362e840e6.png"
@@ -50,7 +50,7 @@ const recommendedContacts = [
     image: "/lovable-uploads/528dd7e5-5612-42d0-975c-7bbf91b02672.png"
   },
   {
-    name: "Lisa Bergman",
+    name: "Emmie Nilsson",
     role: "Lärare",
     school: "Affärsgymnasiet",
     image: "/lovable-uploads/e8c5fbf6-ba45-4f5a-99ee-66dbc7fd22d1.png"
@@ -61,11 +61,10 @@ export default function Profil() {
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
       <AppSidebar />
-      <div className="flex-1 ml-64">
-        <Header />
+      <div className="flex-1 ml-80">
         
-        <div className="p-6 mt-16">
-          <div className="max-w-7xl mx-auto">
+        <div className="p-6 mt-4">
+          <div className="max-w-[1500px] mx-auto">
             <div className="grid grid-cols-3 gap-6">
               <div className="col-span-2">
                 <ProfileHeader
@@ -73,7 +72,7 @@ export default function Profil() {
                   role="Lärare på NTI Helsingborg"
                   followers={192}
                   reviews={54}
-                  imageUrl="/lovable-uploads/144055b7-14c4-4338-bad3-b07c15415914.png"
+                  imageUrl="/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
                 />
 
                 <AboutSection

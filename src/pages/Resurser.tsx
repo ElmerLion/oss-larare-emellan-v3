@@ -84,21 +84,8 @@ export default function Resurser() {
 
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-semibold">Resurser</h1>
-            
-            <div className="flex gap-4">
-              <div className="relative w-[300px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Vad letar du efter?"
-                  className="pl-10 bg-white"
-                />
-              </div>
-            </div>
-          </div>
 
-          <ScrollArea className="h-[calc(100vh-180px)]">
+          <ScrollArea className="h-[calc(100vh-40px)]">
             <div className="grid grid-cols-2 gap-6">
               {resources.map((resource, index) => (
                 <div
@@ -133,10 +120,10 @@ export default function Resurser() {
                   </div>
                   
                   <div className="flex gap-2 mt-4">
-                    <Button variant="secondary" className="w-full bg-sage-100 hover:bg-sage-200">
+                    <Button variant="secondary" className="w-full bg-sage-200 hover:bg-sage-300">
                       Se mer
                     </Button>
-                    <Button variant="secondary" className="w-full bg-sage-100 hover:bg-sage-200">
+                    <Button variant="secondary" className="w-full bg-sage-200 hover:bg-sage-300">
                       Ladda ner
                     </Button>
                   </div>

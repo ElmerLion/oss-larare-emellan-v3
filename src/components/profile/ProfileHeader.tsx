@@ -16,17 +16,17 @@ export function ProfileHeader({ name, role, followers, reviews, imageUrl }: Prof
         <img
           src={imageUrl}
           alt={name}
-          className="w-24 h-24 rounded-full border-4 border-white object-cover"
+          className="w-28 h-28 rounded-full border-4 border-white object-cover"
         />
         <div className="flex-1">
           <h2 className="text-2xl font-semibold">{name}</h2>
           <p className="text-gray-500">{role}</p>
           <div className="flex gap-6 mt-4">
             <div className="flex items-center gap-1">
-              <span className="text-gray-600">{followers} Följare</span>
+              <span className="text-gray-600 font-semibold"><span className="text-blue-400">{followers}</span> Följare</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-gray-600">{reviews} Positiva Recensioner</span>
+              <span className="text-gray-600 font-semibold"><span className="text-green-600">{reviews}</span> Positiva Recensioner</span>
             </div>
           </div>
         </div>

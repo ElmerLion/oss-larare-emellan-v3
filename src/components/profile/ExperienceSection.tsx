@@ -12,12 +12,20 @@ export function ExperienceSection() {
         </Button>
       </div>
       <div className="space-y-4">
-        <div className="flex items-start gap-4">
+        <div className="flex-cols items-start gap-4">
           <div className="w-3 h-3 bg-green-500 rounded-full mt-2"></div>
           <div>
             <div className="text-gray-600">2020-Nu</div>
-            <div className="font-medium">Svenska-lärare</div>
+            <div className="font-medium">Svenska Lärare</div>
             <div className="text-gray-600">Springfieldskolan</div>
+            <div className="text-gray-800 mt-2">Jobbar i årskurs 4-6 med svenska. Jag lärde mig mycket om att hantera elever och att skapa eget material.</div>
+          </div>
+          <div className="w-3 h-3 bg-gray-500 rounded-full mt-8"></div>
+          <div>
+            <div className="text-gray-600">2016-2020</div>
+            <div className="font-medium">Engelska Lärare</div>
+            <div className="text-gray-600">Högastensskolan</div>
+            <div className="text-gray-800 mt-2">Jobbade i årskurs 4-6 med engelska efter jag blivit nyexamined lärare. Jag lärde mig mycket om att hantera elever och att skapa eget material.</div>
           </div>
         </div>
       </div>

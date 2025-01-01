@@ -11,7 +11,7 @@ const Index = () => {
       <Header />
       
       <main className="pl-64 pt-16">
-        <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-3 gap-8">
+        <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
           <div className="col-span-2">
             <h1 className="text-2xl font-semibold mb-2">Välkommen tillbaka Elmer!</h1>
             <p className="text-gray-600 mb-8">Detta är vad som hänt senaste veckan</p>

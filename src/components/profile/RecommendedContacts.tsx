@@ -15,7 +15,7 @@ interface RecommendedContactsProps {
 
 export function RecommendedContacts({ contacts }: RecommendedContactsProps) {
   return (
-    <Card className="p-4">
+    <Card className="p-4 max-w-[300px]">
       <h2 className="text-lg font-semibold mb-3">Lärare vi tror du velat lära känna</h2>
       <div className="space-y-3">
         {contacts.map((contact, index) => (

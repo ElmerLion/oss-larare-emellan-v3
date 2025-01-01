@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileCompletion } from "@/components/auth/ProfileCompletion";
+import { Session } from "@supabase/supabase-js";
 
 export default function Login() {
   const navigate = useNavigate();

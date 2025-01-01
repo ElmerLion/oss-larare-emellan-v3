@@ -35,12 +35,21 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
+      // Clear any stored session data
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Logout error:", error);
         toast.error("Ett fel uppstod vid utloggning");
         return;
       }
+
+      // Clear session state
+      setSession(null);
+      
+      // Navigate to login page
       navigate("/login");
       toast.success("Du har loggats ut");
     } catch (error) {

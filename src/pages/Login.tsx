@@ -5,6 +5,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileCompletion } from "@/components/auth/ProfileCompletion";
 import { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,26 +13,60 @@ export default function Login() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    // Check initial session
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        setSession(session);
+        
+        if (session) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('full_name, school')
+            .eq('id', session.user.id)
+            .single();
 
+          if (profileError) throw profileError;
+
+          if (profile?.full_name && profile?.school) {
+            navigate('/');
+          } else {
+            setShowProfileCompletion(true);
+          }
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+        toast.error("Ett fel uppstod vid inloggning");
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       
       if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, school')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('full_name, school')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profile?.full_name && profile?.school) {
-          navigate('/');
-        } else {
-          setShowProfileCompletion(true);
+          if (error) throw error;
+
+          if (profile?.full_name && profile?.school) {
+            navigate('/');
+          } else {
+            setShowProfileCompletion(true);
+          }
+        } catch (error) {
+          console.error("Profile check error:", error);
+          toast.error("Ett fel uppstod vid hämtning av profil");
         }
       }
     });

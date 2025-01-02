@@ -55,7 +55,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={!isAuthenticated ? <Index /> : <Navigate to="/home" replace />} />
               <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
               <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
               <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />

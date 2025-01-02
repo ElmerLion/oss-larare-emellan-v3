@@ -6,10 +6,36 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-sage-50 to-white">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <img src="/Images/OLELogga.png" alt="OLE Logo" className="h-8 w-auto" />
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                className="border-sage-200 hover:bg-sage-50"
+                onClick={() => navigate("/login")}
+              >
+                Logga in
+              </Button>
+              <Button 
+                className="bg-sage-400 hover:bg-sage-500 text-white"
+                onClick={() => navigate("/login")}
+              >
+                Registrera
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 -z-10" />
+      <section className="relative pt-24 h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-sage-300/10 to-sage-400/10 -z-10" />
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Framtidens Community för Lärare
@@ -19,7 +45,7 @@ const Index = () => {
           </p>
           <Button
             size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-lg px-8"
+            className="bg-sage-400 hover:bg-sage-500 text-white text-lg px-8"
             onClick={() => navigate("/login")}
           >
             Registrera dig nu
@@ -41,7 +67,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-sage-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-16">
             Vad kan du göra på OLE?
@@ -93,12 +119,12 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-purple-50">
+      <section className="py-20 bg-sage-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-8">Redo att börja?</h2>
           <Button
             size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-lg px-8"
+            className="bg-sage-400 hover:bg-sage-500 text-white text-lg px-8"
             onClick={() => navigate("/login")}
           >
             Registrera dig nu
@@ -119,8 +145,8 @@ const FeatureCard = ({
   description: string;
 }) => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 text-purple-600 mb-4">
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-sage-100 text-center">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-sage-100 text-sage-600 mb-4">
         {icon}
       </div>
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
@@ -139,7 +165,7 @@ const TestimonialCard = ({
   role: string;
 }) => {
   return (
-    <div className="bg-gray-50 p-6 rounded-lg">
+    <div className="bg-sage-50 p-6 rounded-lg">
       <p className="text-gray-600 italic mb-4">{quote}</p>
       <p className="font-semibold">{author}</p>
       <p className="text-sm text-gray-500">{role}</p>

@@ -1,83 +1,148 @@
-import { AppSidebar } from "@/components/AppSidebar";
-import { Header } from "@/components/Header";
-import { Feed } from "@/components/Feed";
-import { ProfileCard } from "@/components/ProfileCard";
-import { Users, UserPlus, FileText, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { BookOpen, Users, MessageCircle, Settings } from "lucide-react";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <AppSidebar />
-      <Header />
-      
-      <main className="pl-64 pt-16">
-        <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
-          <div className="col-span-2">
-            <h1 className="text-2xl font-semibold mb-2">Välkommen tillbaka Elmer!</h1>
-            <p className="text-gray-600 mb-8">Detta är vad som hänt senaste veckan</p>
-            
-            <div className="grid grid-cols-4 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <Users className="w-5 h-5 text-emerald-500" />
-                  <div className="text-3xl font-semibold text-emerald-500">143</div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Aktiva Lärare</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <UserPlus className="w-5 h-5 text-purple-500" />
-                  <div className="text-3xl font-semibold text-purple-500">14</div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Nya lärare</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <FileText className="w-5 h-5 text-orange-500" />
-                  <div className="text-3xl font-semibold text-orange-500">27</div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Material delade</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <Download className="w-5 h-5 text-pink-500" />
-                  <div className="text-3xl font-semibold text-pink-500">398</div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Material nedladdade</div>
-              </div>
-            </div>
+  const navigate = useNavigate();
 
-            <Feed />
-          </div>
-          
-          <div className="space-y-6">
-            <ProfileCard />
-            
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-semibold mb-4">Just Nu</h2>
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium mb-2">Populära Diskussioner</h3>
-                <div className="space-y-2">
-                  {[
-                    "Projekt-Baserad Inlärning",
-                    "Bästa sättet att lära ut matte",
-                    "Engagera eleverna",
-                    "Använd AI på rätt sätt"
-                  ].map((topic) => (
-                    <a
-                      key={topic}
-                      href="#"
-                      className="block text-sm text-gray-600 hover:text-sage-500"
-                    >
-                      {topic}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+      {/* Hero Section */}
+      <section className="relative h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 -z-10" />
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            Framtidens Community för Lärare
+          </h1>
+          <p className="text-xl sm:text-2xl text-gray-600 mb-8">
+            Dela kunskap, bygg nätverk och utvecklas tillsammans
+          </p>
+          <Button
+            size="lg"
+            className="bg-purple-600 hover:bg-purple-700 text-lg px-8"
+            onClick={() => navigate("/login")}
+          >
+            Registrera dig nu
+          </Button>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Vad är Oss Lärare Emellan?
+          </h2>
+          <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-16">
+            OLE är en digital plattform som hjälper lärare att samarbeta, dela resurser och
+            inspirera varandra för att stärka undervisningen i svenska skolor.
+          </p>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-16">
+            Vad kan du göra på OLE?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <FeatureCard
+              icon={<BookOpen className="w-8 h-8" />}
+              title="Dela Resurser"
+              description="Dela och upptäck lektionsplaner och resurser"
+            />
+            <FeatureCard
+              icon={<Users className="w-8 h-8" />}
+              title="Bygg Nätverk"
+              description="Bygg ett professionellt nätverk med lärare över hela Sverige"
+            />
+            <FeatureCard
+              icon={<MessageCircle className="w-8 h-8" />}
+              title="Delta i Diskussioner"
+              description="Delta i diskussioner och håll dig uppdaterad om nya undervisningsmetoder"
+            />
+            <FeatureCard
+              icon={<Settings className="w-8 h-8" />}
+              title="Anpassa Innehåll"
+              description="Anpassa innehållet till dina ämnen och intressen"
+            />
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-16">
+            Vad säger våra användare?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <TestimonialCard
+              quote="Jag sparar flera timmar varje vecka tack vare OLE. Det har verkligen gjort mitt arbete lättare!"
+              author="Anna Svensson"
+              role="Gymnasielärare"
+            />
+            <TestimonialCard
+              quote="Att bolla idéer med andra är väldigt utvecklade."
+              author="Danjiel Lazarevic"
+              role="Lärare"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-purple-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-8">Redo att börja?</h2>
+          <Button
+            size="lg"
+            className="bg-purple-600 hover:bg-purple-700 text-lg px-8"
+            onClick={() => navigate("/login")}
+          >
+            Registrera dig nu
+          </Button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) => {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 text-purple-600 mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-gray-600">{description}</p>
+    </div>
+  );
+};
+
+const TestimonialCard = ({
+  quote,
+  author,
+  role,
+}: {
+  quote: string;
+  author: string;
+  role: string;
+}) => {
+  return (
+    <div className="bg-gray-50 p-6 rounded-lg">
+      <p className="text-gray-600 italic mb-4">{quote}</p>
+      <p className="font-semibold">{author}</p>
+      <p className="text-sm text-gray-500">{role}</p>
     </div>
   );
 };

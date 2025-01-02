@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import Kontakter from "./pages/Kontakter";
 import Resurser from "./pages/Resurser";
 import Profil from "./pages/Profil";
@@ -51,8 +52,9 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
-            <Route path="/" element={isAuthenticated ? <Index /> : <Navigate to="/login" replace />} />
+            <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
             <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
             <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
             <Route path="/profil" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />

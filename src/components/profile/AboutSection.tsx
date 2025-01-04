@@ -4,9 +4,10 @@ import { EditProfileDialog } from "./EditProfileDialog";
 
 interface AboutSectionProps {
   userId?: string;
+  onProfileUpdate?: () => void;
 }
 
-export function AboutSection({ userId }: AboutSectionProps) {
+export function AboutSection({ userId, onProfileUpdate }: AboutSectionProps) {
   const [profileData, setProfileData] = useState({
     purpose: null,
     motivation: null,
@@ -43,6 +44,13 @@ export function AboutSection({ userId }: AboutSectionProps) {
     fetchProfile();
   }, [userId]);
 
+  const handleProfileUpdate = () => {
+    fetchProfile();
+    if (onProfileUpdate) {
+      onProfileUpdate();
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
@@ -50,7 +58,7 @@ export function AboutSection({ userId }: AboutSectionProps) {
         {isCurrentUser && (
           <EditProfileDialog
             profileData={profileData}
-            onProfileUpdate={fetchProfile}
+            onProfileUpdate={handleProfileUpdate}
           />
         )}
       </div>

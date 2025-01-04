@@ -6,8 +6,44 @@ import { AboutSection } from "@/components/profile/AboutSection";
 import { ExperienceSection } from "@/components/profile/ExperienceSection";
 import { UploadedMaterials } from "@/components/profile/UploadedMaterials";
 import { RecommendedContacts } from "@/components/profile/RecommendedContacts";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Profil() {
+  const [profileData, setProfileData] = useState({
+    full_name: "",
+    title: "",
+    school: "",
+    avatar_url: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
+  });
+
+  const fetchProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return;
+    }
+
+    setProfileData({
+      full_name: data.full_name || "",
+      title: data.title || "",
+      school: data.school || "",
+      avatar_url: data.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
+    });
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
       <AppSidebar />
@@ -19,14 +55,14 @@ export default function Profil() {
               <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-2">
                   <ProfileHeader
-                    name="Elmer Almer Ershagen"
-                    role="Lärare på NTI Helsingborg"
+                    name={profileData.full_name || "Unnamed User"}
+                    role={`${profileData.title}${profileData.school ? ` på ${profileData.school}` : ''}`}
                     followers={192}
                     reviews={54}
-                    imageUrl="/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
+                    imageUrl={profileData.avatar_url}
                   />
 
-                  <AboutSection />
+                  <AboutSection onProfileUpdate={fetchProfile} />
 
                   <ExperienceSection />
 

@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProfileCompletion } from "@/components/auth/ProfileCompletion";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { LandingHeader } from "@/components/LandingHeader";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -81,7 +80,18 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <LandingHeader />
+      <div className="p-4 border-b border-gray-200 bg-white">
+        <button 
+          onClick={() => navigate("/")} 
+          className="flex items-center gap-2"
+        >
+          <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center">
+            <img src="/Images/OLELogga.png" alt="OLE Logo" className="w-full h-full object-contain" />
+          </div>
+          <span className="text-sm text-gray-600">Oss Lärare Emellan</span>
+        </button>
+      </div>
+
       <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-lg shadow-sm">
         <h1 className="text-2xl font-semibold mb-6 text-center">Välkommen tillbaka!</h1>
         <Auth

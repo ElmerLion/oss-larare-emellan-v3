@@ -26,11 +26,7 @@ export default function Profil() {
                     imageUrl="/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
                   />
 
-                  <AboutSection
-                    purpose="Lära mig av likasinnade och hjälpa mina elever nå sina drömmar."
-                    motivation="Jag älskar att se och kunna hjälpa andra yngre personer utveckla sig själva och se dem lyckas."
-                    contribution="Positiv energi, relevanta diskussioner och massvis med material inom programmering."
-                  />
+                  <AboutSection />
 
                   <ExperienceSection />
 

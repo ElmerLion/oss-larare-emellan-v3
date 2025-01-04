@@ -1,6 +1,7 @@
 import { MessageSquare, ThumbsUp, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { CreatePostDialog } from "./CreatePostDialog";
 
 const posts = [
   {
@@ -25,12 +26,50 @@ const posts = [
     reactions: 98,
     comments: 43,
     tags: ["Lätt", "Matematik", "Årskurs 3"],
+    materials: [
+      {
+        title: "Rolig matematik - Lektion 1",
+        type: "pdf",
+      }
+    ]
+  },
+  {
+    id: 3,
+    author: {
+      name: "Maria Larsson",
+      avatar: "/lovable-uploads/23886c31-4d07-445c-bf13-eee4b2127d40.png",
+      timeAgo: "1 timme sen",
+    },
+    content: "Har någon tips på bra övningar för att lära ut svenska som andraspråk? Jag har en grupp elever som kämpar med grundläggande grammatik.",
+    reactions: 15,
+    comments: 8,
+    tags: ["Svenska som andraspråk", "Grammatik"],
+  },
+  {
+    id: 4,
+    author: {
+      name: "Johan Andersson",
+      avatar: "/lovable-uploads/528dd7e5-5612-42d0-975c-7bbf91b02672.png",
+      timeAgo: "2 timmar sen",
+    },
+    content: "Delar med mig av min presentation om hållbar utveckling. Perfekt för gymnasieelever som läser naturkunskap!",
+    reactions: 67,
+    comments: 23,
+    tags: ["Naturkunskap", "Gymnasiet", "Hållbarhet"],
+    materials: [
+      {
+        title: "Hållbar utveckling - Presentation",
+        type: "pptx",
+      }
+    ]
   }
 ];
 
 export function Feed() {
   return (
     <div className="space-y-6">
+      <CreatePostDialog />
+      
       {posts.map((post) => (
         <div key={post.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-start justify-between mb-4">
@@ -63,6 +102,20 @@ export function Feed() {
                 >
                   {tag}
                 </span>
+              ))}
+            </div>
+          )}
+
+          {post.materials && (
+            <div className="mb-4">
+              {post.materials.map((material, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 border border-gray-200 rounded p-3 flex items-center justify-between"
+                >
+                  <span className="font-medium text-gray-700">{material.title}</span>
+                  <Button variant="outline" size="sm">Ladda ner</Button>
+                </div>
               ))}
             </div>
           )}

@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      experiences: {
+        Row: {
+          company: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          profile_id: string
+          role: string
+          start_date: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          profile_id: string
+          role: string
+          start_date: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          profile_id?: string
+          role?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_materials: {
         Row: {
           created_at: string
@@ -105,9 +149,13 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          contribution: string | null
           created_at: string
           full_name: string | null
           id: string
+          motivation: string | null
+          purpose: string | null
           school: string | null
           title: string | null
           updated_at: string
@@ -115,9 +163,13 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          contribution?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          motivation?: string | null
+          purpose?: string | null
           school?: string | null
           title?: string | null
           updated_at?: string
@@ -125,9 +177,13 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          contribution?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          motivation?: string | null
+          purpose?: string | null
           school?: string | null
           title?: string | null
           updated_at?: string

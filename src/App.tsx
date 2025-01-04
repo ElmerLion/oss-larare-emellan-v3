@@ -49,25 +49,27 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-[#F6F6F7]">
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
-              <Route path="/" element={<Index />} />
-              <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
-              <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
-              <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
-              <Route path="/profil" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <div className="flex-grow">
+              <Routes>
+                <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
+                <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
+                <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
+                <Route path="/profil" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
             <Footer />
           </BrowserRouter>
         </div>
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

@@ -4,6 +4,9 @@
 
 @layer base {
   :root {
+    --ole-green: #8da685;
+    --hover-green: #768a6f;
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 

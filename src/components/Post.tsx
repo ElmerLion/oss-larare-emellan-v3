@@ -77,7 +77,7 @@ export function Post({ author, content, reactions, comments, tags, materials }: 
                 style={{ height: '40px', minHeight: '0', boxSizing: 'border-box' }}
                 className="resize-none"
               />
-              <Button size="icon" className="h-10 bg-sage-500 hover:bg-sage-600">
+              <Button size="icon" className="h-10 bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)]">
                 <Send className="h-4 w-4" />
               </Button>
             </div>

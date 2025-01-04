@@ -39,17 +39,17 @@ export function CreatePostDialog() {
       if (postError) throw postError;
 
       toast({
-        title: "Success",
-        description: "Your post has been published!",
+        title: "Publicerad",
+        description: "Din post har delats!",
       });
 
       setIsOpen(false);
       setContent("");
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error('Ett problem uppstod:', error);
       toast({
         title: "Error",
-        description: "Failed to create post. Please try again.",
+        description: "Misslyckades att skapa en post. Försök igen.",
         variant: "destructive",
       });
     }
@@ -59,7 +59,7 @@ export function CreatePostDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button 
-          className="w-full bg-sage-500 hover:bg-sage-600 text-white py-6 text-lg font-medium mb-6"
+           className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6"
         >
           Dela en tanke
         </Button>
@@ -95,7 +95,7 @@ export function CreatePostDialog() {
           </div>
 
           <div className="pt-4 flex justify-end">
-            <Button type="submit" className="bg-sage-500 hover:bg-sage-600">
+            <Button type="submit" className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)]">
               Publicera
             </Button>
           </div>

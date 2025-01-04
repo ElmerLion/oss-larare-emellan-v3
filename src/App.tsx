@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
+import { toast } from "sonner";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -22,10 +23,17 @@ const App = () => {
     // Check for existing session
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session error:", error);
+          toast.error("Ett fel uppstod vid inloggning");
+          setIsAuthenticated(false);
+          return;
+        }
         setIsAuthenticated(!!session);
       } catch (error) {
         console.error("Session check error:", error);
+        toast.error("Ett fel uppstod vid inloggning");
         setIsAuthenticated(false);
       }
     };
@@ -36,10 +44,18 @@ const App = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+      const isAuthed = !!session;
+      setIsAuthenticated(isAuthed);
+      
+      if (!isAuthed) {
+        // Clear any stored tokens when the user is logged out
+        supabase.auth.signOut();
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
   if (isAuthenticated === null) {

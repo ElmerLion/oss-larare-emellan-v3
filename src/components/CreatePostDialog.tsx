@@ -2,20 +2,57 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Upload, Link } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export function CreatePostDialog() {
   const [content, setContent] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual post creation
-    console.log("Creating post:", content);
-    setIsOpen(false);
-    setContent("");
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to create a post",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: post, error: postError } = await supabase
+        .from('posts')
+        .insert({
+          content,
+          author_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (postError) throw postError;
+
+      toast({
+        title: "Success",
+        description: "Your post has been published!",
+      });
+
+      setIsOpen(false);
+      setContent("");
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

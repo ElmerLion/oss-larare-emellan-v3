@@ -16,7 +16,7 @@ interface Material {
 }
 
 interface PostProps {
-  id: number;
+  id: string | number; // Updated to accept both string and number types
   author: Author;
   content: string;
   reactions: number;

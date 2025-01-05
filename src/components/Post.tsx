@@ -12,6 +12,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
+
+type ReactionType = Database['public']['Enums']['reaction_type'];
 
 interface Author {
   name: string;
@@ -32,10 +35,10 @@ interface PostProps {
   comments: number;
   tags?: string[];
   materials?: Material[];
-  userReaction?: string | null;
+  userReaction?: ReactionType | null;
 }
 
-const reactionEmojis: Record<string, { emoji: string; label: string }> = {
+const reactionEmojis: Record<ReactionType, { emoji: string; label: string }> = {
   inspiring: { emoji: "✨", label: "Inspiring" },
   creative: { emoji: "🎨", label: "Creative" },
   helpful: { emoji: "🛠️", label: "Helpful" },
@@ -46,10 +49,10 @@ const reactionEmojis: Record<string, { emoji: string; label: string }> = {
 };
 
 export function Post({ id, author, content, reactions, comments, tags, materials, userReaction: initialUserReaction }: PostProps) {
-  const [userReaction, setUserReaction] = useState<string | null>(initialUserReaction || null);
+  const [userReaction, setUserReaction] = useState<ReactionType | null>(initialUserReaction || null);
   const { toast } = useToast();
 
-  const handleReaction = async (reactionType: string) => {
+  const handleReaction = async (reactionType: ReactionType) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -84,13 +87,11 @@ export function Post({ id, author, content, reactions, comments, tags, materials
 
         const { error } = await supabase
           .from('post_reactions')
-          .insert([
-            {
-              post_id: id,
-              user_id: user.id,
-              reaction: reactionType,
-            },
-          ]);
+          .insert({
+            post_id: id.toString(),
+            user_id: user.id,
+            reaction: reactionType,
+          });
 
         if (error) throw error;
         setUserReaction(reactionType);
@@ -148,7 +149,7 @@ export function Post({ id, author, content, reactions, comments, tags, materials
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {Object.entries(reactionEmojis).map(([key, { emoji, label }]) => (
+            {(Object.entries(reactionEmojis) as [ReactionType, { emoji: string; label: string }][]).map(([key, { emoji, label }]) => (
               <DropdownMenuItem
                 key={key}
                 onClick={() => handleReaction(key)}

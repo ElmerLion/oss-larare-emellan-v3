@@ -3,6 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PostMaterial } from "./PostMaterial";
 import { PostTags } from "./PostTags";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 interface Author {
   name: string;
@@ -23,9 +32,79 @@ interface PostProps {
   comments: number;
   tags?: string[];
   materials?: Material[];
+  userReaction?: string | null;
 }
 
-export function Post({ author, content, reactions, comments, tags, materials }: PostProps) {
+const reactionEmojis: Record<string, { emoji: string; label: string }> = {
+  inspiring: { emoji: "✨", label: "Inspiring" },
+  creative: { emoji: "🎨", label: "Creative" },
+  helpful: { emoji: "🛠️", label: "Helpful" },
+  insightful: { emoji: "💡", label: "Insightful" },
+  encouraging: { emoji: "🌟", label: "Encouraging" },
+  innovative: { emoji: "🚀", label: "Innovative" },
+  fun: { emoji: "🎉", label: "Fun" },
+};
+
+export function Post({ id, author, content, reactions, comments, tags, materials, userReaction: initialUserReaction }: PostProps) {
+  const [userReaction, setUserReaction] = useState<string | null>(initialUserReaction || null);
+  const { toast } = useToast();
+
+  const handleReaction = async (reactionType: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to react to posts",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (userReaction === reactionType) {
+        // Remove reaction
+        const { error } = await supabase
+          .from('post_reactions')
+          .delete()
+          .eq('post_id', id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+        setUserReaction(null);
+      } else {
+        // Add or update reaction
+        if (userReaction) {
+          // Delete existing reaction first
+          await supabase
+            .from('post_reactions')
+            .delete()
+            .eq('post_id', id)
+            .eq('user_id', user.id);
+        }
+
+        const { error } = await supabase
+          .from('post_reactions')
+          .insert([
+            {
+              post_id: id,
+              user_id: user.id,
+              reaction: reactionType,
+            },
+          ]);
+
+        if (error) throw error;
+        setUserReaction(reactionType);
+      }
+    } catch (error) {
+      console.error('Error handling reaction:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update reaction",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-start justify-between mb-4">
@@ -53,10 +132,34 @@ export function Post({ author, content, reactions, comments, tags, materials }: 
       {materials && materials.length > 0 && <PostMaterial materials={materials} />}
 
       <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
-        <div className="flex items-center gap-1">
-          <ThumbsUp className="w-4 h-4" />
-          <span>{reactions} Reaktioner</span>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="flex items-center gap-1 text-gray-500 hover:text-gray-700"
+            >
+              {userReaction ? (
+                <span className="text-xl">{reactionEmojis[userReaction].emoji}</span>
+              ) : (
+                <ThumbsUp className="w-4 h-4" />
+              )}
+              <span>{reactions} Reaktioner</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {Object.entries(reactionEmojis).map(([key, { emoji, label }]) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => handleReaction(key)}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <span className="text-xl">{emoji}</span>
+                <span>{label}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex items-center gap-1">
           <MessageSquare className="w-4 h-4" />
           <span>{comments} Kommentarer</span>

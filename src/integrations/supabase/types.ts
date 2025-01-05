@@ -85,6 +85,45 @@ export type Database = {
           },
         ]
       }
+      post_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          reaction?: Database["public"]["Enums"]["reaction_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_tags: {
         Row: {
           created_at: string
@@ -199,7 +238,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      reaction_type:
+        | "inspiring"
+        | "creative"
+        | "helpful"
+        | "insightful"
+        | "encouraging"
+        | "innovative"
+        | "fun"
     }
     CompositeTypes: {
       [_ in never]: never

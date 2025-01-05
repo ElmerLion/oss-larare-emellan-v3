@@ -7,7 +7,10 @@ export function Feed() {
   const { data: posts, isLoading } = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // First get all posts with their basic info
+      const { data: postsData, error: postsError } = await supabase
         .from('posts')
         .select(`
           *,
@@ -25,8 +28,35 @@ export function Feed() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data || [];
+      if (postsError) throw postsError;
+
+      // Get reaction counts and user reactions for each post
+      const postsWithReactions = await Promise.all(postsData.map(async (post) => {
+        const { count: reactionCount } = await supabase
+          .from('post_reactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('post_id', post.id);
+
+        let userReaction = null;
+        if (user) {
+          const { data: reactionData } = await supabase
+            .from('post_reactions')
+            .select('reaction')
+            .eq('post_id', post.id)
+            .eq('user_id', user.id)
+            .single();
+
+          userReaction = reactionData?.reaction;
+        }
+
+        return {
+          ...post,
+          reaction_count: reactionCount || 0,
+          user_reaction: userReaction,
+        };
+      }));
+
+      return postsWithReactions || [];
     },
   });
 
@@ -44,10 +74,11 @@ export function Feed() {
             timeAgo: "Just nu", // You might want to implement proper time ago calculation
           }}
           content={dbPost.content}
-          reactions={0}
+          reactions={dbPost.reaction_count}
           comments={0}
           materials={dbPost.post_materials}
           tags={dbPost.post_tags?.map(t => t.tag)}
+          userReaction={dbPost.user_reaction}
         />
       ))}
     </div>

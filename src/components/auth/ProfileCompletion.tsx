@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function ProfileCompletion() {
   const [fullName, setFullName] = useState("");
+  const [title, setTitle] = useState("Lärare");
   const [school, setSchool] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,6 +30,7 @@ export function ProfileCompletion() {
       .from('profiles')
       .update({
         full_name: fullName,
+        title: title,
         school: school,
       })
       .eq('id', user.id);
@@ -67,6 +69,19 @@ export function ProfileCompletion() {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              Titel
+            </label>
+            <Input
+              id="title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
             />
           </div>

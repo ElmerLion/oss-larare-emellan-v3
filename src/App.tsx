@@ -56,12 +56,12 @@ const App = () => {
             <div className="flex-grow">
               <Routes>
                 <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Index />} />
                 <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
                 <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
                 <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
                 <Route path="/profil" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
               </Routes>
             </div>
             <Footer />

@@ -16,7 +16,7 @@ interface Material {
 }
 
 interface PostProps {
-  id: string | number; // Updated to accept both string and number types
+  id: string | number;
   author: Author;
   content: string;
   reactions: number;
@@ -31,7 +31,7 @@ export function Post({ author, content, reactions, comments, tags, materials }: 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <img
-            src={author.avatar}
+            src={author.avatar || "/placeholder.svg"}
             alt={author.name}
             className="w-10 h-10 rounded-full object-cover"
           />

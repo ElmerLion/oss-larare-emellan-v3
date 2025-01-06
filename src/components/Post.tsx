@@ -8,6 +8,7 @@ import { Database } from "@/integrations/supabase/types";
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
 interface Author {
+  id?: string;
   name: string;
   avatar: string;
   timeAgo: string;
@@ -41,7 +42,7 @@ export function Post({
 }: PostProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <PostHeader author={author} />
+      <PostHeader author={author} postId={id} />
       
       <p className="text-gray-700 mb-4">{content}</p>
 

@@ -1,4 +1,11 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
+import { MoreVertical, Save, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+
 interface Author {
+  id?: string;
   name: string;
   avatar: string;
   timeAgo: string;
@@ -6,9 +13,45 @@ interface Author {
 
 interface PostHeaderProps {
   author: Author;
+  postId: string | number;
 }
 
-export function PostHeader({ author }: PostHeaderProps) {
+export function PostHeader({ author, postId }: PostHeaderProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleSavePost = async () => {
+    toast({
+      title: "Post sparad",
+      description: "Posten har sparats i dina favoriter",
+    });
+  };
+
+  const handleDeletePost = async () => {
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Post borttagen",
+        description: "Posten har tagits bort",
+      });
+
+      // Invalidate posts query to refresh the feed
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Kunde inte ta bort posten",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex items-start justify-between mb-4">
       <div className="flex items-center gap-3">
@@ -22,11 +65,27 @@ export function PostHeader({ author }: PostHeaderProps) {
           <p className="text-sm text-gray-500">{author.timeAgo}</p>
         </div>
       </div>
-      <button className="text-gray-400 hover:text-gray-600">
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-        </svg>
-      </button>
+      
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <button className="text-gray-400 hover:text-gray-600">
+            <MoreVertical className="w-6 h-6" />
+          </button>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onClick={handleSavePost}>
+            <Save className="mr-2 h-4 w-4" />
+            <span>Spara post</span>
+          </ContextMenuItem>
+          
+          {author.id === supabase.auth.getUser().then(({ data }) => data.user?.id) && (
+            <ContextMenuItem onClick={handleDeletePost} className="text-red-600">
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Ta bort post</span>
+            </ContextMenuItem>
+          )}
+        </ContextMenuContent>
+      </ContextMenu>
     </div>
   );
 }

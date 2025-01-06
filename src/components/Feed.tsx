@@ -19,6 +19,7 @@ export function Feed() {
         .select(`
           *,
           profiles:author_id (
+            id,
             full_name,
             avatar_url
           ),
@@ -113,6 +114,7 @@ export function Feed() {
           key={dbPost.id}
           id={dbPost.id}
           author={{
+            id: dbPost.profiles?.id,
             name: dbPost.profiles?.full_name || "Unknown User",
             avatar: dbPost.profiles?.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
             timeAgo: "Just nu", // You might want to implement proper time ago calculation

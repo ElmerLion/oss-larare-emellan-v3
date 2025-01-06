@@ -30,12 +30,18 @@ export function Feed() {
 
       if (postsError) throw postsError;
 
-      // Get reaction counts and user reactions for each post
+      // Get reaction counts, comment counts and user reactions for each post
       const postsWithReactions = await Promise.all(postsData.map(async (post) => {
-        const { count: reactionCount } = await supabase
-          .from('post_reactions')
-          .select('*', { count: 'exact', head: true })
-          .eq('post_id', post.id);
+        const [{ count: reactionCount }, { count: commentCount }] = await Promise.all([
+          supabase
+            .from('post_reactions')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', post.id),
+          supabase
+            .from('post_comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', post.id),
+        ]);
 
         let userReaction = null;
         if (user) {
@@ -52,6 +58,7 @@ export function Feed() {
         return {
           ...post,
           reaction_count: reactionCount || 0,
+          comment_count: commentCount || 0,
           user_reaction: userReaction,
         };
       }));
@@ -75,7 +82,7 @@ export function Feed() {
           }}
           content={dbPost.content}
           reactions={dbPost.reaction_count}
-          comments={0}
+          comments={dbPost.comment_count}
           materials={dbPost.post_materials}
           tags={dbPost.post_tags?.map(t => t.tag)}
           userReaction={dbPost.user_reaction}

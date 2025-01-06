@@ -55,7 +55,7 @@ export function Feed() {
             .select('reaction')
             .eq('post_id', post.id)
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle(); // Changed from .single() to .maybeSingle()
 
           userReaction = reactionData?.reaction;
         }

@@ -2,8 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { Post } from "./Post";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function Feed() {
+  const queryClient = useQueryClient();
+
   const { data: posts, isLoading } = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
@@ -66,6 +70,39 @@ export function Feed() {
       return postsWithReactions || [];
     },
   });
+
+  // Subscribe to changes in post_reactions and post_comments
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_reactions'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['posts'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_comments'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['posts'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   return (
     <div className="space-y-6">

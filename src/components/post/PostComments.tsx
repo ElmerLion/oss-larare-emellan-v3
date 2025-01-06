@@ -1,10 +1,11 @@
 import { MessageSquare, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Comment {
   id: string;
@@ -24,9 +25,26 @@ interface PostCommentsProps {
 export function PostComments({ postId, totalComments }: PostCommentsProps) {
   const [comment, setComment] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const { data: comments = [], refetch } = useQuery({
+  useEffect(() => {
+    const fetchUserAvatar = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
+        setUserAvatar(data?.avatar_url);
+      }
+    };
+    fetchUserAvatar();
+  }, []);
+
+  const { data: comments = [] } = useQuery({
     queryKey: ['comments', postId, showAllComments],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -46,6 +64,29 @@ export function PostComments({ postId, totalComments }: PostCommentsProps) {
       return data as Comment[];
     },
   });
+
+  // Subscribe to real-time updates for comments
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_comments',
+          filter: `post_id=eq.${postId}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [postId, queryClient]);
 
   const handleSubmitComment = async () => {
     try {
@@ -70,7 +111,6 @@ export function PostComments({ postId, totalComments }: PostCommentsProps) {
       if (error) throw error;
 
       setComment("");
-      refetch();
       
       toast({
         title: "Success",
@@ -107,19 +147,19 @@ export function PostComments({ postId, totalComments }: PostCommentsProps) {
         </div>
       ))}
 
-      {totalComments > 2 && !showAllComments && (
+      {totalComments > 2 && (
         <Button
           variant="link"
-          onClick={() => setShowAllComments(true)}
+          onClick={() => setShowAllComments(!showAllComments)}
           className="text-gray-500 hover:text-gray-700"
         >
-          Se mer
+          {showAllComments ? "Göm" : "Se mer"}
         </Button>
       )}
 
       <div className="flex gap-3">
         <img
-          src="/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
+          src={userAvatar || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
           alt="Your avatar"
           className="w-8 h-8 rounded-full object-cover"
         />

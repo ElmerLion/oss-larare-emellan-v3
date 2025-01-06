@@ -3,6 +3,7 @@ import { MoreVertical, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 interface Author {
   id?: string;
@@ -19,6 +20,15 @@ interface PostHeaderProps {
 export function PostHeader({ author, postId }: PostHeaderProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const handleSavePost = async () => {
     toast({
@@ -78,7 +88,7 @@ export function PostHeader({ author, postId }: PostHeaderProps) {
             <span>Spara post</span>
           </ContextMenuItem>
           
-          {author.id === supabase.auth.getUser().then(({ data }) => data.user?.id) && (
+          {author.id === currentUserId && (
             <ContextMenuItem onClick={handleDeletePost} className="text-red-600">
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Ta bort post</span>

@@ -77,7 +77,7 @@ export function PostHeader({ author, postId }: PostHeaderProps) {
       </div>
       
       <ContextMenu>
-        <ContextMenuTrigger>
+        <ContextMenuTrigger asChild>
           <button className="text-gray-400 hover:text-gray-600">
             <MoreVertical className="w-6 h-6" />
           </button>

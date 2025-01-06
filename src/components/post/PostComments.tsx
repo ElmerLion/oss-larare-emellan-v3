@@ -133,19 +133,22 @@ export function PostComments({ postId, totalComments }: PostCommentsProps) {
         <span>{totalComments} Kommentarer</span>
       </div>
 
-      {comments.map((comment) => (
-        <div key={comment.id} className="flex gap-3">
-          <img
-            src={comment.profiles.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
-            alt={comment.profiles.full_name || "User"}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-          <div className="flex-1 bg-gray-50 rounded-lg p-3">
-            <div className="font-medium text-sm">{comment.profiles.full_name || "Unknown User"}</div>
-            <p className="text-sm text-gray-700">{comment.content}</p>
+      {/* Fixed height container for comments */}
+      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[200px]'} overflow-hidden`}>
+        {comments.map((comment) => (
+          <div key={comment.id} className="flex gap-3">
+            <img
+              src={comment.profiles.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
+              alt={comment.profiles.full_name || "User"}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <div className="flex-1 bg-gray-50 rounded-lg p-3">
+              <div className="font-medium text-sm">{comment.profiles.full_name || "Unknown User"}</div>
+              <p className="text-sm text-gray-700">{comment.content}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {totalComments > 2 && (
         <Button

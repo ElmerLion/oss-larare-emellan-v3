@@ -51,7 +51,6 @@ export function PostHeader({ author, postId }: PostHeaderProps) {
         description: "Posten har tagits bort",
       });
 
-      // Invalidate posts query to refresh the feed
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     } catch (error) {
       toast({
@@ -77,7 +76,7 @@ export function PostHeader({ author, postId }: PostHeaderProps) {
       </div>
       
       <ContextMenu>
-        <ContextMenuTrigger asChild>
+        <ContextMenuTrigger className="cursor-pointer">
           <button className="text-gray-400 hover:text-gray-600">
             <MoreVertical className="w-6 h-6" />
           </button>

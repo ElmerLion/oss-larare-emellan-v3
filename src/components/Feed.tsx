@@ -4,6 +4,7 @@ import { CreatePostDialog } from "./CreatePostDialog";
 import { Post } from "./Post";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNowStrict } from "date-fns";
 
 export function Feed() {
   const queryClient = useQueryClient();
@@ -55,7 +56,7 @@ export function Feed() {
             .select('reaction')
             .eq('post_id', post.id)
             .eq('user_id', user.id)
-            .maybeSingle(); // Changed from .single() to .maybeSingle()
+            .maybeSingle();
 
           userReaction = reactionData?.reaction;
         }
@@ -68,7 +69,13 @@ export function Feed() {
         };
       }));
 
-      return postsWithReactions || [];
+      return postsWithReactions.map(post => ({
+        ...post,
+        timeAgo: formatDistanceToNowStrict(new Date(post.created_at), { 
+          addSuffix: true,
+          unit: 'day'
+        })
+      })) || [];
     },
   });
 
@@ -117,7 +124,7 @@ export function Feed() {
             id: dbPost.profiles?.id,
             name: dbPost.profiles?.full_name || "Unknown User",
             avatar: dbPost.profiles?.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
-            timeAgo: "Just nu", // You might want to implement proper time ago calculation
+            timeAgo: dbPost.timeAgo,
           }}
           content={dbPost.content}
           reactions={dbPost.reaction_count}

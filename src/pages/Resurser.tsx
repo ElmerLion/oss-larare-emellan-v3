@@ -2,11 +2,12 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
-import { FilterSidebar } from "@/components/FilterSidebar";
+import { FilterSidebar, ResourceFilters } from "@/components/FilterSidebar";
 import { CreateResourceDialog } from "@/components/CreateResourceDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface Resource {
   id: string;
@@ -28,14 +29,45 @@ const difficultyMap = {
 
 export default function Resurser() {
   const { toast } = useToast();
+  const [filters, setFilters] = useState<ResourceFilters>({
+    orderBy: 'created_at',
+    type: 'all',
+    subject: 'all',
+    grade: 'all',
+    difficulty: 'all'
+  });
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: resources = [], isLoading } = useQuery({
-    queryKey: ['resources'],
+    queryKey: ['resources', filters, searchQuery],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('resources')
         .select('*')
-        .order('created_at', { ascending: false });
+        
+      // Apply filters
+      if (filters.type !== 'all') {
+        query = query.eq('type', filters.type);
+      }
+      if (filters.subject !== 'all') {
+        query = query.eq('subject', filters.subject);
+      }
+      if (filters.grade !== 'all') {
+        query = query.eq('grade', filters.grade);
+      }
+      if (filters.difficulty !== 'all') {
+        query = query.eq('difficulty', filters.difficulty);
+      }
+      
+      // Apply search
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      }
+
+      // Apply ordering
+      query = query.order('created_at', { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Resource[];
@@ -50,7 +82,6 @@ export default function Resurser() {
 
       if (error) throw error;
 
-      // Create a download link
       const url = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = url;
@@ -72,7 +103,10 @@ export default function Resurser() {
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
       <AppSidebar />
-      <FilterSidebar />
+      <FilterSidebar 
+        onFilterChange={setFilters}
+        onSearchChange={setSearchQuery}
+      />
 
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
@@ -81,6 +115,8 @@ export default function Resurser() {
           <ScrollArea className="h-[calc(100vh-40px)]">
             {isLoading ? (
               <div className="text-center py-4">Laddar resurser...</div>
+            ) : resources.length === 0 ? (
+              <div className="text-center py-4">Inga resurser hittades</div>
             ) : (
               <div className="grid grid-cols-2 gap-6">
                 {resources.map((resource) => (

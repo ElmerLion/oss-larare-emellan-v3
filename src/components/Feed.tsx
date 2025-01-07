@@ -5,6 +5,7 @@ import { Post } from "./Post";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNowStrict } from "date-fns";
+import { sv } from 'date-fns/locale';
 
 export function Feed() {
   const queryClient = useQueryClient();
@@ -69,13 +70,36 @@ export function Feed() {
         };
       }));
 
-      return postsWithReactions.map(post => ({
-        ...post,
-        timeAgo: formatDistanceToNowStrict(new Date(post.created_at), { 
-          addSuffix: true,
-          unit: 'day'
-        })
-      })) || [];
+      return postsWithReactions.map(post => {
+        const minutes = Math.floor((Date.now() - new Date(post.created_at).getTime()) / 1000 / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        const weeks = Math.floor(days / 7);
+        const months = Math.floor(days / 30);
+        const years = Math.floor(days / 365);
+
+        let timeAgo;
+        if (minutes < 1) {
+          timeAgo = "precis";
+        } else if (minutes < 60) {
+          timeAgo = `${minutes} minuter sen`;
+        } else if (hours < 24) {
+          timeAgo = `${hours} timmar sen`;
+        } else if (days < 7) {
+          timeAgo = `${days} dagar sen`;
+        } else if (weeks < 4) {
+          timeAgo = `${weeks} veckor sen`;
+        } else if (months < 12) {
+          timeAgo = `${months} månader sen`;
+        } else {
+          timeAgo = `${years} år sen`;
+        }
+
+        return {
+          ...post,
+          timeAgo
+        };
+      }) || [];
     },
   });
 

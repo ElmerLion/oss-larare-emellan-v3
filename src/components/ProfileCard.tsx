@@ -1,7 +1,27 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ProfileCard() {
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      return data;
+    },
+  });
+
+  if (!profile) return null;
+
   return (
     <Card className="p-6 border border-gray-200 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Min Profil</h2>
@@ -11,16 +31,16 @@ export function ProfileCard() {
         <div className="absolute inset-x-0 bottom-10 transform translate-y-1/2 flex justify-center">
           <Avatar className="h-24 w-24 rounded-full border-2 border-white">
             <AvatarImage
-              src="/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
-              alt="Elmer Almer Ershagen"
+              src={profile.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
+              alt={profile.full_name || "Profile Picture"}
             />
           </Avatar>
         </div>
       </div>
 
       {/* Profile Name and Title */}
-      <h3 className="font-semibold mt-8">Elmer Almer Ershagen</h3>
-      <p className="text-sm text-gray-500 mb-2">Lärare på NTI Helsingborg</p>
+      <h3 className="font-semibold mt-8">{profile.full_name || "Unnamed User"}</h3>
+      <p className="text-sm text-gray-500 mb-2">{profile.title || "Lärare"}</p>
 
       {/* Bio */}
       <p className="text-sm text-gray-700 mb-6">

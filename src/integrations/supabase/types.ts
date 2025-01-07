@@ -341,6 +341,59 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          author_id: string
+          created_at: string
+          description: string
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          file_name: string | null
+          file_path: string | null
+          grade: string
+          id: string
+          subject: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          description: string
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          file_name?: string | null
+          file_path?: string | null
+          grade: string
+          id?: string
+          subject: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          description?: string
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          file_name?: string | null
+          file_path?: string | null
+          grade?: string
+          id?: string
+          subject?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_lists: {
         Row: {
           created_at: string
@@ -381,6 +434,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      difficulty_level: "easy" | "medium" | "hard"
       reaction_type:
         | "inspiring"
         | "creative"

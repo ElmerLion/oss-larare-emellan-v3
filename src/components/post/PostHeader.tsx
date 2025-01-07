@@ -14,7 +14,7 @@ interface Author {
 
 interface PostHeaderProps {
   author: Author;
-  postId: string | number;
+  postId: string;  // Changed from string | number to just string
 }
 
 export function PostHeader({ author, postId }: PostHeaderProps) {

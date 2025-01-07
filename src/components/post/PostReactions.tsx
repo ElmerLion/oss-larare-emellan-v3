@@ -24,7 +24,7 @@ const reactionEmojis: Record<ReactionType, { emoji: string; label: string }> = {
 };
 
 interface PostReactionsProps {
-  postId: string | number;
+  postId: string;  // Changed from string | number to just string
   reactions: number;
   userReaction: ReactionType | null;
 }
@@ -69,7 +69,7 @@ export function PostReactions({ postId, reactions, userReaction: initialUserReac
         const { error } = await supabase
           .from('post_reactions')
           .insert({
-            post_id: postId.toString(),
+            post_id: postId,
             user_id: user.id,
             reaction: reactionType,
           });

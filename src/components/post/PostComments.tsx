@@ -18,7 +18,7 @@ interface Comment {
 }
 
 interface PostCommentsProps {
-  postId: string | number;
+  postId: string;  // Changed from string | number to just string
   totalComments: number;
 }
 
@@ -103,7 +103,7 @@ export function PostComments({ postId, totalComments }: PostCommentsProps) {
       const { error } = await supabase
         .from('post_comments')
         .insert({
-          post_id: postId.toString(),
+          post_id: postId,
           user_id: user.id,
           content: comment,
         });

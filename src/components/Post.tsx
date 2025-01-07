@@ -20,7 +20,7 @@ interface Material {
 }
 
 interface PostProps {
-  id: string | number;
+  id: string;  // Changed from string | number to just string
   author: Author;
   content: string;
   reactions: number;

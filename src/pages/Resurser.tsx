@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
 import { FilterSidebar, ResourceFilters } from "@/components/FilterSidebar";
 import { CreateResourceDialog } from "@/components/CreateResourceDialog";
+import { ResourceDetailsDialog } from "@/components/resources/ResourceDetailsDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ interface Resource {
   difficulty: "easy" | "medium" | "hard";
   file_path: string;
   file_name: string;
+  author_id: string;
 }
 
 const difficultyMap = {
@@ -37,6 +39,7 @@ export default function Resurser() {
     difficulty: 'all'
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   const { data: resources = [], isLoading } = useQuery({
     queryKey: ['resources', filters, searchQuery],
@@ -149,7 +152,11 @@ export default function Resurser() {
                     </div>
                     
                     <div className="flex gap-2 mt-4">
-                      <Button variant="secondary" className="w-full bg-sage-200 hover:bg-sage-300">
+                      <Button 
+                        variant="secondary" 
+                        className="w-full bg-sage-200 hover:bg-sage-300"
+                        onClick={() => setSelectedResource(resource)}
+                      >
                         Se mer
                       </Button>
                       <Button 
@@ -165,6 +172,12 @@ export default function Resurser() {
               </div>
             )}
           </ScrollArea>
+
+          <ResourceDetailsDialog
+            resource={selectedResource}
+            open={!!selectedResource}
+            onOpenChange={(open) => !open && setSelectedResource(null)}
+          />
         </div>
       </div>
     </div>

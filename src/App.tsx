@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Kontakter from "./pages/Kontakter";
 import Resurser from "./pages/Resurser";
+import MittBibliotek from "./pages/MittBibliotek";
 import Profil from "./pages/Profil";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => {
                 <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
                 <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
                 <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
+                <Route path="/mitt-bibliotek" element={isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />} />
                 <Route path="/profil" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
                 <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
               </Routes>

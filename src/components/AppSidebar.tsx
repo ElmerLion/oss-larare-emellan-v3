@@ -1,4 +1,4 @@
-import { Home, User, Users, Book, Settings, LogOut, LogIn, UserPlus } from "lucide-react";
+import { Home, User, Users, Book, Settings, LogOut, LogIn, UserPlus, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ const menuItems = [
   { icon: User, label: "Profil", path: "/profil" },
   { icon: Users, label: "Kontakter", path: "/kontakter" },
   { icon: Book, label: "Resurser", path: "/resurser" },
+  { icon: Library, label: "Mitt Bibliotek", path: "/mitt-bibliotek" },
   { icon: Settings, label: "Inställningar", path: "/installningar" },
 ];
 

@@ -53,6 +53,78 @@ export type Database = {
           },
         ]
       }
+      list_saved_materials: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          material_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          material_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          material_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_saved_materials_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_saved_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "post_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      list_saved_posts: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_saved_posts_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_saved_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           content: string
@@ -268,6 +340,38 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      user_lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

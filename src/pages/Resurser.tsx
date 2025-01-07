@@ -56,7 +56,8 @@ export default function Resurser() {
         query = query.eq('grade', filters.grade);
       }
       if (filters.difficulty !== 'all') {
-        query = query.eq('difficulty', filters.difficulty);
+        // Type assertion to ensure difficulty is of the correct type
+        query = query.eq('difficulty', filters.difficulty as "easy" | "medium" | "hard");
       }
       
       // Apply search

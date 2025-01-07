@@ -11,7 +11,7 @@ export interface ResourceFilters {
   type: string;
   subject: string;
   grade: string;
-  difficulty: string;
+  difficulty: 'all' | 'easy' | 'medium' | 'hard';
 }
 
 export function FilterSidebar({ onFilterChange, onSearchChange }: FilterSidebarProps) {
@@ -21,7 +21,7 @@ export function FilterSidebar({ onFilterChange, onSearchChange }: FilterSidebarP
       type: key === 'type' ? value : 'all',
       subject: key === 'subject' ? value : 'all',
       grade: key === 'grade' ? value : 'all',
-      difficulty: key === 'difficulty' ? value : 'all',
+      difficulty: key === 'difficulty' ? value as 'all' | 'easy' | 'medium' | 'hard' : 'all',
     });
   };
 

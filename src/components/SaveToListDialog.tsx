@@ -9,7 +9,7 @@ interface SaveToListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemId: string;
-  itemType: 'post' | 'material';
+  itemType: 'post' | 'resource' | 'material';
 }
 
 export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveToListDialogProps) {
@@ -34,12 +34,25 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
 
   const handleSaveToList = async (listId: string) => {
     try {
-      const table = itemType === 'post' ? 'list_saved_posts' : 'list_saved_materials';
-      
-      // Create the insert data with the correct type
-      const insertData = itemType === 'post' 
-        ? { list_id: listId, post_id: itemId }
-        : { list_id: listId, material_id: itemId };
+      let table: string;
+      let insertData: Record<string, string>;
+
+      switch (itemType) {
+        case 'post':
+          table = 'list_saved_posts';
+          insertData = { list_id: listId, post_id: itemId };
+          break;
+        case 'resource':
+          table = 'list_saved_resources';
+          insertData = { list_id: listId, resource_id: itemId };
+          break;
+        case 'material':
+          table = 'list_saved_materials';
+          insertData = { list_id: listId, material_id: itemId };
+          break;
+        default:
+          throw new Error('Invalid item type');
+      }
 
       const { error } = await supabase
         .from(table)

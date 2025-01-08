@@ -125,6 +125,42 @@ export type Database = {
           },
         ]
       }
+      list_saved_resources: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string | null
+          resource_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id?: string | null
+          resource_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string | null
+          resource_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_saved_resources_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_saved_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           content: string

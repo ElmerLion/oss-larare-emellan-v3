@@ -12,6 +12,8 @@ interface SaveToListDialogProps {
   itemType: 'post' | 'resource' | 'material';
 }
 
+type TableNames = 'list_saved_posts' | 'list_saved_resources' | 'list_saved_materials';
+
 export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveToListDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -34,7 +36,7 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
 
   const handleSaveToList = async (listId: string) => {
     try {
-      let table: string;
+      let table: TableNames;
       let insertData: Record<string, string>;
 
       switch (itemType) {

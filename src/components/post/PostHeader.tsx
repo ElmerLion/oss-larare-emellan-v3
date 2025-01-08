@@ -15,9 +15,10 @@ interface Author {
 interface PostHeaderProps {
   author: Author;
   postId: string;  // Changed from string | number to just string
+  onSave: () => void;
 }
 
-export function PostHeader({ author, postId }: PostHeaderProps) {
+export function PostHeader({ author, postId, onSave }: PostHeaderProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -82,7 +83,7 @@ export function PostHeader({ author, postId }: PostHeaderProps) {
           </button>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={handleSavePost}>
+          <ContextMenuItem onClick={onSave}>
             <Save className="mr-2 h-4 w-4" />
             <span>Spara post</span>
           </ContextMenuItem>

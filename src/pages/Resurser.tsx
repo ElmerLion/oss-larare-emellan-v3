@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { SaveToListDialog } from "@/components/SaveToListDialog";
 
 interface Resource {
   id: string;
@@ -40,6 +41,7 @@ export default function Resurser() {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [selectedResourceForSave, setSelectedResourceForSave] = useState<string | null>(null);
 
   const { data: resources = [], isLoading } = useQuery({
     queryKey: ['resources', filters, searchQuery],
@@ -132,6 +134,7 @@ export default function Resurser() {
                       variant="ghost"
                       size="icon"
                       className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setSelectedResourceForSave(resource.id)}
                     >
                       <Bookmark className="h-5 w-5" />
                     </Button>
@@ -177,6 +180,13 @@ export default function Resurser() {
             resource={selectedResource}
             open={!!selectedResource}
             onOpenChange={(open) => !open && setSelectedResource(null)}
+          />
+
+          <SaveToListDialog
+            open={!!selectedResourceForSave}
+            onOpenChange={(open) => !open && setSelectedResourceForSave(null)}
+            itemId={selectedResourceForSave || ''}
+            itemType="material"
           />
         </div>
       </div>

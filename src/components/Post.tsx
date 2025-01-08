@@ -4,6 +4,8 @@ import { PostComments } from "./post/PostComments";
 import { PostMaterial } from "./PostMaterial";
 import { PostTags } from "./PostTags";
 import { Database } from "@/integrations/supabase/types";
+import { SaveToListDialog } from "./SaveToListDialog";
+import { useState } from "react";
 
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
@@ -40,9 +42,15 @@ export function Post({
   materials,
   userReaction,
 }: PostProps) {
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <PostHeader author={author} postId={id} />
+      <PostHeader 
+        author={author} 
+        postId={id} 
+        onSave={() => setShowSaveDialog(true)}
+      />
       
       <p className="text-gray-700 mb-4">{content}</p>
 
@@ -60,6 +68,13 @@ export function Post({
       <div className="pt-4 border-t border-gray-100">
         <PostComments postId={id} totalComments={comments} />
       </div>
+
+      <SaveToListDialog
+        open={showSaveDialog}
+        onOpenChange={setShowSaveDialog}
+        itemId={id}
+        itemType="post"
+      />
     </div>
   );
 }

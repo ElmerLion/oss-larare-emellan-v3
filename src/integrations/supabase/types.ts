@@ -53,42 +53,6 @@ export type Database = {
           },
         ]
       }
-      list_saved_materials: {
-        Row: {
-          created_at: string
-          id: string
-          list_id: string
-          material_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          list_id: string
-          material_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          list_id?: string
-          material_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "list_saved_materials_list_id_fkey"
-            columns: ["list_id"]
-            isOneToOne: false
-            referencedRelation: "user_lists"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "list_saved_materials_material_id_fkey"
-            columns: ["material_id"]
-            isOneToOne: false
-            referencedRelation: "post_materials"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       list_saved_posts: {
         Row: {
           created_at: string

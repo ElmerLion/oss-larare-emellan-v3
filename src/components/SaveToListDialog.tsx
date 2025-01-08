@@ -9,10 +9,10 @@ interface SaveToListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemId: string;
-  itemType: 'post' | 'resource' | 'material';
+  itemType: 'post' | 'resource';
 }
 
-type TableNames = 'list_saved_posts' | 'list_saved_resources' | 'list_saved_materials';
+type TableNames = 'list_saved_posts' | 'list_saved_resources';
 
 export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveToListDialogProps) {
   const { toast } = useToast();
@@ -47,10 +47,6 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
         case 'resource':
           table = 'list_saved_resources';
           insertData = { list_id: listId, resource_id: itemId };
-          break;
-        case 'material':
-          table = 'list_saved_materials';
-          insertData = { list_id: listId, material_id: itemId };
           break;
         default:
           throw new Error('Invalid item type');

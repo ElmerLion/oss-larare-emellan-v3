@@ -37,7 +37,7 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
   const handleSaveToList = async (listId: string) => {
     try {
       let table: TableNames;
-      let insertData: Record<string, string>;
+      let insertData: Record<string, any>;
 
       switch (itemType) {
         case 'post':

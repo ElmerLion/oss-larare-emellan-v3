@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 interface SavedItem {
   id: string;
   title: string;
-  type: 'post' | 'material' | 'resource';
+  type: 'post' | 'resource';
 }
 
 interface List {
@@ -56,28 +56,6 @@ async function fetchUserLists() {
           id: item.post.id,
           title: item.post.content.substring(0, 100) + "...",
           type: 'post'
-        });
-      }
-    });
-
-    // Fetch saved materials
-    const { data: savedMaterials } = await supabase
-      .from('list_saved_materials')
-      .select(`
-        id,
-        material:post_materials(
-          id,
-          title
-        )
-      `)
-      .eq('list_id', list.id);
-
-    savedMaterials?.forEach(item => {
-      if (item.material) {
-        savedItems.push({
-          id: item.material.id,
-          title: item.material.title,
-          type: 'material'
         });
       }
     });
@@ -226,7 +204,7 @@ export default function MittBibliotek() {
                             <span className="ml-2 text-sm text-gray-500">({item.type})</span>
                           </div>
                           <Button variant="ghost" size="sm">
-                            {item.type === 'material' || item.type === 'resource' ? 'Ladda ner' : 'Visa'}
+                            {item.type === 'resource' ? 'Ladda ner' : 'Visa'}
                           </Button>
                         </div>
                       ))}

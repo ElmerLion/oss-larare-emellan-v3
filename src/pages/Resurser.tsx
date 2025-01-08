@@ -186,7 +186,7 @@ export default function Resurser() {
             open={!!selectedResourceForSave}
             onOpenChange={(open) => !open && setSelectedResourceForSave(null)}
             itemId={selectedResourceForSave || ''}
-            itemType="material"
+            itemType="resource"
           />
         </div>
       </div>

@@ -7,52 +7,121 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+
+interface SavedItem {
+  id: string;
+  title: string;
+  type: 'post' | 'material' | 'resource';
+}
 
 interface List {
   id: string;
   name: string;
-  savedPosts: {
-    id: string;
-    title: string;
-    type: 'post';
-  }[];
-  savedMaterials: {
-    id: string;
-    title: string;
-    type: 'material';
-  }[];
+  savedItems: SavedItem[];
 }
 
-// Placeholder data
-const placeholderLists: List[] = [
-  {
-    id: '1',
-    name: 'Favoriter',
-    savedPosts: [
-      { id: '1', title: 'Matematikövningar för årskurs 6', type: 'post' },
-      { id: '2', title: 'Tips för distansundervisning', type: 'post' }
-    ],
-    savedMaterials: [
-      { id: '1', title: 'Geometri presentation', type: 'material' },
-      { id: '2', title: 'Övningsuppgifter algebra', type: 'material' }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Läsåret 2024',
-    savedPosts: [
-      { id: '3', title: 'Kreativa skrivövningar', type: 'post' }
-    ],
-    savedMaterials: [
-      { id: '3', title: 'Grammatikgenomgång', type: 'material' }
-    ]
+async function fetchUserLists() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  // Fetch user's lists
+  const { data: lists, error: listsError } = await supabase
+    .from('user_lists')
+    .select('*')
+    .eq('user_id', user.id);
+
+  if (listsError) throw listsError;
+
+  const enrichedLists: List[] = [];
+
+  for (const list of lists) {
+    const savedItems: SavedItem[] = [];
+
+    // Fetch saved posts
+    const { data: savedPosts } = await supabase
+      .from('list_saved_posts')
+      .select(`
+        id,
+        post:posts(
+          id,
+          content
+        )
+      `)
+      .eq('list_id', list.id);
+
+    savedPosts?.forEach(item => {
+      if (item.post) {
+        savedItems.push({
+          id: item.post.id,
+          title: item.post.content.substring(0, 100) + "...",
+          type: 'post'
+        });
+      }
+    });
+
+    // Fetch saved materials
+    const { data: savedMaterials } = await supabase
+      .from('list_saved_materials')
+      .select(`
+        id,
+        material:post_materials(
+          id,
+          title
+        )
+      `)
+      .eq('list_id', list.id);
+
+    savedMaterials?.forEach(item => {
+      if (item.material) {
+        savedItems.push({
+          id: item.material.id,
+          title: item.material.title,
+          type: 'material'
+        });
+      }
+    });
+
+    // Fetch saved resources
+    const { data: savedResources } = await supabase
+      .from('list_saved_resources')
+      .select(`
+        id,
+        resource:resources(
+          id,
+          title
+        )
+      `)
+      .eq('list_id', list.id);
+
+    savedResources?.forEach(item => {
+      if (item.resource) {
+        savedItems.push({
+          id: item.resource.id,
+          title: item.resource.title,
+          type: 'resource'
+        });
+      }
+    });
+
+    enrichedLists.push({
+      id: list.id,
+      name: list.name,
+      savedItems
+    });
   }
-];
+
+  return enrichedLists;
+}
 
 export default function MittBibliotek() {
-  const [lists, setLists] = useState<List[]>(placeholderLists);
   const [newListName, setNewListName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const { data: lists = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['userLists'],
+    queryFn: fetchUserLists
+  });
 
   const handleCreateList = async () => {
     if (!newListName.trim()) {
@@ -67,32 +136,31 @@ export default function MittBibliotek() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_lists')
         .insert([
           { name: newListName, user_id: user.id }
-        ])
-        .select()
-        .single();
+        ]);
 
       if (error) throw error;
 
-      const newList: List = {
-        id: data.id,
-        name: data.name,
-        savedPosts: [],
-        savedMaterials: []
-      };
-
-      setLists([...lists, newList]);
       setNewListName("");
       setIsDialogOpen(false);
+      refetch();
       toast.success("Listan har skapats");
     } catch (error) {
       console.error('Error creating list:', error);
       toast.error("Ett fel uppstod när listan skulle skapas");
     }
   };
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Laddar...</div>;
+  }
+
+  if (error) {
+    return <div className="flex h-screen items-center justify-center text-red-500">Ett fel uppstod</div>;
+  }
 
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
@@ -146,41 +214,34 @@ export default function MittBibliotek() {
                     </Button>
                   </div>
 
-                  {list.savedPosts.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Sparade inlägg</h3>
-                      <div className="space-y-2">
-                        {list.savedPosts.map((post) => (
-                          <div
-                            key={post.id}
-                            className="bg-gray-50 p-3 rounded-md flex justify-between items-center"
-                          >
-                            <span className="text-gray-900">{post.title}</span>
-                            <Button variant="ghost" size="sm">Visa</Button>
+                  {list.savedItems.length > 0 ? (
+                    <div className="space-y-2">
+                      {list.savedItems.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-gray-50 p-3 rounded-md flex justify-between items-center"
+                        >
+                          <div>
+                            <span className="text-gray-900">{item.title}</span>
+                            <span className="ml-2 text-sm text-gray-500">({item.type})</span>
                           </div>
-                        ))}
-                      </div>
+                          <Button variant="ghost" size="sm">
+                            {item.type === 'material' || item.type === 'resource' ? 'Ladda ner' : 'Visa'}
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  )}
-
-                  {list.savedMaterials.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Sparade material</h3>
-                      <div className="space-y-2">
-                        {list.savedMaterials.map((material) => (
-                          <div
-                            key={material.id}
-                            className="bg-gray-50 p-3 rounded-md flex justify-between items-center"
-                          >
-                            <span className="text-gray-900">{material.title}</span>
-                            <Button variant="ghost" size="sm">Ladda ner</Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">Inga sparade objekt i denna lista</p>
                   )}
                 </div>
               ))}
+
+              {lists.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  Du har inga listor än. Skapa en ny lista för att börja spara innehåll!
+                </div>
+              )}
             </div>
           </ScrollArea>
         </div>

@@ -35,13 +35,15 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
   const handleSaveToList = async (listId: string) => {
     try {
       const table = itemType === 'post' ? 'list_saved_posts' : 'list_saved_materials';
-      const itemColumn = itemType === 'post' ? 'post_id' : 'material_id';
+      
+      // Create the insert data with the correct type
+      const insertData = itemType === 'post' 
+        ? { list_id: listId, post_id: itemId }
+        : { list_id: listId, material_id: itemId };
 
       const { error } = await supabase
         .from(table)
-        .insert([
-          { list_id: listId, [itemColumn]: itemId }
-        ]);
+        .insert([insertData]);
 
       if (error) throw error;
 

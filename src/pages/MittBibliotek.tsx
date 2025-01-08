@@ -1,13 +1,12 @@
 import { AppSidebar } from "@/components/AppSidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderPlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { LibraryList } from "@/components/library/LibraryList";
+import { CreateListDialog } from "@/components/library/CreateListDialog";
 
 interface SavedItem {
   id: string;
@@ -93,44 +92,11 @@ async function fetchUserLists() {
 }
 
 export default function MittBibliotek() {
-  const [newListName, setNewListName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const { data: lists = [], isLoading, error, refetch } = useQuery({
     queryKey: ['userLists'],
     queryFn: fetchUserLists
   });
-
-  const handleCreateList = async () => {
-    if (!newListName.trim()) {
-      toast.error("Du måste ange ett namn för listan");
-      return;
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Du måste vara inloggad för att skapa en lista");
-        return;
-      }
-
-      const { error } = await supabase
-        .from('user_lists')
-        .insert([
-          { name: newListName, user_id: user.id }
-        ]);
-
-      if (error) throw error;
-
-      setNewListName("");
-      setIsDialogOpen(false);
-      refetch();
-      toast.success("Listan har skapats");
-    } catch (error) {
-      console.error('Error creating list:', error);
-      toast.error("Ett fel uppstod när listan skulle skapas");
-    }
-  };
 
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center">Laddar...</div>;
@@ -149,70 +115,19 @@ export default function MittBibliotek() {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">Mitt Bibliotek</h1>
             
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-sage-500 hover:bg-sage-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Skapa ny lista
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Skapa ny lista</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <Input
-                    placeholder="Listans namn"
-                    value={newListName}
-                    onChange={(e) => setNewListName(e.target.value)}
-                  />
-                  <Button 
-                    className="w-full bg-sage-500 hover:bg-sage-600"
-                    onClick={handleCreateList}
-                  >
-                    Skapa lista
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              className="bg-sage-500 hover:bg-sage-600"
+              onClick={() => setIsDialogOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Skapa ny lista
+            </Button>
           </div>
 
           <ScrollArea className="h-[calc(100vh-140px)]">
             <div className="grid grid-cols-1 gap-6">
               {lists.map((list) => (
-                <div
-                  key={list.id}
-                  className="bg-white rounded-lg p-6 shadow-sm space-y-4"
-                >
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-gray-900">{list.name}</h2>
-                    <Button variant="outline" size="sm">
-                      <FolderPlus className="w-4 h-4 mr-2" />
-                      Lägg till
-                    </Button>
-                  </div>
-
-                  {list.savedItems.length > 0 ? (
-                    <div className="space-y-2">
-                      {list.savedItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="bg-gray-50 p-3 rounded-md flex justify-between items-center"
-                        >
-                          <div>
-                            <span className="text-gray-900">{item.title}</span>
-                            <span className="ml-2 text-sm text-gray-500">({item.type})</span>
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            {item.type === 'resource' ? 'Ladda ner' : 'Visa'}
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">Inga sparade objekt i denna lista</p>
-                  )}
-                </div>
+                <LibraryList key={list.id} list={list} />
               ))}
 
               {lists.length === 0 && (
@@ -222,6 +137,12 @@ export default function MittBibliotek() {
               )}
             </div>
           </ScrollArea>
+
+          <CreateListDialog
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            onSuccess={refetch}
+          />
         </div>
       </div>
     </div>

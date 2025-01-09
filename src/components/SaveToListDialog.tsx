@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2, Star } from "lucide-react";
 
 interface SaveToListDialogProps {
@@ -15,7 +15,6 @@ interface SaveToListDialogProps {
 type TableNames = 'list_saved_posts' | 'list_saved_resources';
 
 export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveToListDialogProps) {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: lists, isLoading } = useQuery({
@@ -51,45 +50,38 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
     enabled: !!itemId
   });
 
-  const handleSaveToList = async (listId: string) => {
+  const handleListClick = async (listId: string) => {
     try {
       let table: TableNames;
-      let insertData: Record<string, any>;
+      const idField = itemType === 'post' ? 'post_id' : 'resource_id';
+      table = itemType === 'post' ? 'list_saved_posts' : 'list_saved_resources';
 
-      switch (itemType) {
-        case 'post':
-          table = 'list_saved_posts';
-          insertData = { list_id: listId, post_id: itemId };
-          break;
-        case 'resource':
-          table = 'list_saved_resources';
-          insertData = { list_id: listId, resource_id: itemId };
-          break;
-        default:
-          throw new Error('Invalid item type');
+      if (savedLists?.includes(listId)) {
+        // Remove from list
+        const { error } = await supabase
+          .from(table)
+          .delete()
+          .eq('list_id', listId)
+          .eq(idField, itemId);
+
+        if (error) throw error;
+        toast.success("Objektet har tagits bort från listan");
+      } else {
+        // Add to list
+        const { error } = await supabase
+          .from(table)
+          .insert([{ list_id: listId, [idField]: itemId }]);
+
+        if (error) throw error;
+        toast.success("Objektet har sparats i din lista");
       }
-
-      const { error } = await supabase
-        .from(table)
-        .insert([insertData]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sparad!",
-        description: "Objektet har sparats i din lista",
-      });
 
       queryClient.invalidateQueries({ queryKey: ['user-lists'] });
       queryClient.invalidateQueries({ queryKey: ['saved-lists'] });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving to list:', error);
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte spara objektet i listan",
-        variant: "destructive",
-      });
+      console.error('Error managing list item:', error);
+      toast.error("Ett fel uppstod");
     }
   };
 
@@ -111,8 +103,7 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
                 key={list.id}
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => handleSaveToList(list.id)}
-                disabled={savedLists?.includes(list.id)}
+                onClick={() => handleListClick(list.id)}
               >
                 <span>{list.name}</span>
                 {savedLists?.includes(list.id) && (

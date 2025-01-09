@@ -399,6 +399,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          parent_list_id: string | null
           updated_at: string
           user_id: string
         }
@@ -406,6 +407,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          parent_list_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -413,10 +415,18 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          parent_list_id?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_lists_parent_list_id_fkey"
+            columns: ["parent_list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_lists_user_id_fkey"
             columns: ["user_id"]

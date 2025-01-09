@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 
 interface SaveToListDialogProps {
   open: boolean;
@@ -32,6 +32,23 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
       if (error) throw error;
       return data;
     }
+  });
+
+  const { data: savedLists } = useQuery({
+    queryKey: ['saved-lists', itemType, itemId],
+    queryFn: async () => {
+      const table = itemType === 'post' ? 'list_saved_posts' : 'list_saved_resources';
+      const idField = itemType === 'post' ? 'post_id' : 'resource_id';
+
+      const { data, error } = await supabase
+        .from(table)
+        .select('list_id')
+        .eq(idField, itemId);
+
+      if (error) throw error;
+      return data.map(item => item.list_id);
+    },
+    enabled: !!itemId
   });
 
   const handleSaveToList = async (listId: string) => {
@@ -63,8 +80,8 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
         description: "Objektet har sparats i din lista",
       });
 
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['user-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['saved-lists'] });
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving to list:', error);
@@ -93,10 +110,14 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
               <Button
                 key={list.id}
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-between"
                 onClick={() => handleSaveToList(list.id)}
+                disabled={savedLists?.includes(list.id)}
               >
-                {list.name}
+                <span>{list.name}</span>
+                {savedLists?.includes(list.id) && (
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                )}
               </Button>
             ))}
           </div>

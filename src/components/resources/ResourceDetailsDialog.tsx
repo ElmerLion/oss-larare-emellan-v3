@@ -2,6 +2,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ResourceDetailsDialogProps {
   resource: {
@@ -27,6 +30,8 @@ const difficultyMap = {
 };
 
 export function ResourceDetailsDialog({ resource, open, onOpenChange }: ResourceDetailsDialogProps) {
+  const { toast } = useToast();
+
   const { data: author } = useQuery({
     queryKey: ['profile', resource?.author_id],
     queryFn: async () => {
@@ -53,6 +58,39 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
     enabled: !!resource?.file_path,
   });
 
+  const handleDownload = async () => {
+    if (!resource?.file_path) return;
+    
+    try {
+      const { data, error } = await supabase.storage
+        .from('resources')
+        .download(resource.file_path);
+
+      if (error) throw error;
+
+      const url = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = resource.file_name || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Nedladdning startad",
+        description: "Din fil laddas ned nu",
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte ladda ner filen. Försök igen.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!resource) return null;
 
   const isImage = resource.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
@@ -66,7 +104,6 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
           <DialogTitle className="text-2xl font-semibold">{resource.title}</DialogTitle>
         </DialogHeader>
 
-        {/* Author information */}
         {author && (
           <div className="flex items-center gap-3 mb-6">
             <Avatar className="h-12 w-12">
@@ -82,7 +119,6 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
           </div>
         )}
 
-        {/* Resource details */}
         <div className="space-y-4">
           <p className="text-gray-700">{resource.description}</p>
 
@@ -98,33 +134,42 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
             </span>
           </div>
 
-          {/* File preview */}
           {fileUrl && (
-            <div className="mt-6 border rounded-lg p-4">
-              <h4 className="font-semibold mb-2">Förhandsvisning</h4>
-              {isImage ? (
-                <img
-                  src={fileUrl}
-                  alt={resource.title}
-                  className="max-h-[400px] object-contain mx-auto"
-                />
-              ) : isPDF ? (
-                <iframe
-                  src={`${fileUrl}#view=FitH`}
-                  className="w-full h-[400px]"
-                  title={resource.title}
-                />
-              ) : isPowerPoint ? (
-                <div className="text-center p-4 bg-gray-50 rounded">
-                  <p className="text-gray-600">PowerPoint-presentation</p>
-                  <p className="text-sm text-gray-500">Ladda ner för att visa</p>
-                </div>
-              ) : (
-                <div className="text-center p-4 bg-gray-50 rounded">
-                  <p className="text-gray-600">Förhandsvisning inte tillgänglig</p>
-                  <p className="text-sm text-gray-500">Ladda ner filen för att visa innehållet</p>
-                </div>
-              )}
+            <div className="mt-6 space-y-4">
+              <Button 
+                onClick={handleDownload}
+                className="w-full bg-sage-500 hover:bg-sage-600"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Ladda ner {resource.file_name}
+              </Button>
+
+              <div className="border rounded-lg p-4">
+                <h4 className="font-semibold mb-2">Förhandsvisning</h4>
+                {isImage ? (
+                  <img
+                    src={fileUrl}
+                    alt={resource.title}
+                    className="max-h-[400px] object-contain mx-auto"
+                  />
+                ) : isPDF ? (
+                  <iframe
+                    src={`${fileUrl}#view=FitH`}
+                    className="w-full h-[400px]"
+                    title={resource.title}
+                  />
+                ) : isPowerPoint ? (
+                  <div className="text-center p-4 bg-gray-50 rounded">
+                    <p className="text-gray-600">PowerPoint-presentation</p>
+                    <p className="text-sm text-gray-500">Ladda ner för att visa</p>
+                  </div>
+                ) : (
+                  <div className="text-center p-4 bg-gray-50 rounded">
+                    <p className="text-gray-600">Förhandsvisning inte tillgänglig</p>
+                    <p className="text-sm text-gray-500">Ladda ner filen för att visa innehållet</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

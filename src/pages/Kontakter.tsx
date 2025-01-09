@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
 interface Profile {
@@ -31,7 +31,19 @@ export default function Kontakter() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Fetch current user
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    fetchUser();
+  }, []);
 
   // Fetch all profiles
   const { data: profiles } = useQuery({
@@ -50,21 +62,18 @@ export default function Kontakter() {
   const { data: messages, refetch: refetchMessages } = useQuery({
     queryKey: ['messages', selectedUser?.id],
     queryFn: async () => {
-      if (!selectedUser?.id) return [];
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      if (!selectedUser?.id || !currentUserId) return [];
 
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .or(`and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`)
         .order('created_at', { ascending: true });
       
       if (error) throw error;
       return data as Message[];
     },
-    enabled: !!selectedUser,
+    enabled: !!selectedUser && !!currentUserId,
   });
 
   // Set up real-time subscription for new messages
@@ -92,22 +101,12 @@ export default function Kontakter() {
   }, [selectedUser, refetchMessages]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedUser) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to send messages",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
     const { error } = await supabase
       .from('messages')
       .insert({
-        sender_id: user.id,
+        sender_id: currentUserId,
         receiver_id: selectedUser.id,
         content: newMessage,
       });
@@ -153,7 +152,7 @@ export default function Kontakter() {
             </div>
 
             <div className="space-y-2">
-              {filteredProfiles.map((profile) => (
+              {filteredProfiles?.map((profile) => (
                 <div
                   key={profile.id}
                   onClick={() => setSelectedUser(profile)}
@@ -212,7 +211,7 @@ export default function Kontakter() {
 
               <div className="flex-1 p-4 overflow-y-auto space-y-4">
                 {messages?.map((message) => {
-                  const isSentByMe = message.sender_id === supabase.auth.getUser()?.data?.user?.id;
+                  const isSentByMe = message.sender_id === currentUserId;
                   return (
                     <div
                       key={message.id}

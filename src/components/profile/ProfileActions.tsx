@@ -1,7 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle, UserPlus } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export function ProfileActions() {
+  const { id: profileId } = useParams();
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
+
+  useEffect(() => {
+    const checkCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsCurrentUser(user?.id === profileId);
+    };
+    checkCurrentUser();
+  }, [profileId]);
+
+  if (isCurrentUser) return null;
+
   return (
     <div className="flex flex-col gap-2">
       <Button variant="default" className="bg-sage-400 hover:bg-sage-500">

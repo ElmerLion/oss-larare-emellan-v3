@@ -9,6 +9,7 @@ interface ProfileHeaderProps {
   reviews: number;
   imageUrl: string;
   onProfileUpdate?: () => void;
+  isCurrentUser?: boolean;
 }
 
 export function ProfileHeader({ 
@@ -17,7 +18,8 @@ export function ProfileHeader({
   followers, 
   reviews, 
   imageUrl,
-  onProfileUpdate 
+  onProfileUpdate,
+  isCurrentUser = false
 }: ProfileHeaderProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -25,7 +27,7 @@ export function ProfileHeader({
         <ProfileAvatar 
           imageUrl={imageUrl} 
           name={name} 
-          onProfileUpdate={onProfileUpdate}
+          onProfileUpdate={isCurrentUser ? onProfileUpdate : undefined}
         />
         <div className="flex-1">
           <h2 className="text-2xl font-semibold">{name}</h2>

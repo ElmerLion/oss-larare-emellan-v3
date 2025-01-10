@@ -16,16 +16,23 @@ interface Experience {
   is_current: boolean;
 }
 
-export function ExperienceSection() {
+interface ExperienceSectionProps {
+  userId?: string;
+}
+
+export function ExperienceSection({ userId }: ExperienceSectionProps) {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const { toast } = useToast();
 
   const fetchExperiences = async () => {
     const { data: { user } } = await supabase.auth.getUser();
+    const targetId = userId || user?.id;
+    
     const { data, error } = await supabase
       .from('experiences')
       .select('*')
+      .eq('profile_id', targetId)
       .order('start_date', { ascending: false });
 
     if (error) {
@@ -34,7 +41,7 @@ export function ExperienceSection() {
     }
 
     setExperiences(data || []);
-    setIsCurrentUser(!!user);
+    setIsCurrentUser(user?.id === targetId);
   };
 
   const handleDelete = async (id: string) => {
@@ -61,7 +68,7 @@ export function ExperienceSection() {
 
   useEffect(() => {
     fetchExperiences();
-  }, []);
+  }, [userId]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">

@@ -8,23 +8,28 @@ import { UploadedMaterials } from "@/components/profile/UploadedMaterials";
 import { RecommendedContacts } from "@/components/profile/RecommendedContacts";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useParams } from "react-router-dom";
 
 export default function Profil() {
+  const { id: profileId } = useParams();
   const [profileData, setProfileData] = useState({
     full_name: "",
     title: "",
     school: "",
     avatar_url: "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
   });
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
 
   const fetchProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const targetId = profileId || user?.id;
+    
+    if (!targetId) return;
 
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', targetId)
       .single();
 
     if (error) {
@@ -38,11 +43,13 @@ export default function Profil() {
       school: data.school || "",
       avatar_url: data.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png",
     });
+
+    setIsCurrentUser(user?.id === targetId);
   };
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [profileId]);
 
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
@@ -60,11 +67,18 @@ export default function Profil() {
                     followers={192}
                     reviews={54}
                     imageUrl={profileData.avatar_url}
+                    onProfileUpdate={fetchProfile}
+                    isCurrentUser={isCurrentUser}
                   />
 
-                  <AboutSection onProfileUpdate={fetchProfile} />
+                  <AboutSection 
+                    userId={profileId} 
+                    onProfileUpdate={fetchProfile}
+                  />
 
-                  <ExperienceSection />
+                  <ExperienceSection 
+                    userId={profileId}
+                  />
 
                   <UploadedMaterials materials={[
                     {

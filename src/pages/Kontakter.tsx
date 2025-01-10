@@ -26,16 +26,38 @@ export default function Kontakter() {
     fetchUser();
   }, []);
 
-  // Fetch all profiles
+  // Fetch contacts first, then all other profiles
   const { data: profiles } = useQuery({
-    queryKey: ['profiles'],
+    queryKey: ['contacts'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // First get contacts
+      const { data: contactsData } = await supabase
+        .from('user_contacts')
+        .select('contact_id')
+        .eq('user_id', user.id);
+
+      const contactIds = contactsData?.map(contact => contact.contact_id) || [];
+
+      // Get contact profiles
+      const { data: contacts } = await supabase
         .from('profiles')
-        .select('*');
-      
-      if (error) throw error;
-      return data as Profile[];
+        .select('*')
+        .in('id', contactIds);
+
+      // Get all other profiles
+      const { data: otherProfiles } = await supabase
+        .from('profiles')
+        .select('*')
+        .not('id', 'in', [...contactIds, user.id]);
+
+      // Combine and sort profiles, putting contacts first
+      return [
+        ...(contacts || []).map(profile => ({ ...profile, isContact: true })),
+        ...(otherProfiles || []).map(profile => ({ ...profile, isContact: false }))
+      ];
     },
   });
 

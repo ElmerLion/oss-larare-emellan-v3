@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 interface ContactListProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  profiles: Profile[] | undefined;
+  profiles: (Profile & { isContact?: boolean })[] | undefined;
   selectedUser: Profile | null;
   onSelectUser: (user: Profile) => void;
 }
@@ -48,7 +48,8 @@ export function ContactList({
               onClick={() => onSelectUser(profile)}
               className={cn(
                 "p-3 rounded-lg cursor-pointer hover:bg-gray-50",
-                selectedUser?.id === profile.id && "bg-blue-50"
+                selectedUser?.id === profile.id && "bg-blue-50",
+                profile.isContact && "border-l-4 border-sage-400"
               )}
             >
               <div className="flex items-center gap-3">

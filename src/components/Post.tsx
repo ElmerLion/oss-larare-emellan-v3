@@ -6,6 +6,7 @@ import { PostTags } from "./PostTags";
 import { Database } from "@/integrations/supabase/types";
 import { SaveToListDialog } from "./SaveToListDialog";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
@@ -22,7 +23,7 @@ interface Material {
 }
 
 interface PostProps {
-  id: string;  // Changed from string | number to just string
+  id: string;
   author: Author;
   content: string;
   reactions: number;
@@ -46,11 +47,13 @@ export function Post({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <PostHeader 
-        author={author} 
-        postId={id} 
-        onSave={() => setShowSaveDialog(true)}
-      />
+      <Link to={`/profil/${author.id}`} className="block mb-4">
+        <PostHeader 
+          author={author} 
+          postId={id} 
+          onSave={() => setShowSaveDialog(true)}
+        />
+      </Link>
       
       <p className="text-gray-700 mb-4">{content}</p>
 

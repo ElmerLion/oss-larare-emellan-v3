@@ -14,9 +14,11 @@ import Resurser from "./pages/Resurser";
 import MittBibliotek from "./pages/MittBibliotek";
 import Profil from "./pages/Profil";
 
+
 const queryClient = new QueryClient();
 
 const App = () => {
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -32,6 +34,17 @@ const App = () => {
     };
 
     checkSession();
+
+    const fetchCurrentUserId = async () => {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error("Error fetching current user:", error);
+          return;
+        }
+        setCurrentUserId(user?.id || null);
+      };
+
+      fetchCurrentUserId();
 
     // Listen for auth changes
     const {
@@ -62,7 +75,8 @@ const App = () => {
                 <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
                 <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
                 <Route path="/mitt-bibliotek" element={isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />} />
-                <Route path="/profil" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
+                <Route path="/profil/:id" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
+                <Route path="/profil" element={isAuthenticated ? <Navigate to={`/profil/${currentUserId}`} replace /> : <Navigate to="/login" replace />} />
                 <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
               </Routes>
             </div>

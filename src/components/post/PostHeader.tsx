@@ -57,7 +57,7 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
     }
   };
 
-  const AvatarWrapper = disableProfileClick 
+  const AvatarWrapper = disableProfileClick
     ? ({ children }: { children: React.ReactNode }) => <div>{children}</div>
     : ({ children }: { children: React.ReactNode }) => (
         <Link to={`/profil/${author.id}`}>{children}</Link>

@@ -52,7 +52,6 @@ export function Post({
           author={author} 
           postId={id} 
           onSave={() => setShowSaveDialog(true)}
-          disableProfileClick={true}
         />
       </div>
       

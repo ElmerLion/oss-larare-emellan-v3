@@ -24,12 +24,13 @@ const reactionEmojis: Record<ReactionType, { emoji: string; label: string }> = {
 };
 
 interface PostReactionsProps {
-  postId: string;  // Changed from string | number to just string
+  postId: string;
   reactions: number;
   userReaction: ReactionType | null;
+  compact?: boolean;
 }
 
-export function PostReactions({ postId, reactions, userReaction: initialUserReaction }: PostReactionsProps) {
+export function PostReactions({ postId, reactions, userReaction: initialUserReaction, compact = false }: PostReactionsProps) {
   const [userReaction, setUserReaction] = useState<ReactionType | null>(initialUserReaction || null);
   const { toast } = useToast();
 
@@ -93,12 +94,12 @@ export function PostReactions({ postId, reactions, userReaction: initialUserReac
         <Button 
           variant="ghost" 
           size="sm"
-          className="flex items-center gap-1 text-gray-500 hover:text-gray-700"
+          className={`flex items-center gap-1 text-gray-500 hover:text-gray-700 ${compact ? 'p-0 h-auto' : ''}`}
         >
           {userReaction ? (
-            <span className="text-xl">{reactionEmojis[userReaction].emoji}</span>
+            <span className={`${compact ? 'text-base' : 'text-xl'}`}>{reactionEmojis[userReaction].emoji}</span>
           ) : (
-            <ThumbsUp className="w-4 h-4" />
+            <ThumbsUp className={`${compact ? 'w-3 h-3' : 'w-4 h-4'}`} />
           )}
           <span>{reactions} Reaktioner</span>
         </Button>

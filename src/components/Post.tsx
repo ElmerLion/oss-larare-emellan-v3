@@ -47,29 +47,28 @@ export function Post({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <Link to={`/profil/${author.id}`} className="block mb-4">
+      <div className="mb-4">
         <PostHeader 
           author={author} 
           postId={id} 
           onSave={() => setShowSaveDialog(true)}
+          disableProfileClick={true}
         />
-      </Link>
+      </div>
       
       <p className="text-gray-700 mb-4">{content}</p>
 
       {tags && tags.length > 0 && <PostTags tags={tags} />}
       {materials && materials.length > 0 && <PostMaterial materials={materials} />}
 
-      <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
+      <div className="pt-4 border-t border-gray-100 flex items-center gap-4 text-gray-500 text-sm">
+        <PostComments postId={id} totalComments={comments} />
         <PostReactions
           postId={id}
           reactions={reactions}
           userReaction={userReaction}
+          compact={true}
         />
-      </div>
-
-      <div className="pt-4 border-t border-gray-100">
-        <PostComments postId={id} totalComments={comments} />
       </div>
 
       <SaveToListDialog

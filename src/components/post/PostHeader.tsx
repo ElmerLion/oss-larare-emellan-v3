@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface Author {
   id?: string;
@@ -14,11 +15,12 @@ interface Author {
 
 interface PostHeaderProps {
   author: Author;
-  postId: string;  // Changed from string | number to just string
+  postId: string;
   onSave: () => void;
+  disableProfileClick?: boolean;
 }
 
-export function PostHeader({ author, postId, onSave }: PostHeaderProps) {
+export function PostHeader({ author, postId, onSave, disableProfileClick }: PostHeaderProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -30,13 +32,6 @@ export function PostHeader({ author, postId, onSave }: PostHeaderProps) {
     };
     getCurrentUser();
   }, []);
-
-  const handleSavePost = async () => {
-    toast({
-      title: "Post sparad",
-      description: "Posten har sparats i dina favoriter",
-    });
-  };
 
   const handleDeletePost = async () => {
     try {
@@ -62,14 +57,22 @@ export function PostHeader({ author, postId, onSave }: PostHeaderProps) {
     }
   };
 
+  const AvatarWrapper = disableProfileClick 
+    ? ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+    : ({ children }: { children: React.ReactNode }) => (
+        <Link to={`/profil/${author.id}`}>{children}</Link>
+      );
+
   return (
     <div className="flex items-start justify-between mb-4">
       <div className="flex items-center gap-3">
-        <img
-          src={author.avatar || "/placeholder.svg"}
-          alt={author.name}
-          className="w-10 h-10 rounded-full object-cover"
-        />
+        <AvatarWrapper>
+          <img
+            src={author.avatar || "/placeholder.svg"}
+            alt={author.name}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        </AvatarWrapper>
         <div>
           <h3 className="font-semibold">{author.name}</h3>
           <p className="text-sm text-gray-500">{author.timeAgo}</p>

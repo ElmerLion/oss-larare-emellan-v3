@@ -59,7 +59,7 @@ export default function Profil() {
 
   useEffect(() => {
     fetchProfile();
-  }, [profileId]); // Re-fetch when profileId changes
+  }, [profileId]);
 
   if (isLoading) {
     return (
@@ -106,22 +106,10 @@ export default function Profil() {
                     userId={profileId}
                   />
 
-                  <UploadedMaterials materials={[
-                    {
-                      title: "Introduktion till Programmering",
-                      description: "En grundläggande guide för nybörjare i programmering, med fokus på Python och grundläggande koncept.",
-                      tags: [
-                        { subject: "Programmering", level: "Gymnasiet 1", difficulty: "Lätt" }
-                      ]
-                    },
-                    {
-                      title: "Webbutveckling Projekt",
-                      description: "Ett komplett projektmaterial för att lära ut HTML, CSS och JavaScript genom praktiska övningar.",
-                      tags: [
-                        { subject: "Webbutveckling", level: "Gymnasiet 2", difficulty: "Medel" }
-                      ]
-                    }
-                  ]} />
+                  <UploadedMaterials 
+                    userId={profileId || ''} 
+                    isCurrentUser={isCurrentUser}
+                  />
                 </div>
 
                 <div className="col-span-1">

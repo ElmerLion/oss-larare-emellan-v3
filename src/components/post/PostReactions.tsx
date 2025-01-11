@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Database } from "@/integrations/supabase/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,9 +30,38 @@ interface PostReactionsProps {
   compact?: boolean;
 }
 
-export function PostReactions({ postId, reactions, userReaction: initialUserReaction, compact = false }: PostReactionsProps) {
+export function PostReactions({ postId, reactions: initialReactions, userReaction: initialUserReaction, compact = false }: PostReactionsProps) {
   const [userReaction, setUserReaction] = useState<ReactionType | null>(initialUserReaction || null);
+  const [reactionCount, setReactionCount] = useState(initialReactions);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_reactions',
+          filter: `post_id=eq.${postId}`
+        },
+        async () => {
+          // Update reaction count
+          const { count } = await supabase
+            .from('post_reactions')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', postId);
+          
+          setReactionCount(count || 0);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [postId]);
 
   const handleReaction = async (reactionType: ReactionType) => {
     try {
@@ -101,7 +130,7 @@ export function PostReactions({ postId, reactions, userReaction: initialUserReac
           ) : (
             <ThumbsUp className={`${compact ? 'w-3 h-3' : 'w-4 h-4'}`} />
           )}
-          <span>{reactions} Reaktioner</span>
+          <span>{reactionCount} Reaktioner</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -109,10 +138,11 @@ export function PostReactions({ postId, reactions, userReaction: initialUserReac
           <DropdownMenuItem
             key={key}
             onClick={() => handleReaction(key)}
-            className="flex items-center gap-2 cursor-pointer"
+            className={`flex items-center gap-2 cursor-pointer ${userReaction === key ? 'bg-gray-100' : ''}`}
           >
             <span className="text-xl">{emoji}</span>
             <span>{label}</span>
+            {userReaction === key && <span className="ml-2 text-sm text-gray-500">(Click to remove)</span>}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

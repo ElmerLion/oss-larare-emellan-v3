@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
+import { ResourceDetailsDialog } from "./resources/ResourceDetailsDialog";
 
 interface Material {
   title: string;
@@ -104,29 +104,13 @@ export function PostMaterial({ materials }: PostMaterialProps) {
         </div>
       ))}
 
-      <Dialog open={!!selectedMaterial} onOpenChange={(open) => !open && setSelectedMaterial(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{materialDetails?.title}</DialogTitle>
-          </DialogHeader>
-          {materialDetails && (
-            <div className="space-y-4">
-              <p className="text-gray-600">{materialDetails.description}</p>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
-                  {materialDetails.subject}
-                </span>
-                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
-                  {materialDetails.grade}
-                </span>
-                <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                  {materialDetails.difficulty}
-                </span>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {materialDetails && (
+        <ResourceDetailsDialog
+          resource={materialDetails}
+          open={!!selectedMaterial}
+          onOpenChange={(open) => !open && setSelectedMaterial(null)}
+        />
+      )}
     </div>
   );
 }

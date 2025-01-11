@@ -18,11 +18,12 @@ interface Comment {
 }
 
 interface PostCommentsProps {
-  postId: string;  // Changed from string | number to just string
+  postId: string;
   totalComments: number;
+  showCommentForm?: boolean;
 }
 
-export function PostComments({ postId, totalComments }: PostCommentsProps) {
+export function PostComments({ postId, totalComments, showCommentForm = false }: PostCommentsProps) {
   const [comment, setComment] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
@@ -126,14 +127,17 @@ export function PostComments({ postId, totalComments }: PostCommentsProps) {
     }
   };
 
-  return (
-    <div className="space-y-4">
+  if (!showCommentForm) {
+    return (
       <div className="flex items-center gap-1 text-gray-500 text-sm">
         <MessageSquare className="w-4 h-4" />
         <span>{totalComments} Kommentarer</span>
       </div>
+    );
+  }
 
-      {/* Fixed height container for comments */}
+  return (
+    <div className="space-y-4">
       <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[200px]'} overflow-hidden`}>
         {comments.map((comment) => (
           <div key={comment.id} className="flex gap-3">

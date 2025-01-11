@@ -60,13 +60,20 @@ export function Post({
       {tags && tags.length > 0 && <PostTags tags={tags} />}
       {materials && materials.length > 0 && <PostMaterial materials={materials} />}
 
-      <div className="pt-4 border-t border-gray-100 flex items-center gap-4 text-gray-500 text-sm">
-        <PostComments postId={id} totalComments={comments} />
-        <PostReactions
+      <div className="pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
+          <PostComments totalComments={comments} />
+          <PostReactions
+            postId={id}
+            reactions={reactions}
+            userReaction={userReaction}
+            compact={true}
+          />
+        </div>
+        <PostComments
           postId={id}
-          reactions={reactions}
-          userReaction={userReaction}
-          compact={true}
+          totalComments={comments}
+          showCommentForm={true}
         />
       </div>
 

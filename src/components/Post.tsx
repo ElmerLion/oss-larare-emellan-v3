@@ -62,7 +62,7 @@ export function Post({
 
       <div className="pt-4 border-t border-gray-100">
         <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
-          <PostComments totalComments={comments} />
+          <PostComments postId={id} totalComments={comments} />
           <PostReactions
             postId={id}
             reactions={reactions}

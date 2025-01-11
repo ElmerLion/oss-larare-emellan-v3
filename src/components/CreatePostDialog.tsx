@@ -3,10 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Upload, Link } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { LinkMaterialDialog } from "./LinkMaterialDialog";
+import { LinkedMaterialsList } from "./post/LinkedMaterialsList";
+import { PostActionButtons } from "./post/PostActionButtons";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Material {
   id: string;
@@ -21,6 +23,7 @@ export function CreatePostDialog() {
   const [showLinkMaterial, setShowLinkMaterial] = useState(false);
   const [linkedMaterials, setLinkedMaterials] = useState<Material[]>([]);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +51,6 @@ export function CreatePostDialog() {
 
       if (postError) throw postError;
 
-      // Insert linked materials
       if (linkedMaterials.length > 0) {
         const { error: materialsError } = await supabase
           .from('post_materials')
@@ -62,6 +64,9 @@ export function CreatePostDialog() {
 
         if (materialsError) throw materialsError;
       }
+
+      // Invalidate and refetch posts query to show the new post immediately
+      await queryClient.invalidateQueries({ queryKey: ['posts'] });
 
       toast({
         title: "Publicerad",
@@ -115,48 +120,15 @@ export function CreatePostDialog() {
               />
             </div>
             
-            {linkedMaterials.length > 0 && (
-              <div className="space-y-2">
-                <Label>Länkade material</Label>
-                <div className="space-y-2">
-                  {linkedMaterials.map((material) => (
-                    <div
-                      key={material.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                    >
-                      <span>{material.title}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeMaterial(material.id)}
-                      >
-                        Ta bort
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <LinkedMaterialsList 
+              materials={linkedMaterials}
+              onRemove={removeMaterial}
+            />
             
-            <div className="space-y-2">
-              <Label>Lägg till</Label>
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" className="flex-1">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Ladda upp fil
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowLinkMaterial(true)}
-                >
-                  <Link className="w-4 h-4 mr-2" />
-                  Länka material
-                </Button>
-              </div>
-            </div>
+            <PostActionButtons
+              onUploadClick={() => {}}
+              onLinkClick={() => setShowLinkMaterial(true)}
+            />
 
             <div className="pt-4 flex justify-end">
               <Button type="submit" className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)]">

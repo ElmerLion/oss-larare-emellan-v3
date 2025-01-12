@@ -70,11 +70,13 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
           <img
             src={author.avatar || "/placeholder.svg"}
             alt={author.name}
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover cursor-pointer"
           />
         </AvatarWrapper>
         <div>
-          <h3 className="font-semibold">{author.name}</h3>
+          <AvatarWrapper>
+            <h3 className="font-semibold hover:underline cursor-pointer">{author.name}</h3>
+          </AvatarWrapper>
           <p className="text-sm text-gray-500">{author.timeAgo}</p>
         </div>
       </div>

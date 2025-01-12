@@ -20,6 +20,32 @@ export function ProfileCard() {
     },
   });
 
+  const { data: stats } = useQuery({
+    queryKey: ['profile-stats'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const [{ count: downloads }, { count: profileViews }] = await Promise.all([
+        supabase
+          .from('resource_downloads')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id),
+        supabase
+          .from('profile_visits')
+          .select('*', { count: 'exact', head: true })
+          .eq('profile_id', user.id)
+          .gte('visited_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      ]);
+
+      return {
+        downloads: downloads || 0,
+        profileViews: profileViews || 0
+      };
+    },
+    enabled: !!profile
+  });
+
   if (!profile) return null;
 
   return (
@@ -44,17 +70,14 @@ export function ProfileCard() {
 
       {/* Bio */}
       <p className="text-sm text-gray-700 mb-6">
-        Hej, jag heter Elmer, jag lär ut programmering på NTI och försöker
-        alltid hitta nya sätt att undervisa.
+        {profile.bio || "Ingen bio än"}
       </p>
 
       {/* Stats */}
       <div className="flex space-x-4 justify-evenly">
         {/* Downloads Stat */}
         <div className="flex items-center">
-          {/* Background */}
           <div className="w-9 h-9 flex items-center justify-center bg-orange-300 rounded-md text-white">
-            {/* Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-5 h-5"
@@ -71,7 +94,7 @@ export function ProfileCard() {
             </svg>
           </div>
           <div>
-            <div className="text-sm font-bold px-2 text-black">5</div>
+            <div className="text-sm font-bold px-2 text-black">{stats?.downloads || 0}</div>
             <div className="text-xs text-gray-600 px-2">Nedladdningar</div>
           </div>
         </div>
@@ -79,9 +102,7 @@ export function ProfileCard() {
         {/* Profile Views Stat */}
         <div className="h-12 flex items-center">
           <div className="flex items-center">
-            {/* Background */}
             <div className="w-9 h-9 flex items-center justify-center bg-orange-300 rounded-md text-white">
-              {/* Icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-5 h-5"
@@ -99,7 +120,7 @@ export function ProfileCard() {
             </div>
           </div>
           <div>
-            <div className="text-sm font-bold px-2 text-black">12</div>
+            <div className="text-sm font-bold px-2 text-black">{stats?.profileViews || 0}</div>
             <div className="text-xs text-gray-600 px-2">Profilvisningar</div>
           </div>
         </div>

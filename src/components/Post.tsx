@@ -6,7 +6,6 @@ import { PostTags } from "./PostTags";
 import { Database } from "@/integrations/supabase/types";
 import { SaveToListDialog } from "./SaveToListDialog";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
@@ -52,6 +51,7 @@ export function Post({
           author={author} 
           postId={id} 
           onSave={() => setShowSaveDialog(true)}
+          disableProfileClick={false}
         />
       </div>
       

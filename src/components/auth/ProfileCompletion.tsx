@@ -19,8 +19,8 @@ export function ProfileCompletion() {
     
     if (!user) {
       toast({
-        title: "Error",
-        description: "No user found. Please try logging in again.",
+        title: "Fel",
+        description: "Ingen användare hittades. Vänligen logga in igen.",
         variant: "destructive",
       });
       return;
@@ -37,16 +37,16 @@ export function ProfileCompletion() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Could not update profile. Please try again.",
+        title: "Fel",
+        description: "Kunde inte uppdatera profilen. Vänligen försök igen.",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Profile updated successfully!",
+      title: "Klart!",
+      description: "Din profil har uppdaterats!",
     });
     navigate('/');
   };

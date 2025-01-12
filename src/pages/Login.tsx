@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileCompletion } from "@/components/auth/ProfileCompletion";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Login() {
   const navigate = useNavigate();
   const [showProfileCompletion, setShowProfileCompletion] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    // Check initial session
     const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -43,7 +47,6 @@ export default function Login() {
 
     checkSession();
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -74,6 +77,41 @@ export default function Login() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (isRegistering) {
+        if (password !== confirmPassword) {
+          toast.error("Lösenorden matchar inte");
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        toast.success("Registrering lyckades! Kontrollera din e-post för verifiering.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+      }
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      toast.error(error.message === "Invalid login credentials"
+        ? "Felaktiga inloggningsuppgifter"
+        : "Ett fel uppstod, försök igen senare"
+      );
+    }
+  };
+
   if (showProfileCompletion) {
     return <ProfileCompletion />;
   }
@@ -93,27 +131,61 @@ export default function Login() {
       </div>
 
       <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-lg shadow-sm">
-        <h1 className="text-2xl font-semibold mb-6 text-center">Välkommen tillbaka!</h1>
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          theme="light"
-          providers={["google"]}
-          localization={{
-            variables: {
-              sign_in: {
-                email_label: "E-postadress",
-                password_label: "Lösenord",
-                button_label: "Logga in",
-              },
-              sign_up: {
-                email_label: "E-postadress",
-                password_label: "Lösenord",
-                button_label: "Registrera",
-              },
-            },
-          }}
-        />
+        <h1 className="text-2xl font-semibold mb-6 text-center">
+          {isRegistering ? "Skapa konto" : "Välkommen tillbaka!"}
+        </h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">E-postadress</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Lösenord</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {isRegistering && (
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
+          <Button type="submit" className="w-full">
+            {isRegistering ? "Registrera" : "Logga in"}
+          </Button>
+        </form>
+
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="text-sm text-gray-600 hover:underline"
+          >
+            {isRegistering
+              ? "Har du redan ett konto? Logga in"
+              : "Ny här? Skapa ett konto"}
+          </button>
+        </div>
       </div>
     </div>
   );

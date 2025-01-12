@@ -98,6 +98,7 @@ export default function Login() {
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
           theme="light"
+          providers={["google"]}
           localization={{
             variables: {
               sign_in: {

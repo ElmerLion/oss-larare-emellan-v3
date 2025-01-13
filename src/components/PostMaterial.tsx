@@ -52,6 +52,21 @@ export function PostMaterial({ materials }: PostMaterialProps) {
         return;
       }
 
+      const { error: updateError } = await supabase
+                  .from('resources')
+                  .update({ downloads: (resourceData.downloads || 0) + 1 })
+                  .eq('title', material.title);
+
+              if (updateError) {
+                  console.error('Error updating downloads count:', updateError);
+                  toast({
+                      title: "Error",
+                      description: "Kunde inte uppdatera nedladdningsantalet",
+                      variant: "destructive",
+                  });
+                  return;
+      }
+
       const { data, error } = await supabase.storage
         .from('resources')
         .download(resourceData.file_path);

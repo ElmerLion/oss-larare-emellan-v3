@@ -31,6 +31,7 @@ const App = () => {
         console.error("Session check error:", error);
         setIsAuthenticated(false);
       }
+      fetchCurrentUserId();
     };
 
     checkSession();
@@ -44,7 +45,7 @@ const App = () => {
         setCurrentUserId(user?.id || null);
       };
 
-      fetchCurrentUserId();
+
 
     // Listen for auth changes
     const {

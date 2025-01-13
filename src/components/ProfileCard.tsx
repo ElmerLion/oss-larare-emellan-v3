@@ -12,7 +12,7 @@ export function ProfileCard() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, full_name, title, purpose, motivation, contribution, avatar_url, visits')
         .eq('id', user.id)
         .single();
 
@@ -26,24 +26,32 @@ export function ProfileCard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const [{ count: downloads }, { count: profileViews }] = await Promise.all([
-        supabase
-          .from('resource_downloads')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id),
-        supabase
-          .from('profile_visits')
-          .select('*', { count: 'exact', head: true })
-          .eq('profile_id', user.id)
-          .gte('visited_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-      ]);
+      // Fetch resources uploaded by the user
+      const { data: resources, error } = await supabase
+        .from('resources')
+        .select('downloads')
+        .eq('id', user.id); // Use `id` instead of `user_id`
+
+      if (error) throw error;
+
+      // Calculate total downloads
+      const totalDownloads = resources?.reduce((sum, resource) => sum + (resource.downloads || 0), 0) || 0;
+
+      // Fetch the profile to get visits
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('visits')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
 
       return {
-        downloads: downloads || 0,
-        profileViews: profileViews || 0
+        downloads: totalDownloads,
+        profileViews: profile?.visits || 0,
       };
     },
-    enabled: !!profile
+    enabled: !!profile,
   });
 
   if (!profile) return null;
@@ -70,7 +78,9 @@ export function ProfileCard() {
 
       {/* Bio */}
       <p className="text-sm text-gray-700 mb-6">
-        {profile.bio || "Ingen bio än"}
+        Jag är här för att {profile.purpose?.toLowerCase()}.<br />
+        Jag jobbar som lärare för att {profile.motivation?.toLowerCase()}.<br />
+        På Oss Lärare Emellan bidrar jag med {profile.contribution?.toLowerCase()}
       </p>
 
       {/* Stats */}
@@ -99,7 +109,7 @@ export function ProfileCard() {
           </div>
         </div>
 
-        {/* Profile Views Stat */}
+        {/* Profile Visits Stat */}
         <div className="h-12 flex items-center">
           <div className="flex items-center">
             <div className="w-9 h-9 flex items-center justify-center bg-orange-300 rounded-md text-white">
@@ -121,7 +131,7 @@ export function ProfileCard() {
           </div>
           <div>
             <div className="text-sm font-bold px-2 text-black">{stats?.profileViews || 0}</div>
-            <div className="text-xs text-gray-600 px-2">Profilvisningar</div>
+            <div className="text-xs text-gray-600 px-2">Profilbesök</div>
           </div>
         </div>
       </div>

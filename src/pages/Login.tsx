@@ -186,7 +186,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegistering && (
             <div className="space-y-2">
-              <Label htmlFor="fullName">Fullständigt namn</Label>
+              <Label htmlFor="fullName">För- och efternamn</Label>
               <Input
                 id="fullName"
                 type="text"

@@ -29,7 +29,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a 
-                href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/" 
+                href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/"
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-sage-500"

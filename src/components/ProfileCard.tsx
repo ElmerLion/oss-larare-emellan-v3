@@ -65,7 +65,7 @@ export function ProfileCard() {
         <div className="absolute inset-x-0 bottom-10 transform translate-y-1/2 flex justify-center">
           <Avatar className="h-24 w-24 rounded-full border-2 border-white">
             <AvatarImage
-              src={profile.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
+              src={profile.avatar_url || "/placeholder.svg"}
               alt={profile.full_name || "Profile Picture"}
             />
           </Avatar>

@@ -21,41 +21,33 @@ const App = () => {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
-      } catch (error) {
-        console.error("Session check error:", error);
-        setIsAuthenticated(false);
-      }
-      fetchCurrentUserId();
-    };
+useEffect(() => {
+  const checkSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setIsAuthenticated(true);
+      const { data: user } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    } else {
+      setIsAuthenticated(false);
+      setCurrentUserId(null);
+    }
+  };
 
-    checkSession();
+  checkSession();
 
-    const fetchCurrentUserId = async () => {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) {
-          console.error("Error fetching current user:", error);
-          return;
-        }
-        setCurrentUserId(user?.id || null);
-      };
+  const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (session) {
+      setIsAuthenticated(true);
+      setCurrentUserId(session.user.id); // Update user ID on login
+    } else {
+      setIsAuthenticated(false);
+      setCurrentUserId(null); // Clear user ID on logout
+    }
+  });
 
-
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  return () => subscription.unsubscribe();
+}, []);
 
   if (isAuthenticated === null) {
     return null; // or a loading spinner

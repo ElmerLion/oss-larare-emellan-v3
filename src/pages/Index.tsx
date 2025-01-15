@@ -24,14 +24,14 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <Button 
                 variant="outline" 
-                className="border-sage-200 hover:bg-sage-50"
+                className="border-[color:var(--hover-green)] hover:bg-sage-50"
                 onClick={() => navigate("/login")}
               >
                 Logga in
               </Button>
               <Button 
-                className="bg-sage-400 hover:bg-sage-500 text-white"
-                onClick={() => navigate("/login")}
+                className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white"
+                onClick={() => navigate("/login?register=true")}
               >
                 Registrera
               </Button>
@@ -52,8 +52,8 @@ const Index = () => {
           </p>
           <Button
             size="lg"
-            className="bg-sage-400 hover:bg-sage-500 text-white text-lg px-8"
-            onClick={() => navigate("/login")}
+            className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8"
+            onClick={() => navigate("/login?register=true")}
           >
             Registrera dig nu
           </Button>
@@ -131,15 +131,14 @@ const Index = () => {
           <h2 className="text-3xl font-bold mb-8">Redo att börja?</h2>
           <Button
             size="lg"
-            className="bg-sage-400 hover:bg-sage-500 text-white text-lg px-8"
-            onClick={() => navigate("/login")}
+            className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8"
+            onClick={() => navigate("/login?register=true")}
           >
             Registrera dig nu
           </Button>
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

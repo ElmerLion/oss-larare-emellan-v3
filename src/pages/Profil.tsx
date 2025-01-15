@@ -55,6 +55,7 @@ export default function Profil() {
     } finally {
       setIsLoading(false);
     }
+
   };
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function Profil() {
           <Header />
           <main className="mt-16 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
             <div className="p-6">
-              <div>Loading...</div>
+              <div>Laddar...</div>
             </div>
           </main>
         </div>

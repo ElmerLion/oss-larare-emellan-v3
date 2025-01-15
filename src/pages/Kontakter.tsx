@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ export default function Kontakter() {
   const [newMessage, setNewMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
   // Fetch current user
   useEffect(() => {
@@ -26,53 +28,71 @@ export default function Kontakter() {
     fetchUser();
   }, []);
 
-  // Fetch contacts first, then all other profiles
+  // Fetch contacts
   const { data: profiles } = useQuery({
-    queryKey: ['contacts'],
+    queryKey: ["contacts"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // First get contacts
-      const { data: contactsData } = await supabase
-        .from('user_contacts')
-        .select('contact_id')
-        .eq('user_id', user.id);
+      // Fetch contacts
+      const { data: contactsData, error: contactsError } = await supabase
+        .from("user_contacts")
+        .select("contact_id")
+        .eq("user_id", user.id);
 
-      const contactIds = contactsData?.map(contact => contact.contact_id) || [];
+      if (contactsError) {
+        console.error("Error fetching contacts:", contactsError);
+        throw contactsError;
+      }
 
-      // Get contact profiles
-      const { data: contacts } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', contactIds);
+      const contactIds = contactsData?.map((contact) => contact.contact_id) || [];
 
-      // Get all other profiles
-      const { data: otherProfiles } = await supabase
-        .from('profiles')
-        .select('*')
-        .not('id', 'in', [...contactIds, user.id]);
+      if (contactIds.length === 0) {
+        // No contacts
+        return [];
+      }
 
-      // Combine and sort profiles, putting contacts first
-      return [
-        ...(contacts || []).map(profile => ({ ...profile, isContact: true })),
-        ...(otherProfiles || []).map(profile => ({ ...profile, isContact: false }))
-      ];
+      // Fetch profiles of contacts
+      const { data: contacts, error: profilesError } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("id", contactIds);
+
+      if (profilesError) {
+        console.error("Error fetching contact profiles:", profilesError);
+        throw profilesError;
+      }
+
+      return contacts || [];
     },
   });
 
+  // Automatically select user from query parameters
+  useEffect(() => {
+    const chatUserId = searchParams.get("chat");
+    if (chatUserId && profiles) {
+      const userToSelect = profiles.find((profile) => profile.id === chatUserId);
+      if (userToSelect) {
+        setSelectedUser(userToSelect);
+      }
+    }
+  }, [searchParams, profiles]);
+
   // Fetch messages for selected conversation
   const { data: messages, refetch: refetchMessages } = useQuery({
-    queryKey: ['messages', selectedUser?.id],
+    queryKey: ["messages", selectedUser?.id],
     queryFn: async () => {
       if (!selectedUser?.id || !currentUserId) return [];
 
       const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`)
-        .order('created_at', { ascending: true });
-      
+        .from("messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
+        )
+        .order("created_at", { ascending: true });
+
       if (error) throw error;
       return data as Message[];
     },
@@ -84,13 +104,13 @@ export default function Kontakter() {
     if (!selectedUser) return;
 
     const channel = supabase
-      .channel('messages')
+      .channel("messages")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
         },
         (payload) => {
           refetchMessages();
@@ -107,7 +127,7 @@ export default function Kontakter() {
     if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
     const { error } = await supabase
-      .from('messages')
+      .from("messages")
       .insert({
         sender_id: currentUserId,
         receiver_id: selectedUser.id,
@@ -130,7 +150,6 @@ export default function Kontakter() {
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
       <AppSidebar />
-      
       <div className="flex flex-1 ml-64 p-6 gap-6">
         <ContactList
           searchQuery={searchQuery}
@@ -139,7 +158,6 @@ export default function Kontakter() {
           selectedUser={selectedUser}
           onSelectUser={setSelectedUser}
         />
-
         <ChatWindow
           selectedUser={selectedUser}
           messages={messages}

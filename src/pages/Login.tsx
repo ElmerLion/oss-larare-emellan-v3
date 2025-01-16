@@ -162,8 +162,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     return <ProfileCompletion />;
   }
 
-
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 border-b border-gray-200 bg-white">

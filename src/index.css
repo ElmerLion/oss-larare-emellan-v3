@@ -100,5 +100,50 @@
 
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+
+  @keyframes zoom {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes blob-move {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    25% {
+      transform: translate(10px, -10px) scale(1.05);
+    }
+    50% {
+      transform: translate(-10px, 10px) scale(1.1);
+    }
+    75% {
+      transform: translate(-10px, -10px) scale(1.05);
+    }
+  }
+
+  @layer utilities {
+    .animate-zoom {
+      animation: zoom 8s ease-in-out infinite;
+    }
+    .animate-blob {
+        animation: blob-move 6s ease-in-out infinite;
+    }
+    .btn-animated {
+        @apply hover:scale-105 transform transition-all duration-300 ease-in-out hover:shadow-lg;
+    }
+
+    .btn-solid {
+        @apply bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white;
+    }
+
+    .btn-outline {
+        @apply border-[color:var(--hover-green)] hover:bg-sage-50;
+    }
   }
 }

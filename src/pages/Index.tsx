@@ -13,7 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sage-50 to-white flex flex-col relative">
+    <div className="min-h-screen bg-gradient-to-b from-sage-50 to-white flex flex-col relative cursor-default">
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">

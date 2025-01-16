@@ -1,8 +1,12 @@
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Element } from "react-scroll";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 export function AboutSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 }); // Triggers when 20% of the component is in view
+
   return (
     <Element name="about">
       <section className="py-20 bg-gradient-to-r from-sage-50 to-white relative z-0 overflow-hidden">
@@ -32,39 +36,43 @@ export function AboutSection() {
           </svg>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          ref={ref}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        >
           {/* Title with Animation */}
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8 }}
             className="text-4xl font-bold text-center mb-12"
           >
-            <span className="text-green-600">OLE</span> Hjälper <span className="text-blue-500">Lärare</span> Att Lyckas.
+            <span className="text-green-600">OLE</span> Hjälper{" "}
+            <span className="text-blue-500">Lärare</span> Att Lyckas.
           </motion.h2>
 
           {/* Description with Subtle Animation */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-16"
           >
             OLE är en digital plattform som hjälper lärare att{" "}
             <span className="font-semibold text-green-700">samarbeta</span>,{" "}
-            <span className="font-semibold text-blue-600">dela resurser</span>{" "}
-            och <span className="font-semibold text-purple-600">inspirera</span>{" "}
+            <span className="font-semibold text-blue-600">dela resurser</span> och{" "}
+            <span className="font-semibold text-purple-600">inspirera</span>{" "}
             varandra för att stärka undervisningen i svenska skolor.
           </motion.p>
 
           {/* Call-to-Action */}
           <div className="flex justify-center mt-12">
             <Button
-                size="lg"
-                className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8 btn-animated"
-              >
-                Läs mer om OLE
-              </Button>
+              size="lg"
+              className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8 btn-animated"
+            >
+              Läs mer om OLE
+            </Button>
           </div>
         </div>
       </section>

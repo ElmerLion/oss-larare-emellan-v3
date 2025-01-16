@@ -61,13 +61,24 @@ export function AppSidebar() {
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen p-4 fixed left-0 top-0">
-      <div className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center text-white font-bold">
-          <img src="/Images/OLELogga.png" alt="OLE Logo" className="w-full h-full object-contain" />
-        </div>
-        <span className="text-sm text-gray-600">Oss Lärare Emellan</span>
-      </div>
-      
+        <div className="flex items-center gap-2 group gap-2 mb-8">
+                <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg ">
+                <button
+                      onClick={() => navigate("/home")}
+                      className="flex items-center gap-2"
+                    >
+                  <img
+                    src="/Images/OLELogga.png"
+                    alt="OLE Logo"
+                    className="w-full h-full object-contain"
+                  />
+                  </button>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
+                  Oss Lärare Emellan
+                </span>
+              </div>
+
       <nav className="space-y-1">
         {menuItems.map((item) => (
           <Link

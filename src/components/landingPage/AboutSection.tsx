@@ -2,13 +2,15 @@ import { motion, useInView } from "framer-motion";
 import { Element } from "react-scroll";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export function AboutSection() {
+  const navigate = useNavigate();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 }); // Triggers when 20% of the component is in view
 
   return (
-    <Element name="about">
+    <Element name="about" id="about">
       <section className="py-20 bg-gradient-to-r from-sage-50 to-white relative z-0 overflow-hidden">
         {/* Background Blobs */}
         <div className="absolute inset-0 -z-10">
@@ -70,8 +72,9 @@ export function AboutSection() {
             <Button
               size="lg"
               className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8 btn-animated"
+              onClick={() => window.location.href = "/login?register=true"}
             >
-              Läs mer om OLE
+              Gå med nu
             </Button>
           </div>
         </div>

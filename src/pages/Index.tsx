@@ -6,7 +6,8 @@ import { Link as ScrollLink, Element } from "react-scroll";
 import { FeatureSection } from "@/components/landingPage/FeatureSection";
 import { TestimonialsSection } from "@/components/landingPage/TestimonialsSection";
 import { AboutSection } from "@/components/landingPage/AboutSection";
-import { HeroSection } from "@/components/landingPage/HeroSection"
+import { HeroSection } from "@/components/landingPage/HeroSection";
+import { LandingPageHeader } from "@/components/landingPage/LandingPageHeader"
 
 
 const Index = () => {
@@ -16,46 +17,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-sage-50 to-white flex flex-col relative cursor-default">
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <ScrollLink to="hero" smooth duration={500} className="cursor-pointer">
-              <div className="flex items-center gap-2 group">
-                <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg ">
-                <button
-                      onClick={() => navigate("/")}
-                      className="flex items-center gap-2"
-                    >
-                  <img
-                    src="/Images/OLELogga.png"
-                    alt="OLE Logo"
-                    className="w-full h-full object-contain"
-                  />
-                  </button>
-                </div>
-                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
-                  Oss Lärare Emellan
-                </span>
-              </div>
-            </ScrollLink>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                className="border-[color:var(--hover-green)] hover:bg-sage-50 btn-animated btn-outline"
-                onClick={() => navigate("/login")}
-              >
-                Logga in
-              </Button>
-              <Button
-                className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] btn-animated  btn-solid text-white"
-                onClick={() => navigate("/login?register=true")}
-              >
-                Registrera
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <LandingPageHeader></LandingPageHeader>
 
       {/* Hero Section */}
         <HeroSection></HeroSection>
@@ -70,7 +32,7 @@ const Index = () => {
         <TestimonialsSection></TestimonialsSection>
 
       {/* CTA Section */}
-    <Element name="cta">
+    <Element name="cta" id="cta">
       <section className="py-20 bg-gradient-to-r from-sage-50 via-white to-sage-50 relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Subtle Decorative Elements */}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
     return (
-      <Element name="hero">
+      <Element name="hero" id="hero">
         <section className="relative pt-24 h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 z-10">
 
           {/* Blobs */}

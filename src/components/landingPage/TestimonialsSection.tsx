@@ -7,7 +7,7 @@ export function TestimonialsSection() {
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <Element name="testimonials">
+    <Element name="testimonials" id="testimonials">
       <section
         ref={ref}
         className="py-20 bg-gradient-to-r from-white to-sage-50"

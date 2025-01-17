@@ -13,6 +13,8 @@ import Kontakter from "./pages/Kontakter";
 import Resurser from "./pages/Resurser";
 import MittBibliotek from "./pages/MittBibliotek";
 import Profil from "./pages/Profil";
+import OmOss from "./pages/OmOss";
+import IntegritetsPolicy from "./pages/IntegritetsPolicy";
 
 
 const queryClient = new QueryClient();
@@ -71,6 +73,8 @@ useEffect(() => {
                 <Route path="/profil/:id" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
                 <Route path="/profil" element={isAuthenticated ? <Navigate to={`/profil/${currentUserId}`} replace /> : <Navigate to="/login" replace />} />
                 <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
+                <Route path="/omoss" element={<OmOss />} />
+                <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
               </Routes>
             </div>
             <Footer />

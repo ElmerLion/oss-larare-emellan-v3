@@ -21,7 +21,7 @@ export function Footer() {
             <h3 className="text-gray-800 font-medium mb-4">Snabblänkar</h3>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>
-                <a href="#about" className="hover:text-green-600">Om Oss</a>
+                <a href="/omoss" className="hover:text-green-600">Om Oss</a>
               </li>
               <li>
                 <a href="#features" className="hover:text-green-600">Funktioner</a>
@@ -30,10 +30,7 @@ export function Footer() {
                 <a href="#testimonials" className="hover:text-green-600">Omdömen</a>
               </li>
               <li>
-                <a href="#cta" className="hover:text-green-600">Kontakta Oss</a>
-              </li>
-              <li>
-                <a href="/privacy-policy" className="hover:text-green-600">Integritetspolicy</a>
+                <a href="/Integritets-policy" className="hover:text-green-600">Integritetspolicy</a>
               </li>
             </ul>
           </div>

@@ -8,7 +8,7 @@ export function FeatureSection() {
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <Element name="features">
+    <Element name="features" id="features">
       <section
         ref={ref}
         className="py-20 bg-gradient-to-r from-green-50 via-sage-50 to-green-100 relative"

@@ -40,7 +40,7 @@ export function LandingPageHeader() {
               </Button>
               <Button
                 className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] btn-animated  btn-solid text-white"
-                onClick={() => navigate("/login?register=true")}
+                onClick={() => window.location.href = "/login?register=true"}
               >
                 Registrera
               </Button>

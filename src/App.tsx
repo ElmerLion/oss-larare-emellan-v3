@@ -15,6 +15,8 @@ import MittBibliotek from "./pages/MittBibliotek";
 import Profil from "./pages/Profil";
 import OmOss from "./pages/OmOss";
 import IntegritetsPolicy from "./pages/IntegritetsPolicy";
+import Diskussioner from "./pages/Diskussioner";
+import DiscussionDetail from "@/components/DiscussionDetail";
 
 
 const queryClient = new QueryClient();
@@ -75,6 +77,8 @@ useEffect(() => {
                 <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
                 <Route path="/omoss" element={<OmOss />} />
                 <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
+                <Route path="/diskussioner" element={<Diskussioner />} />
+                <Route path="/diskussioner/:id" element={<DiscussionDetail />} />
               </Routes>
             </div>
             <Footer />

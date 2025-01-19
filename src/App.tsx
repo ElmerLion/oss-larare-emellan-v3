@@ -78,7 +78,7 @@ useEffect(() => {
                 <Route path="/omoss" element={<OmOss />} />
                 <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
                 <Route path="/diskussioner" element={<Diskussioner />} />
-                <Route path="/diskussioner/:id" element={<DiscussionDetail />} />
+                <Route path="/diskussioner/:slug" element={<DiscussionDetail />} />
               </Routes>
             </div>
             <Footer />

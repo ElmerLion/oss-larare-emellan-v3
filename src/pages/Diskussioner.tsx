@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; // Assume you have a Textarea component
+import LatestDiscussions from "@/components/LatestDiscussions";
 
 const Diskussioner = () => {
   const queryClient = useQueryClient();
@@ -31,7 +32,6 @@ const Diskussioner = () => {
         `)
         .order("created_at", { ascending: false });
 
-     console.log("Fetched Discussions:", data, "Error:", error);
       if (error) throw error;
       return data || [];
     },
@@ -46,7 +46,7 @@ const Diskussioner = () => {
 
       const { error } = await supabase.from("discussions").insert({
         question: newDiscussion,
-        description: newDescription, // Include description in the payload
+        description: newDescription,
         slug,
       });
 
@@ -55,7 +55,7 @@ const Diskussioner = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(["discussions"]);
       setNewDiscussion("");
-      setNewDescription(""); // Reset the description field
+      setNewDescription("");
       setIsCreating(false);
     },
   });
@@ -69,20 +69,20 @@ const Diskussioner = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
-      <Header />
 
-      <main className="pl-64 pt-16">
+      <main className="pl-64">
         <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
           <div className="col-span-2">
-            <h1 className="text-2xl font-semibold mb-2">Diskussioner</h1>
-            <p className="text-gray-600 mb-8">
-              Utforska pågående diskussioner och delta med dina idéer.
-            </p>
-
+            <div>
+                <h1 className="text-2xl font-semibold mb-2">Diskussioner</h1>
+                <p className="text-gray-600 mb-8">
+                  Utforska pågående diskussioner och delta med dina idéer.
+                </p>
+            </div>
             {/* Button to start a new discussion */}
             <div className="mb-8">
               <Button
-                className="bg-[color:var(--ole-green)] text-white"
+                className="bg-[color:var(--ole-green)] text-white w-full"
                 onClick={() => setIsCreating(!isCreating)}
               >
                 {isCreating ? "Avbryt" : "Starta en ny diskussion"}
@@ -133,21 +133,20 @@ const Diskussioner = () => {
                   <p className="text-gray-700 mt-2">{discussion.description}</p>
                   <div className="space-y-3 mt-4">
                     {discussion.latest_answers?.length > 0 ? (
-                      discussion.latest_answers.map((answer) => (
-                        <div
-                          key={answer.id}
-                          className="bg-gray-50 p-4 rounded-md border border-gray-100"
-                        >
-                          <p className="text-gray-700">{answer.content}</p>
-                          <p className="text-sm text-gray-400 mt-2">
-                            Svarat {new Date(answer.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                      ))
+                      <div
+                        key={discussion.latest_answers[discussion.latest_answers.length-1].id}
+                        className="bg-gray-50 p-4 rounded-md border border-gray-100"
+                      >
+                        <p className="text-gray-700">{discussion.latest_answers[discussion.latest_answers.length-1].content}</p>
+                        <p className="text-sm text-gray-400 mt-2">
+                          Svarat {new Date(discussion.latest_answers[discussion.latest_answers.length-1].created_at).toLocaleString()}
+                        </p>
+                      </div>
                     ) : (
                       <p className="text-gray-500">Inga svar ännu.</p>
                     )}
                   </div>
+
                 </div>
               ))}
             </div>
@@ -157,20 +156,7 @@ const Diskussioner = () => {
           <div className="space-y-6">
             <ProfileCard />
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-semibold mb-4">Populära Diskussioner</h2>
-              <div className="space-y-2">
-                {[...Array(4).keys()].map((index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    className="block text-sm text-gray-600 hover:text-sage-500"
-                  >
-                    Populär diskussion {index + 1}
-                  </a>
-                ))}
-              </div>
-            </div>
+            <LatestDiscussions />
           </div>
         </div>
       </main>

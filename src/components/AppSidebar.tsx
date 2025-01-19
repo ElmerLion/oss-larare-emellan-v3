@@ -1,4 +1,4 @@
-import { Home, User, Users, Book, Settings, LogOut, LogIn, UserPlus, Library } from "lucide-react";
+import { Home, User, Users, Book, Settings, LogOut, LogIn, UserPlus, Library, MessageSquare } from "lucide-react"; // Added MessageSquare for Diskussioner
 import { cn } from "@/lib/utils";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
+// Updated menuItems with "Diskussioner"
 const menuItems = [
   { icon: Home, label: "Hem", path: "/" },
   { icon: User, label: "Profil", path: "/profil" },
+  { icon: MessageSquare, label: "Diskussioner", path: "/diskussioner" }, // Added here
   { icon: Users, label: "Kontakter", path: "/kontakter" },
   { icon: Book, label: "Resurser", path: "/resurser" },
   { icon: Library, label: "Mitt Bibliotek", path: "/mitt-bibliotek" },
@@ -37,8 +39,8 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       // Clear any stored session data
-      localStorage.removeItem('supabase.auth.token');
-      
+      localStorage.removeItem("supabase.auth.token");
+
       // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -49,7 +51,7 @@ export function AppSidebar() {
 
       // Clear session state
       setSession(null);
-      
+
       // Navigate to login page
       navigate("/login");
       toast.success("Du har loggats ut");
@@ -61,23 +63,16 @@ export function AppSidebar() {
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen p-4 fixed left-0 top-0">
-        <div className="flex items-center gap-2 group gap-2 mb-8">
-                <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg ">
-                <button
-                      onClick={() => navigate("/home")}
-                      className="flex items-center gap-2"
-                    >
-                  <img
-                    src="/Images/OLELogga.png"
-                    alt="OLE Logo"
-                    className="w-full h-full object-contain"
-                  />
-                  </button>
-                </div>
-                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
-                  Oss Lärare Emellan
-                </span>
-              </div>
+      <div className="flex items-center gap-2 group gap-2 mb-8">
+        <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg ">
+          <button onClick={() => navigate("/home")} className="flex items-center gap-2">
+            <img src="/Images/OLELogga.png" alt="OLE Logo" className="w-full h-full object-contain" />
+          </button>
+        </div>
+        <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
+          Oss Lärare Emellan
+        </span>
+      </div>
 
       <nav className="space-y-1">
         {menuItems.map((item) => (

@@ -85,7 +85,7 @@ export default function Profil() {
         <Header />
         <main className="mt-16 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
           <div className="p-6">
-            <div className="max-w-[1500px] mx-auto">
+            <div className="max-w-[2800px] mx-auto">
               <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-2">
                   <ProfileHeader

@@ -17,6 +17,7 @@ import OmOss from "./pages/OmOss";
 import IntegritetsPolicy from "./pages/IntegritetsPolicy";
 import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
+import Installningar from "./pages/Installningar";
 
 
 const queryClient = new QueryClient();
@@ -79,6 +80,7 @@ useEffect(() => {
                 <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
                 <Route path="/diskussioner" element={<Diskussioner />} />
                 <Route path="/diskussioner/:slug" element={<DiscussionDetail />} />
+                <Route path="/installningar" element={<Installningar />} />
               </Routes>
             </div>
             <Footer />

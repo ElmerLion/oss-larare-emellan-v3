@@ -63,59 +63,65 @@ export function PostReactions({ postId, reactions: initialReactions, userReactio
     };
   }, [postId]);
 
-  const handleReaction = async (reactionType: ReactionType) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to react to posts",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (userReaction === reactionType) {
-        // Remove reaction
-        const { error } = await supabase
-          .from('post_reactions')
-          .delete()
-          .eq('post_id', postId)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-        setUserReaction(null);
-      } else {
-        // Add or update reaction
-        if (userReaction) {
-          // Delete existing reaction first
-          await supabase
-            .from('post_reactions')
-            .delete()
-            .eq('post_id', postId)
-            .eq('user_id', user.id);
+const handleReaction = async (reactionType: ReactionType) => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast({
+            title: "Error",
+            description: "Du måste vara inloggad för att reagera på inlägg!",
+            variant: "destructive",
+          });
+          return;
         }
 
-        const { error } = await supabase
-          .from('post_reactions')
-          .insert({
-            post_id: postId,
-            user_id: user.id,
-            reaction: reactionType,
-          });
+        if (userReaction === reactionType) {
+          // Remove reaction
+          const { error } = await supabase
+            .from("post_reactions")
+            .delete()
+            .eq("post_id", postId)
+            .eq("user_id", user.id);
 
-        if (error) throw error;
-        setUserReaction(reactionType);
+          if (error) throw error;
+
+          setUserReaction(null);
+          setReactionCount((prev) => Math.max(0, prev - 1)); // Decrement reaction count
+        } else {
+          if (userReaction) {
+            // Remove existing reaction first
+            await supabase
+              .from("post_reactions")
+              .delete()
+              .eq("post_id", postId)
+              .eq("user_id", user.id);
+            setReactionCount((prev) => Math.max(0, prev - 1)); // Decrement reaction count
+          }
+
+          // Add new reaction
+          const { error } = await supabase
+            .from("post_reactions")
+            .insert({
+              post_id: postId,
+              user_id: user.id,
+              reaction: reactionType,
+            });
+
+          if (error) throw error;
+
+          setUserReaction(reactionType);
+          setReactionCount((prev) => prev + 1); // Increment reaction count
+        }
+      } catch (error) {
+        console.error("Problem med att hantera reaktion:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update reaction",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      console.error('Error handling reaction:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update reaction",
-        variant: "destructive",
-      });
-    }
-  };
+    };
+
 
   return (
     <DropdownMenu>

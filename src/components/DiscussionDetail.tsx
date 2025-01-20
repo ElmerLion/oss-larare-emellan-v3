@@ -2,14 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProfileCard } from "@/components/ProfileCard";
 import LatestDiscussions from "@/components/LatestDiscussions";
 
 const DiscussionDetail = () => {
-  const { slug } = useParams(); // Get the discussion slug from the URL
+  const { slug } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [newAnswer, setNewAnswer] = useState("");
@@ -27,56 +26,44 @@ const DiscussionDetail = () => {
     fetchUser();
   }, []);
 
-  // Fetch the discussion and its answers
-  const { data: discussion, isLoading, error } = useQuery({
-    queryKey: ["discussion", slug],
-    queryFn: async () => {
-      if (!slug) {
-        throw new Error("Slug is undefined");
-      }
+const { data: discussion, isLoading, error } = useQuery({
+  queryKey: ["discussion", slug],
+  queryFn: async () => {
+    if (!slug) {
+      throw new Error("Slug is undefined");
+    }
 
-      const { data, error } = await supabase
-        .from("discussions")
-        .select(`
-          slug,
-          question,
-          description,
-          answers (
-            id,
-            content,
-            created_at,
-            user_id,
-            user:profiles(
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq("slug", slug)
-        .single();
+    const { data: discussion, error: discussionError } = await supabase
+      .from("discussions")
+      .select("slug, question, description")
+      .eq("slug", slug)
+      .single();
 
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!slug, // Only execute the query if slug is defined
-  });
+    if (discussionError) throw discussionError;
 
-  // Fetch the latest discussions
-  const { data: latestDiscussions } = useQuery({
-    queryKey: ["latest-discussions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("discussions")
-        .select("slug, question")
-        .order("created_at", { ascending: false })
-        .limit(4);
+    const { data: answers, error: answersError } = await supabase
+      .from("answers")
+      .select(`
+        id,
+        content,
+        created_at,
+        user_id,
+        user:profiles(
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq("discussion_slug", slug)
+      .order("created_at", { ascending: false }); // Sort newest first
 
-      if (error) throw error;
-      return data || [];
-    },
-  });
+    if (answersError) throw answersError;
 
-  // Mutation to add a new answer
+    return { ...discussion, answers };
+  },
+  enabled: !!slug, // Only execute the query if slug is defined
+});
+
+
   const addAnswerMutation = useMutation({
     mutationFn: async () => {
       if (!currentUserId) {
@@ -86,9 +73,9 @@ const DiscussionDetail = () => {
       const { error } = await supabase
         .from("answers")
         .insert({
-          discussion_slug: slug, // Use the actual slug
+          discussion_slug: slug,
           content: newAnswer,
-          user_id: currentUserId, // Link the answer to the current user
+          user_id: currentUserId,
         });
 
       if (error) throw error;
@@ -112,14 +99,29 @@ const DiscussionDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
 
-      <main className="pl-64 pt-16">
+      <main className="pl-64">
         <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
           <div className="col-span-2">
-            {/* Discussion Question and Description */}
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
             <p className="text-gray-700 mb-8">{discussion?.description}</p>
+            <form onSubmit={handleAddAnswer} className="mt-8 mb-8 space-y-4">
+              <textarea
+                value={newAnswer}
+                onChange={(e) => {
+                  setNewAnswer(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                placeholder="Skriv ditt svar här..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
+                rows={1}
+                required
+              />
+              <Button type="submit" className="w-full bg-[color:var(--ole-green)] text-white">
+                Svara
+              </Button>
+            </form>
 
-            {/* Display answers */}
             <div className="space-y-4">
               {discussion?.answers?.length > 0 ? (
                 discussion.answers.map((answer) => (
@@ -146,35 +148,11 @@ const DiscussionDetail = () => {
               )}
             </div>
 
-            {/* Form to add a new answer */}
-            <form onSubmit={handleAddAnswer} className="mt-8 space-y-4">
-              <textarea
-                value={newAnswer}
-                onChange={(e) => {
-                  setNewAnswer(e.target.value);
-                  e.target.style.height = "auto"; // Reset height
-                  e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on scroll height
-                }}
-                placeholder="Skriv ditt svar här..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
-                rows={1} // Initial number of rows
-                required
-              />
-              <Button
-                type="submit"
-                className="w-full bg-[color:var(--ole-green)] text-white"
-              >
-                Svara
-              </Button>
-            </form>
 
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
             <ProfileCard />
-
-            {/* Latest Discussions */}
             <LatestDiscussions />
           </div>
         </div>

@@ -47,14 +47,14 @@ export function Post({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="mb-4">
-        <PostHeader 
-          author={author} 
-          postId={id} 
+        <PostHeader
+          author={author}
+          postId={id}
           onSave={() => setShowSaveDialog(true)}
           disableProfileClick={false}
         />
       </div>
-      
+
       <p className="text-gray-700 mb-4">{content}</p>
 
       {tags && tags.length > 0 && <PostTags tags={tags} />}
@@ -81,7 +81,7 @@ export function Post({
         open={showSaveDialog}
         onOpenChange={setShowSaveDialog}
         itemId={id}
-        itemType="post"
+        itemType="inlägg"
       />
     </div>
   );

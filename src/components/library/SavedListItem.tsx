@@ -47,7 +47,6 @@ export function SavedListItem({ item, listId, onItemClick }: SavedListItemProps)
         onClick={() => onItemClick(item)}
       >
         <span className="text-gray-900">{item.title}</span>
-        <span className="ml-2 text-sm text-gray-500">({item.type})</span>
       </div>
       <Button
         variant="ghost"

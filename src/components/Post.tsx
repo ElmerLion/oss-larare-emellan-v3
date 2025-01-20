@@ -81,7 +81,7 @@ export function Post({
         open={showSaveDialog}
         onOpenChange={setShowSaveDialog}
         itemId={id}
-        itemType="inlägg"
+        itemType="post"
       />
     </div>
   );

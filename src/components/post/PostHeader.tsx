@@ -3,7 +3,7 @@ import { MoreVertical, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import MiniProfile from "@/components/profile/MiniProfile";
 
 interface Author {
   id?: string;
@@ -66,30 +66,17 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
     }
   };
 
-  const AvatarWrapper = disableProfileClick
-    ? ({ children }: { children: React.ReactNode }) => <div>{children}</div>
-    : ({ children }: { children: React.ReactNode }) => (
-        <Link to={`/profil/${author.id}`}>{children}</Link>
-      );
-
   return (
     <div className="flex items-start justify-between mb-4 relative">
-      {/* Author Info */}
-      <div className="flex items-center gap-3">
-        <AvatarWrapper>
-          <img
-            src={author.avatar || "/placeholder.svg"}
-            alt={author.name}
-            className="w-10 h-10 rounded-full object-cover cursor-pointer"
-          />
-        </AvatarWrapper>
-        <div>
-          <AvatarWrapper>
-            <h3 className="font-semibold hover:underline cursor-pointer">{author.name}</h3>
-          </AvatarWrapper>
-          <p className="text-sm text-gray-500">{author.timeAgo}</p>
-        </div>
-      </div>
+      {/* Author Info with MiniProfile */}
+      <MiniProfile
+        id={author.id || ""}
+        name={author.name || "Unnamed User"}
+        avatarUrl={author.avatar}
+        timeAgo={author.timeAgo}
+        size="medium"
+        showLink={!disableProfileClick}
+      />
 
       {/* Menu Trigger */}
       <div ref={menuRef} className="relative">

@@ -25,19 +25,26 @@ export default function Profil() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
+
+      // Get current user and check the target ID
       const { data: { user } } = await supabase.auth.getUser();
       const targetId = profileId || user?.id;
-      
-      if (!targetId) return;
 
+      if (!targetId) {
+        console.error("Error: Profile ID and user ID are both null.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch profile
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', targetId)
+        .from("profiles")
+        .select("*")
+        .eq("id", targetId)
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
         return;
       }
 
@@ -51,11 +58,10 @@ export default function Profil() {
 
       setIsCurrentUser(user?.id === targetId);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
-
   };
 
   useEffect(() => {
@@ -114,26 +120,7 @@ export default function Profil() {
                 </div>
 
                 <div className="col-span-1">
-                  <RecommendedContacts contacts={[
-                    {
-                      name: "Maria Larsson",
-                      role: "Lärare",
-                      school: "Affärsgymnasiet",
-                      image: "/lovable-uploads/23886c31-4d07-445c-bf13-eee4b2127d40.png"
-                    },
-                    {
-                      name: "Erik Svensson",
-                      role: "Lärare",
-                      school: "Affärsgymnasiet",
-                      image: "/lovable-uploads/e7d324d6-19e4-4218-97a3-91fd2b88597c.png"
-                    },
-                    {
-                      name: "Amanda Gunnarsson Nial",
-                      role: "Lärare",
-                      school: "Affärsgymnasiet",
-                      image: "/lovable-uploads/360aff04-e122-43cf-87b2-bad362e840e6.png"
-                    }
-                  ]} />
+                  <RecommendedContacts/>
                 </div>
               </div>
             </div>

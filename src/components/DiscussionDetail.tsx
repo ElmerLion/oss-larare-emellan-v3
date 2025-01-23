@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,14 +6,16 @@ import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProfileCard } from "@/components/ProfileCard";
 import LatestDiscussions from "@/components/LatestDiscussions";
+import MiniProfile from "@/components/profile/MiniProfile";
+import { formatDistanceToNow } from "date-fns";
 
 const DiscussionDetail = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [newAnswer, setNewAnswer] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  // Fetch current user ID
   useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -26,44 +28,47 @@ const DiscussionDetail = () => {
     fetchUser();
   }, []);
 
-const { data: discussion, isLoading, error } = useQuery({
-  queryKey: ["discussion", slug],
-  queryFn: async () => {
-    if (!slug) {
-      throw new Error("Slug is undefined");
-    }
+  // Fetch discussion and answers
+  const { data: discussion, isLoading, error } = useQuery({
+    queryKey: ["discussion", slug],
+    queryFn: async () => {
+      if (!slug) {
+        throw new Error("Slug is undefined");
+      }
 
-    const { data: discussion, error: discussionError } = await supabase
-      .from("discussions")
-      .select("slug, question, description")
-      .eq("slug", slug)
-      .single();
+      const { data: discussion, error: discussionError } = await supabase
+        .from("discussions")
+        .select("slug, question, description")
+        .eq("slug", slug)
+        .single();
 
-    if (discussionError) throw discussionError;
+      if (discussionError) throw discussionError;
 
-    const { data: answers, error: answersError } = await supabase
-      .from("answers")
-      .select(`
-        id,
-        content,
-        created_at,
-        user_id,
-        user:profiles(
-          full_name,
-          avatar_url
-        )
-      `)
-      .eq("discussion_slug", slug)
-      .order("created_at", { ascending: false }); // Sort newest first
+      const { data: answers, error: answersError } = await supabase
+        .from("answers")
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          user:profiles(
+            full_name,
+            avatar_url,
+            title,
+            school
+          )
+        `)
+        .eq("discussion_slug", slug)
+        .order("created_at", { ascending: false }); // Newest answers first
 
-    if (answersError) throw answersError;
+      if (answersError) throw answersError;
 
-    return { ...discussion, answers };
-  },
-  enabled: !!slug, // Only execute the query if slug is defined
-});
+      return { ...discussion, answers };
+    },
+    enabled: !!slug, // Only execute the query if slug is defined
+  });
 
-
+  // Add a new answer
   const addAnswerMutation = useMutation({
     mutationFn: async () => {
       if (!currentUserId) {
@@ -92,6 +97,7 @@ const { data: discussion, isLoading, error } = useQuery({
     addAnswerMutation.mutate();
   };
 
+  // Handle loading and error states
   if (isLoading) return <p>Laddar diskussion...</p>;
   if (error) return <p>Något gick fel: {error.message}</p>;
 
@@ -101,9 +107,13 @@ const { data: discussion, isLoading, error } = useQuery({
 
       <main className="pl-64">
         <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
+          {/* Main Content */}
           <div className="col-span-2">
+            {/* Discussion Header */}
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
             <p className="text-gray-700 mb-8">{discussion?.description}</p>
+
+            {/* Answer Form */}
             <form onSubmit={handleAddAnswer} className="mt-8 mb-8 space-y-4">
               <textarea
                 value={newAnswer}
@@ -122,35 +132,43 @@ const { data: discussion, isLoading, error } = useQuery({
               </Button>
             </form>
 
-            <div className="space-y-4">
-              {discussion?.answers?.length > 0 ? (
-                discussion.answers.map((answer) => (
+            {/* Answers Section */}
+            {discussion.answers.length > 0 ? (
+              discussion.answers.map((answer) => {
+                const timeAgo = formatDistanceToNow(new Date(answer.created_at), { addSuffix: true });
+
+                return (
                   <div
                     key={answer.id}
-                    className="bg-white p-4 rounded-md border border-gray-200 flex gap-4"
+                    className="bg-white p-4 rounded-md border border-gray-200 flex flex-col gap-4"
                   >
-                    <img
-                      src={answer.user?.avatar_url || "/default-avatar.png"}
-                      alt={answer.user?.full_name || "User"}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div>
-                      <p className="font-semibold">{answer.user?.full_name || "Okänd användare"}</p>
+                    {/* Mini Profile */}
+                    <div className="flex items-start gap-4">
+                      <MiniProfile
+                        id={answer.user_id}
+                        name={answer.user?.full_name || "Okänd användare"}
+                        avatarUrl={answer.user?.avatar_url}
+                        title={answer.user?.title}
+                        school={answer.user?.school}
+                        timeAgo={timeAgo}
+                        size="medium"
+                      />
+                    </div>
+
+                    {/* Answer Content */}
+                    <div className="mt-2">
                       <p className="text-gray-700">{answer.content}</p>
-                      <p className="text-sm text-gray-400">
-                        Svarat {new Date(answer.created_at).toLocaleString()}
-                      </p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
-              )}
+                );
+              })
+            ) : (
+              <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
+            )}
             </div>
 
 
-          </div>
-
+          {/* Sidebar */}
           <div className="space-y-6">
             <ProfileCard />
             <LatestDiscussions />

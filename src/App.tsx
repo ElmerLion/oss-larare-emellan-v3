@@ -31,8 +31,7 @@ useEffect(() => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       setIsAuthenticated(true);
-      const { data: user } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
+      setCurrentUserId(session.user.id); // Always set the current user ID
     } else {
       setIsAuthenticated(false);
       setCurrentUserId(null);
@@ -53,6 +52,7 @@ useEffect(() => {
 
   return () => subscription.unsubscribe();
 }, []);
+
 
   if (isAuthenticated === null) {
     return null; // or a loading spinner

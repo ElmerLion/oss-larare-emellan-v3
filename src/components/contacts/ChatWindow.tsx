@@ -1,9 +1,11 @@
-import { Send } from "lucide-react";
+import { Send, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { LinkMaterialDialog } from "@/components/LinkMaterialDialog";
 import type { Profile } from "@/types/profile";
 import type { Message } from "@/types/message";
 
@@ -13,7 +15,7 @@ interface ChatWindowProps {
   newMessage: string;
   currentUserId: string | null;
   onNewMessageChange: (message: string) => void;
-  onSendMessage: () => void;
+  onSendMessage: (linkedMaterialId?: string) => void;
 }
 
 export function ChatWindow({
@@ -24,6 +26,8 @@ export function ChatWindow({
   onNewMessageChange,
   onSendMessage,
 }: ChatWindowProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   if (!selectedUser) {
     return (
       <div className="flex-1 bg-white rounded-lg shadow-sm flex items-center justify-center text-gray-500">
@@ -41,7 +45,7 @@ export function ChatWindow({
           className="w-10 h-10 rounded-full object-cover"
         />
         <div>
-          <Link 
+          <Link
             to={`/profil/${selectedUser.id}`}
             className="font-medium hover:underline"
           >
@@ -67,6 +71,16 @@ export function ChatWindow({
               )}
             >
               <p>{message.content}</p>
+              {message.material && (
+                <div className="mt-2">
+                  <Link
+                    to={`/material/${message.material}`}
+                    className="text-sm text-blue-500 hover:underline"
+                  >
+                    Visa bifogat material
+                  </Link>
+                </div>
+              )}
               <p className="text-xs mt-1 opacity-70">
                 {format(new Date(message.created_at), 'MMM d, HH:mm')}
               </p>
@@ -76,16 +90,23 @@ export function ChatWindow({
       </div>
 
       <div className="p-4 border-t">
-        <div className="flex gap-2">
-          <Input 
-            placeholder="Skriv ett meddelande..." 
-            className="bg-gray-50"
+        <div className="flex gap-2 items-center">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Input
+            placeholder="Skriv ett meddelande..."
+            className="bg-gray-50 flex-1"
             value={newMessage}
             onChange={(e) => onNewMessageChange(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && onSendMessage()}
           />
-          <Button 
-            onClick={onSendMessage}
+          <Button
+            onClick={() => onSendMessage()}
             size="icon"
             className="bg-blue-500 hover:bg-blue-600"
           >
@@ -93,6 +114,16 @@ export function ChatWindow({
           </Button>
         </div>
       </div>
+
+      {/* Material Dialog */}
+      <LinkMaterialDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSelect={(material) => {
+          setIsDialogOpen(false);
+          onSendMessage(material.id);
+        }}
+      />
     </div>
   );
 }

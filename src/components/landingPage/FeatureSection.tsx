@@ -1,7 +1,34 @@
-import { BookOpen, Users, MessageCircle, Settings } from "lucide-react";
 import { Element } from "react-scroll";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+
+const features = [
+  {
+    title: "Dela Resurser",
+    description:
+      "Dela och upptäck resurser för att förbättra undervisningen. Hitta inspiration i andras material och dela dina egna idéer.",
+    image: "/Images/share-resources.png",
+  },
+  {
+    title: "Bygg Nätverk",
+    description:
+      "Anslut med andra lärare, utbyt idéer och samarbeta över hela Sverige. Skapa meningsfulla relationer och stärk ditt professionella nätverk.",
+    image: "/Images/networking.png",
+  },
+  {
+    title: "Delta i Diskussioner",
+    description:
+      "Håll dig uppdaterad med nya metoder genom diskussioner och forum. Dela insikter och lär dig från andras erfarenheter i olika ämnen.",
+    image: "/Images/discussions.png",
+  },
+  {
+    title: "Anpassa Innehåll",
+    description:
+      "Filtrera och anpassa innehåll baserat på dina ämnen och intressen. Få en skräddarsydd upplevelse med relevanta resurser och diskussioner.",
+    image: "/Images/customize-content.png",
+  },
+];
+
 
 export function FeatureSection() {
   const ref = useRef(null);
@@ -9,12 +36,8 @@ export function FeatureSection() {
 
   return (
     <Element name="features" id="features">
-
-      <section
-        ref={ref}
-        className="py-20 bg-gradient-to-r from-green-50 via-sage-50 to-green-100 relative"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={ref} className="py-20 bg-gradient-to-r from-green-50 via-sage-50 to-green-100">
+        <div className="max-w-7xl mx-auto px-6">
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -22,88 +45,48 @@ export function FeatureSection() {
             className="text-3xl font-bold text-center mb-16 text-gray-800"
           >
             Vad kan du göra med{" "}
-            <span className="text-green-600">Oss Lärare Emellan</span>?
+            <span className="text-[var(--ole-green)]">Oss Lärare Emellan?</span>
           </motion.h2>
-          <a href="/funktioner">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                icon: <BookOpen className="w-8 h-8 text-white" />,
-                title: "Dela Resurser",
-                description: "Dela och upptäck lektionsplaner och resurser",
-                bgColor: "bg-green-500",
-              },
-              {
-                icon: <Users className="w-8 h-8 text-white" />,
-                title: "Bygg Nätverk",
-                description:
-                  "Bygg ett professionellt nätverk med lärare över hela Sverige",
-                bgColor: "bg-blue-500",
-              },
-              {
-                icon: <MessageCircle className="w-8 h-8 text-white" />,
-                title: "Delta i Diskussioner",
-                description:
-                  "Delta i diskussioner och håll dig uppdaterad om nya undervisningsmetoder",
-                bgColor: "bg-purple-500",
-              },
-              {
-                icon: <Settings className="w-8 h-8 text-white" />,
-                title: "Anpassa Innehåll",
-                description:
-                  "Anpassa innehållet till dina ämnen och intressen",
-                bgColor: "bg-yellow-500",
-              },
-            ].map((feature, index) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {features.map((feature, index) => (
               <FeatureCard
                 key={index}
-                icon={feature.icon}
                 title={feature.title}
                 description={feature.description}
-                bgColor={feature.bgColor}
+                image={feature.image}
                 isInView={isInView}
-                index={index}
+                reversed={index % 2 === 1}
               />
             ))}
           </div>
-        </a>
         </div>
       </section>
     </Element>
   );
 }
 
-const FeatureCard = ({
-  icon,
-  title,
-  description,
-  bgColor,
-  isInView,
-  index,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  bgColor: string;
-  isInView: boolean;
-  index: number;
-}) => {
+const FeatureCard = ({ title, description, image, isInView, reversed }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.2 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className="bg-white p-6 rounded-lg shadow-lg text-center transition transform hover:shadow-2xl"
+      transition={{ duration: 0.6 }}
+      whileHover={{ scale: 1.02 }}
+      className={`flex flex-col md:flex-row items-center gap-8 bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-200 ${
+        reversed ? "md:flex-row-reverse" : ""
+      }`}
     >
-      <div
-        className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${bgColor} text-white mb-4`}
-      >
-        {icon}
+      {/* Image Section */}
+      <div className="md:w-1/2">
+        <img src={image} alt={title} className="w-full h-64 object-cover rounded-lg shadow-md" />
       </div>
-      <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+
+      {/* Text Section */}
+      <div className="md:w-1/2">
+        <h3 className="text-2xl font-semibold text-[var(--ole-green)] mb-4">{title}</h3>
+        <p className="text-gray-700 leading-relaxed">{description}</p>
+      </div>
     </motion.div>
   );
 };

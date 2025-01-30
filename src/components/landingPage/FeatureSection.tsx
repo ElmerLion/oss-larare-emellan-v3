@@ -9,6 +9,7 @@ export function FeatureSection() {
 
   return (
     <Element name="features" id="features">
+
       <section
         ref={ref}
         className="py-20 bg-gradient-to-r from-green-50 via-sage-50 to-green-100 relative"
@@ -23,6 +24,7 @@ export function FeatureSection() {
             Vad kan du göra med{" "}
             <span className="text-green-600">Oss Lärare Emellan</span>?
           </motion.h2>
+          <a href="/funktioner">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
@@ -64,6 +66,7 @@ export function FeatureSection() {
               />
             ))}
           </div>
+        </a>
         </div>
       </section>
     </Element>

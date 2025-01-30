@@ -22,7 +22,7 @@ export function AboutSection() {
             <path
               d="M50,-50C60,-30,80,-20,90,-5C100,10,90,30,70,40C50,50,20,60,5,50C-10,40,-20,20,-40,10C-60,-5,-50,-30,-40,-50C-30,-70,-10,-80,10,-80C30,-80,40,-70,50,-50Z"
               transform="translate(100 100)"
-              fill="#A5D6A7"
+              fill="var(--ole-green)"
             />
           </svg>
           <svg
@@ -33,7 +33,7 @@ export function AboutSection() {
             <path
               d="M40,-50C55,-40,75,-25,75,-5C75,15,55,35,40,50C25,65,5,75,-15,70C-35,65,-55,45,-55,25C-55,5,-35,-15,-20,-35C-5,-55,15,-65,40,-50Z"
               transform="translate(100 100)"
-              fill="#81C784"
+              fill="var(--ole-green)"
             />
           </svg>
         </div>
@@ -49,8 +49,8 @@ export function AboutSection() {
             transition={{ duration: 0.8 }}
             className="text-4xl font-bold text-center mb-12"
           >
-            <span className="text-green-600">OLE</span> Hjälper{" "}
-            <span className="text-blue-500">Lärare</span> Att Lyckas.
+            <span className="text-[var(--ole-green)]">OLE</span> Hjälper{" "}
+            <span className="text-[var(--ole-green)]">Lärare</span> Att Lyckas.
           </motion.h2>
 
           {/* Description with Subtle Animation */}
@@ -61,9 +61,9 @@ export function AboutSection() {
             className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-16"
           >
             OLE är en digital plattform som hjälper lärare att{" "}
-            <span className="font-semibold text-green-700">samarbeta</span>,{" "}
-            <span className="font-semibold text-blue-600">dela resurser</span> och{" "}
-            <span className="font-semibold text-purple-600">inspirera</span>{" "}
+            <span className="font-semibold text-[var(--ole-green)]">samarbeta</span>,{" "}
+            <span className="font-semibold text-[var(--ole-green)]">dela resurser</span> och{" "}
+            <span className="font-semibold text-[var(--ole-green)]">inspirera</span>{" "}
             varandra för att stärka undervisningen i svenska skolor.
           </motion.p>
 

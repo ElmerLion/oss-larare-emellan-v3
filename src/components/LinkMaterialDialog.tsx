@@ -41,18 +41,24 @@ export function LinkMaterialDialog({ open, onOpenChange, onSelect }: LinkMateria
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent
+        className="sm:max-w-[525px]"
+        aria-describedby="dialog-description"
+      >
         <DialogHeader>
           <DialogTitle>Välj material att länka</DialogTitle>
         </DialogHeader>
-        
+
+        <div id="dialog-description" className="text-sm text-gray-600">
+          Select a material to link with your message.
+        </div>
+
         <div className="space-y-4">
           <Input
             placeholder="Sök material..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          
           <ScrollArea className="h-[400px] pr-4">
             {isLoading ? (
               <div className="text-center py-4">Laddar material...</div>
@@ -78,6 +84,7 @@ export function LinkMaterialDialog({ open, onOpenChange, onSelect }: LinkMateria
           </ScrollArea>
         </div>
       </DialogContent>
+
     </Dialog>
   );
 }

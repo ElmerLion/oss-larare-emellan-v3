@@ -5,4 +5,12 @@ export interface Message {
   content: string;
   created_at: string;
   read_at: string | null;
+  materials?: {
+    material_id: string;
+    resources: {
+      id: string;
+      title: string;
+      file_path: string;
+    };
+  }[];
 }

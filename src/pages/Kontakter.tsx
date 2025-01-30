@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,16 +6,23 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { ContactList } from "@/components/contacts/ContactList";
 import { ChatWindow } from "@/components/contacts/ChatWindow";
+import { ResourceDetailsDialog } from "@/components/resources/ResourceDetailsDialog";
 import type { Profile } from "@/types/profile";
 import type { Message } from "@/types/message";
+import type { Material } from "@/types/material";
 
 export default function Kontakter() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null); // State for viewing material
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const [linkedMaterials, setLinkedMaterials] = useState<Material[]>([]);
+  const [linkedFiles, setLinkedFiles] = useState<Material[]>([]);
+
+
 
   // Fetch current user
   useEffect(() => {
@@ -28,6 +35,7 @@ export default function Kontakter() {
     fetchUser();
   }, []);
 
+
   // Fetch contacts
   const { data: profiles } = useQuery({
     queryKey: ["contacts"],
@@ -35,34 +43,23 @@ export default function Kontakter() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // Fetch contacts
       const { data: contactsData, error: contactsError } = await supabase
         .from("user_contacts")
         .select("contact_id")
         .eq("user_id", user.id);
 
-      if (contactsError) {
-        console.error("Error fetching contacts:", contactsError);
-        throw contactsError;
-      }
+      if (contactsError) throw contactsError;
 
       const contactIds = contactsData?.map((contact) => contact.contact_id) || [];
 
-      if (contactIds.length === 0) {
-        // No contacts
-        return [];
-      }
+      if (contactIds.length === 0) return [];
 
-      // Fetch profiles of contacts
       const { data: contacts, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
         .in("id", contactIds);
 
-      if (profilesError) {
-        console.error("Error fetching contact profiles:", profilesError);
-        throw profilesError;
-      }
+      if (profilesError) throw profilesError;
 
       return contacts || [];
     },
@@ -73,31 +70,38 @@ export default function Kontakter() {
     const chatUserId = searchParams.get("chat");
     if (chatUserId && profiles) {
       const userToSelect = profiles.find((profile) => profile.id === chatUserId);
-      if (userToSelect) {
-        setSelectedUser(userToSelect);
-      }
+      if (userToSelect) setSelectedUser(userToSelect);
     }
   }, [searchParams, profiles]);
 
   // Fetch messages for selected conversation
-  const { data: messages, refetch: refetchMessages } = useQuery({
-    queryKey: ["messages", selectedUser?.id],
-    queryFn: async () => {
-      if (!selectedUser?.id || !currentUserId) return [];
+    const { data: messages, refetch: refetchMessages } = useQuery({
+      queryKey: ["messages", selectedUser?.id],
+      queryFn: async () => {
+        if (!selectedUser?.id || !currentUserId) return [];
 
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .or(
-          `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
-        )
-        .order("created_at", { ascending: true });
+        const { data, error } = await supabase
+          .from("messages")
+          .select(`
+            *,
+            materials:message_materials(
+              material_id,
+              resources!message_materials_material_id_fkey(id, title, file_path, description)
+            )
+          `)
+          .or(
+            `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
+          )
+          .order("created_at", { ascending: true });
 
-      if (error) throw error;
-      return data as Message[];
-    },
-    enabled: !!selectedUser && !!currentUserId,
-  });
+
+        return data;
+      },
+      enabled: !!selectedUser && !!currentUserId,
+    });
+
+
+
 
   // Set up real-time subscription for new messages
   useEffect(() => {
@@ -115,6 +119,7 @@ export default function Kontakter() {
         (payload) => {
           refetchMessages();
         }
+
       )
       .subscribe();
 
@@ -123,28 +128,84 @@ export default function Kontakter() {
     };
   }, [selectedUser, refetchMessages]);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+  const handleLinkMaterial = (material: Material) => setLinkedMaterial(material);
 
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        sender_id: currentUserId,
-        receiver_id: selectedUser.id,
-        content: newMessage,
-      });
+  const handleClearLinkedMaterial = () => setLinkedMaterial(null);
 
-    if (error) {
+    const handleSendMessage = async (linkedMaterialIds: string[] = [], linkedFileIds: string[] = []) => {
+        if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+
+        try {
+            // Insert new message
+            const { data: messageData, error: messageError } = await supabase
+                .from("messages")
+                .insert({
+                    sender_id: currentUserId,
+                    receiver_id: selectedUser.id,
+                    content: newMessage,
+                })
+                .select()
+                .single();
+
+            if (messageError) throw messageError;
+
+            console.log("New message created:", messageData);
+
+            // Insert linked materials
+            if (linkedMaterialIds.length > 0) {
+                const materialEntries = linkedMaterialIds.map((materialId) => ({
+                    message_id: messageData.id,
+                    material_id: materialId,
+                }));
+
+                await supabase.from("message_materials").insert(materialEntries);
+            }
+
+            // Insert linked files
+            if (linkedFileIds.length > 0) {
+                const fileEntries = linkedFileIds.map((fileId) => ({
+                    message_id: messageData.id,
+                    file_id: fileId,
+                }));
+
+                await supabase.from("message_files").insert(fileEntries);
+            }
+
+            // Reset inputs
+            setNewMessage("");
+            setLinkedMaterials([]);
+            setLinkedFiles([]);
+            refetchMessages();
+        } catch (error) {
+            console.error("Error inserting/updating materials and files:", error);
+            toast({
+                title: "Error",
+                description: error.message || "An unexpected error occurred",
+                variant: "destructive",
+            });
+        }
+    };
+
+
+
+  const handleViewMaterial = async (materialId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("resources")
+        .select("*")
+        .eq("id", materialId)
+        .single();
+
+      if (error) throw error;
+
+      setSelectedMaterial(data as Material);
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to load material details.",
         variant: "destructive",
       });
-      return;
     }
-
-    setNewMessage("");
-    refetchMessages();
   };
 
   return (
@@ -158,14 +219,47 @@ export default function Kontakter() {
           selectedUser={selectedUser}
           onSelectUser={setSelectedUser}
         />
-        <ChatWindow
-          selectedUser={selectedUser}
-          messages={messages}
-          newMessage={newMessage}
-          currentUserId={currentUserId}
-          onNewMessageChange={setNewMessage}
-          onSendMessage={handleSendMessage}
-        />
+              <ChatWindow
+                  selectedUser={selectedUser}
+                  messages={messages}
+                  newMessage={newMessage}
+                  currentUserId={currentUserId}
+                  onNewMessageChange={setNewMessage}
+                  onSendMessage={(linkedMaterialIds, linkedFileIds) => handleSendMessage(linkedMaterialIds, linkedFileIds)}
+                  linkedMaterials={linkedMaterials}
+                  linkedFiles={linkedFiles} 
+                  onClearLinkedMaterial={(index) => {
+                      const updatedMaterials = [...linkedMaterials];
+                      updatedMaterials.splice(index, 1);
+                      setLinkedMaterials(updatedMaterials);
+                  }}
+                  onClearLinkedFile={(index) => {
+                      const updatedFiles = [...linkedFiles];
+                      updatedFiles.splice(index, 1);
+                      setLinkedFiles(updatedFiles);
+                  }}
+                  onLinkMaterial={(material) => {
+                      if (!linkedMaterials.some((m) => m.id === material.id)) {
+                          setLinkedMaterials([...linkedMaterials, material]);
+                      }
+                  }}
+                  onLinkFile={(file) => {
+                      if (!linkedFiles.some((f) => f.id === file.id)) {
+                          setLinkedFiles([...linkedFiles, file]);
+                      }
+                  }}
+                  onViewMaterial={handleViewMaterial}
+              />
+
+
+
+        {selectedMaterial && (
+          <ResourceDetailsDialog
+            resource={selectedMaterial}
+            open={!!selectedMaterial}
+            onOpenChange={(open) => !open && setSelectedMaterial(null)}
+          />
+        )}
       </div>
     </div>
   );

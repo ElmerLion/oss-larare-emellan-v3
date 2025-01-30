@@ -49,8 +49,8 @@ const Home = () => {
             <div className="grid grid-cols-4 gap-4 mb-8">
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col items-center mb-3">
-                  <Users className="w-5 h-5 text-emerald-500" />
-                  <div className="text-3xl font-semibold text-emerald-500">
+                  <Users className="w-5 h-5 text-[var(--secondary2)]" />
+                  <div className="text-3xl font-semibold text-[var(--secondary2)]">
                     {stats?.activeTeachers || 0}
                   </div>
                 </div>
@@ -58,8 +58,8 @@ const Home = () => {
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col items-center mb-3">
-                  <UserPlus className="w-5 h-5 text-purple-500" />
-                  <div className="text-3xl font-semibold text-purple-500">
+                  <UserPlus className="w-5 h-5 text-[var(--secondary)]" />
+                  <div className="text-3xl font-semibold text-[var(--secondary)]">
                     {stats?.newTeachers || 0}
                   </div>
                 </div>
@@ -67,8 +67,8 @@ const Home = () => {
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col items-center mb-3">
-                  <FileText className="w-5 h-5 text-orange-500" />
-                  <div className="text-3xl font-semibold text-orange-500">
+                  <FileText className="w-5 h-5 text-[var(--secondary2)]" />
+                  <div className="text-3xl font-semibold text-[var(--secondary2)]">
                     {stats?.sharedMaterials || 0}
                   </div>
                 </div>
@@ -76,8 +76,8 @@ const Home = () => {
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col items-center mb-3">
-                  <Download className="w-5 h-5 text-pink-500" />
-                  <div className="text-3xl font-semibold text-pink-500">
+                  <Download className="w-5 h-5 text-[var(--secondary)]" />
+                  <div className="text-3xl font-semibold text-[var(--secondary)]">
                     {stats?.totalDownloads || 0}
                   </div>
                 </div>

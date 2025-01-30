@@ -18,6 +18,7 @@ import IntegritetsPolicy from "./pages/IntegritetsPolicy";
 import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
+import Funktioner from  "./pages/Funktioner";
 
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ useEffect(() => {
                 <Route path="/diskussioner" element={<Diskussioner />} />
                 <Route path="/diskussioner/:slug" element={<DiscussionDetail />} />
                 <Route path="/installningar" element={<Installningar />} />
+                <Route path="/funktioner" element={<Funktioner />} />
               </Routes>
             </div>
             <Footer />

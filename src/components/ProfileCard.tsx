@@ -87,7 +87,7 @@ export function ProfileCard() {
       <div className="flex space-x-4 justify-evenly">
         {/* Downloads Stat */}
         <div className="flex items-center">
-          <div className="w-9 h-9 flex items-center justify-center bg-orange-300 rounded-md text-white">
+          <div className="w-9 h-9 flex items-center justify-center bg-[var(--secondary2)] rounded-md text-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-5 h-5"
@@ -112,7 +112,7 @@ export function ProfileCard() {
         {/* Profile Visits Stat */}
         <div className="h-12 flex items-center">
           <div className="flex items-center">
-            <div className="w-9 h-9 flex items-center justify-center bg-orange-300 rounded-md text-white">
+            <div className="w-9 h-9 flex items-center justify-center bg-[var(--secondary2)] rounded-md text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-5 h-5"

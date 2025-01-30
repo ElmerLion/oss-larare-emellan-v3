@@ -21,7 +21,7 @@ export function HeroSection() {
             cy="400"
             r="245"
             fill="url(#blobGradient)"
-            opacity="0.4"
+            opacity="0.2"
           />
 
           {/* Right Blob */}
@@ -30,7 +30,7 @@ export function HeroSection() {
             cy="350"
             r="200"
             fill="url(#blobGradient)"
-            opacity="0.4"
+            opacity="0.2"
           />
 
           {/* Top-Left Blob */}
@@ -39,13 +39,13 @@ export function HeroSection() {
             cy="450"
             r="200"
             fill="url(#blobGradient)"
-            opacity="0.3"
+            opacity="0.2"
           />
         </g>
         <defs>
           <radialGradient id="blobGradient" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stopColor="#b1d68d" />
-            <stop offset="100%" stopColor="#C9F4E8" />
+            <stop offset="0%" stopColor="#c9d9c8" />
+            <stop offset="100%" stopColor="#e4ebe4" />
           </radialGradient>
         </defs>
       </svg>
@@ -61,19 +61,19 @@ export function HeroSection() {
               {/* Right Edge Blob */}
               <path
                 d="M700 500 C770 430, 870 430, 870 550 C870 670, 770 720, 700 670 C630 620, 630 550, 700 500 Z"
-                fill="#2563eb"
+                fill="var(--secondary2)"
                 opacity="1"
                 transform="translate(400 100)"
               />
               <path
                 d="M670 180 C700 150, 800 150, 800 250 C800 350, 600 400, 650 350 C500 200, 600 250, 650 200 Z"
-                fill="#16a34a"
+                fill="var(--secondary)"
                 opacity="1"
                 transform="translate(480 300)"
               />
               <path
                   d="M600 500 C580 480, 550 520, 580 540 C610 560, 630 520, 610 500 C590 480, 600 500, 600 500 Z"
-                  fill="#2563eb"
+                  fill="var(--secondary2)"
                   opacity="1"
                   transform="translate(420 120)"
               />
@@ -83,25 +83,25 @@ export function HeroSection() {
               {/* Left Edge Blob */}
               <path
                 d="M120 80 C100 60, 80 120, 120 140 C160 160, 180 120, 160 100 C140 80, 140 80, 120 80 Z"
-                fill="#FFD700"
+                fill="var(--secondary2)"
                 opacity="1"
                 transform="translate(-450 350)"
               />
               <path
                 d="M100 150 C50 100, 50 350, 150 400 C250 450, 300 350, 250 250 C200 200, 150 200, 100 150 Z"
-                fill="#FFD700"
+                fill="var(--secondary2)"
                 opacity="1"
                 transform="translate(-550 300)"
               />
               <path
                 d="M50 600 C0 550, 0 650, 100 700 C200 750, 250 650, 200 600 C150 550, 100 550, 50 600 Z"
-                fill="#9333ea"
+                fill="var(--secondary2)"
                 opacity="1"
                 transform="translate(-500 50)"
               />
               <path
                 d="M50 600 C20 650, 0 650, 100 700 C200 750, 250 650, 250 600 C250 650, 100 550, 50 600 Z"
-                fill="#16a34a"
+                fill="var(--secondary)"
                 opacity="1"
                 transform="translate(-400 80)"
               />
@@ -117,8 +117,8 @@ export function HeroSection() {
               transition={{ duration: 0.6 }}
               className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 animate-zoom"
             >
-              Framtidens <span className="text-green-600 underline">Community</span> för{' '}
-                <span className="text-blue-500 underline">Lärare</span>
+              Framtidens <span className="text-[var(--ole-green)] underline">Community</span> för{' '}
+                <span className="text-[var(--ole-green)] underline">Lärare</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: -20 }}
@@ -127,7 +127,7 @@ export function HeroSection() {
               className="text-xl sm:text-2xl text-gray-900 mb-8"
             >
               Dela{" "}
-              <span className="relative text-purple-600 font-bold">
+              <span className="relative text-[var(--ole-green)] font-bold">
                 kunskap
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
@@ -137,14 +137,14 @@ export function HeroSection() {
                 >
                   <path
                     d="M0,5 Q25,10 50,5 T100,5 M0,7 Q25,12 50,7 T100,7"
-                    stroke="#e9d5ff"
+                    stroke="var(--ole-green)"
                     strokeWidth="2"
                     fill="none"
                   />
                 </svg>
               </span>
               , bygg{" "}
-              <span className="relative text-blue-600 font-bold">
+              <span className="relative text-[var(--ole-green)] font-bold">
                 nätverk
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
@@ -154,14 +154,14 @@ export function HeroSection() {
                 >
                   <path
                     d="M0,5 C25,10 75,0 100,5"
-                    stroke="#bfdbfe"
+                    stroke="var(--ole-green)"
                     strokeWidth="2"
                     fill="none"
                   />
                 </svg>
               </span>
               , och{" "}
-              <span className="relative text-green-600 font-bold">
+              <span className="relative text-[var(--ole-green)] font-bold">
                 utvecklas
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
@@ -171,7 +171,7 @@ export function HeroSection() {
                 >
                   <path
                     d="M0,5 Q25,0 50,5 T100,5"
-                    stroke="#98FB98"
+                    stroke="var(--ole-green)"
                     strokeWidth="2"
                     fill="none"
                   />

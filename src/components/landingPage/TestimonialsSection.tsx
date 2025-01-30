@@ -19,7 +19,7 @@ export function TestimonialsSection() {
             transition={{ duration: 0.6 }}
             className="text-3xl font-bold text-center mb-16 text-gray-800"
           >
-            Vad säger våra <span className="text-green-600">användare</span>?
+            Vad säger våra <span className="text-[var(--ole-green)]">användare</span>?
           </motion.h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
@@ -101,7 +101,7 @@ const TestimonialCard = ({
       <img
         src={image}
         alt={name}
-        className="w-16 h-16 rounded-full mx-auto mb-4 border-2 border-green-500 object-cover"
+        className="w-16 h-16 rounded-full mx-auto mb-4 border-2 border-[var(--ole-green)] object-cover"
       />
       {/* Name and Role */}
       <h3 className="text-lg font-semibold text-gray-900">{name}</h3>

@@ -85,7 +85,7 @@ const FeatureItem = ({ title, description, image, isInView, reversed }) => {
         whileHover={{ scale: 1.05 }}
         className="md:w-1/2"
       >
-        <h3 className="text-4xl font-semibold text-[var(--ole-green)] mb-4">{title}</h3>
+        <h3 className="text-2xl font-semibold text-[var(--ole-green)] mb-4">{title}</h3>
         <p className="text-xl leading-relaxed">{description}</p>
       </motion.div>
     </motion.div>

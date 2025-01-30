@@ -77,15 +77,20 @@ const FeatureCard = ({ title, description, image, isInView, reversed }) => {
         reversed ? "md:flex-row-reverse" : ""
       }`}
     >
+
       {/* Image Section */}
       <div className="md:w-1/2">
-        <img src={image} alt={title} className="w-full h-64 object-cover rounded-lg shadow-md" />
+        <a href="/funktioner">
+            <img src={image} alt={title} className="w-full h-64 object-cover rounded-lg shadow-md" />
+        </a>
       </div>
 
       {/* Text Section */}
       <div className="md:w-1/2">
-        <h3 className="text-2xl font-semibold text-[var(--ole-green)] mb-4">{title}</h3>
-        <p className="text-gray-700 leading-relaxed">{description}</p>
+        <a href="/funktioner">
+            <h3 className="text-2xl font-semibold text-[var(--ole-green)] mb-4">{title}</h3>
+            <p className="text-gray-700 leading-relaxed">{description}</p>
+        </a>
       </div>
     </motion.div>
   );

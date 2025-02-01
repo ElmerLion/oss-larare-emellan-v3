@@ -113,7 +113,7 @@ export function CreateResourceDialog() {
           Dela material
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Dela material</DialogTitle>
         </DialogHeader>

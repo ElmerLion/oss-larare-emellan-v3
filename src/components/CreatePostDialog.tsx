@@ -104,7 +104,7 @@ export function CreatePostDialog() {
             Dela en tanke
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
           <DialogHeader>
             <DialogTitle>Dela en tanke</DialogTitle>
           </DialogHeader>

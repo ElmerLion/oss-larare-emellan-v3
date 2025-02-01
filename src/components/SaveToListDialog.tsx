@@ -87,7 +87,7 @@ export function SaveToListDialog({ open, onOpenChange, itemId, itemType }: SaveT
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-white rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Spara till lista</DialogTitle>
         </DialogHeader>

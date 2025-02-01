@@ -52,7 +52,7 @@ export function CreateListDialog({ open, onOpenChange, parentListId, onSuccess }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-white rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Skapa ny lista</DialogTitle>
         </DialogHeader>
@@ -63,7 +63,7 @@ export function CreateListDialog({ open, onOpenChange, parentListId, onSuccess }
             onChange={(e) => setNewListName(e.target.value)}
           />
           <Button 
-            className="w-full bg-sage-500 hover:bg-sage-600"
+            className="w-full bg-[var(--ole-green)] hover:bg-[var(--hover-green)]"
             onClick={handleCreateList}
           >
             Skapa lista

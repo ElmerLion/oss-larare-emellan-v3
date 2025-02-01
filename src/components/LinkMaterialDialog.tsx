@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Material {
   id: string;
@@ -20,38 +20,39 @@ interface LinkMaterialDialogProps {
 }
 
 export function LinkMaterialDialog({ open, onOpenChange, onSelect }: LinkMaterialDialogProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: materials = [], isLoading } = useQuery({
-    queryKey: ['userMaterials'],
+  const { data: materials = [], isLoading, refetch } = useQuery({
+    queryKey: ["userMaterials", searchQuery],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
-        .from('resources')
-        .select('id, title, description, type')
-        .eq('author_id', user.id)
-        .ilike('title', `%${searchQuery}%`);
+        .from("resources")
+        .select("id, title, description, type")
+        .eq("author_id", user.id)
+        .ilike("title", `%${searchQuery}%`);
 
       if (error) throw error;
       return data;
     },
+    enabled: open, // Only fetch when the dialog is open
   });
+
+  // Refetch materials when search query updates
+  useEffect(() => {
+    if (open) refetch();
+  }, [searchQuery, refetch, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[525px]"
-        aria-describedby="dialog-description"
-      >
+      <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Välj material att länka</DialogTitle>
         </DialogHeader>
 
-        <div id="dialog-description" className="text-sm text-gray-600">
-          Select a material to link with your message.
-        </div>
+        <div className="text-sm text-gray-600">Välj material att bifoga till ditt meddelande.</div>
 
         <div className="space-y-4">
           <Input
@@ -69,14 +70,16 @@ export function LinkMaterialDialog({ open, onOpenChange, onSelect }: LinkMateria
                 {materials.map((material) => (
                   <div
                     key={material.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-all"
                     onClick={() => {
                       onSelect(material);
                       onOpenChange(false);
                     }}
                   >
                     <h3 className="font-medium">{material.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{material.description}</p>
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                      {material.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -84,7 +87,6 @@ export function LinkMaterialDialog({ open, onOpenChange, onSelect }: LinkMateria
           </ScrollArea>
         </div>
       </DialogContent>
-
     </Dialog>
   );
 }

@@ -43,7 +43,7 @@ export function DeleteAccountDialog() {
       <AlertDialogTrigger asChild>
         <Button variant="destructive">Radera Konto</Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-white rounded-lg shadow-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>Är du säker på att du vill radera ditt konto?</AlertDialogTitle>
           <AlertDialogDescription>

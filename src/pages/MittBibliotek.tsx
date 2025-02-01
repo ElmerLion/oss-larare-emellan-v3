@@ -116,7 +116,7 @@ export default function MittBibliotek() {
             <h1 className="text-2xl font-semibold text-gray-900">Mitt Bibliotek</h1>
             
             <Button 
-              className="bg-sage-500 hover:bg-sage-600"
+              className="bg-[var(--ole-green)] hover:bg-[var(--hover-green)]"
               onClick={() => setIsDialogOpen(true)}
             >
               <Plus className="w-4 h-4 mr-2" />

@@ -3,6 +3,20 @@ import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ResourceCard } from "@/components/resources/ResourceCard";
+
+interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  grade: string;
+  type: string;
+  difficulty: "easy" | "medium" | "hard";
+  file_path: string;
+  file_name: string;
+  author_id: string;
+}
 
 interface UploadedMaterialsProps {
   userId: string;
@@ -20,14 +34,29 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Resource[];
     },
   });
 
-  const difficultyMap = {
-    easy: "Lätt",
-    medium: "Medel",
-    hard: "Svår"
+  const handleDownload = async (resource: Resource) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('resources')
+        .download(resource.file_path);
+
+      if (error) throw error;
+
+      const url = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = resource.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+    }
   };
 
   return (
@@ -41,7 +70,7 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
           </Button>
         )}
       </div>
-      
+
       <ScrollArea className="h-[400px]">
         {isLoading ? (
           <div className="text-center py-4">Laddar material...</div>
@@ -50,40 +79,13 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
         ) : (
           <div className="grid grid-cols-2 gap-6">
             {resources.map((resource) => (
-              <div
+              <ResourceCard
                 key={resource.id}
-                className="bg-white rounded-lg p-6 shadow-sm border border-gray-100"
-              >
-                <h3 className="text-lg font-semibold mb-2">{resource.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{resource.description}</p>
-                
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
-                    {resource.subject}
-                  </span>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
-                    {resource.grade}
-                  </span>
-                  <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                    {difficultyMap[resource.difficulty]}
-                  </span>
-                </div>
-                
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    variant="secondary" 
-                    className="w-full bg-sage-100 hover:bg-sage-200"
-                  >
-                    Se mer
-                  </Button>
-                  <Button 
-                    variant="secondary" 
-                    className="w-full bg-sage-100 hover:bg-sage-200"
-                  >
-                    Ladda ner
-                  </Button>
-                </div>
-              </div>
+                resource={resource}
+                onSelect={() => {}}
+                onDownload={handleDownload}
+                onSave={() => {}}
+              />
             ))}
           </div>
         )}

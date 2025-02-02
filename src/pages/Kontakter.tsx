@@ -87,12 +87,17 @@ export default function Kontakter() {
             materials:message_materials(
               material_id,
               resources!message_materials_material_id_fkey(id, title, file_path, description)
+            ),
+            files:message_files(
+              file_id,
+              resources:files(id, title, file_path, created_at)
             )
           `)
           .or(
             `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
           )
           .order("created_at", { ascending: true });
+
 
 
         return data;
@@ -134,6 +139,7 @@ export default function Kontakter() {
 
     const handleSendMessage = async (linkedMaterialIds: string[] = [], linkedFileIds: string[] = []) => {
         if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+
 
         try {
             // Insert new message

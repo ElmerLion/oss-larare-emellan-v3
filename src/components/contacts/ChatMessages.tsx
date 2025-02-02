@@ -2,9 +2,53 @@ import { format } from "date-fns";
 import { Paperclip, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import type { Profile } from "@/types/profile";
 import type { Message } from "@/types/message";
 import type { Material } from "@/types/material";
+
+async function downloadFile(filePath: string, fileName: string) {
+  const cleanedFilePath = filePath.trim();
+  console.log("Generating signed URL for filePath:", cleanedFilePath);
+
+  // Generate the signed URL with a 60-second expiration
+  const { data, error } = await supabase
+    .storage
+    .from("message_files")
+    .createSignedUrl(cleanedFilePath, 60);
+
+  if (error) {
+    console.error("Error generating signed URL:", error);
+    return;
+  }
+
+  // Fetch the file as a Blob from the signed URL
+  try {
+    const response = await fetch(data.signedUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const blob = await response.blob();
+
+    // Create an object URL from the blob
+    const objectUrl = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element to trigger the download
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = fileName; // This forces the download with the specified file name
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Revoke the object URL after a short delay to free up memory
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+  } catch (fetchError) {
+    console.error("Error fetching the file for download:", fetchError);
+  }
+}
+
+
 
 interface ChatMessagesProps {
   selectedUser: Profile;
@@ -43,7 +87,6 @@ export function ChatMessages({
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages?.map((message) => {
           const isSentByMe = message.sender_id === currentUserId;
-
           return (
             <div
               key={message.id}
@@ -74,9 +117,11 @@ export function ChatMessages({
               {message.files?.map((file) => (
                 <a
                   key={file.file_id}
-                  href={file.resources.file_path}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    await downloadFile(file.resources.file_path, file.resources.title);
+                  }}
                   className="mt-2 p-2 bg-gray-50 rounded-md flex items-center gap-2 w-full hover:bg-gray-100 transition-colors"
                 >
                   <Upload className="h-4 w-4 text-gray-500" />

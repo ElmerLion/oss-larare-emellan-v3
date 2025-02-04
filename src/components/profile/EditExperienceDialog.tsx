@@ -81,7 +81,7 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
           Add Experience
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Add Experience</DialogTitle>
         </DialogHeader>

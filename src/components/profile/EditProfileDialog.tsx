@@ -75,7 +75,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
           Edit Profile
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>

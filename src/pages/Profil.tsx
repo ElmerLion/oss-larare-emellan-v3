@@ -21,6 +21,7 @@ export default function Profil() {
   });
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [contactsCount, setContactsCount] = useState(0);
 
   const fetchProfile = async () => {
     try {
@@ -64,8 +65,27 @@ export default function Profil() {
     }
   };
 
+  // Function to fetch contacts count on the fly
+  const fetchContactsCount = async () => {
+    if (!profileId) return;
+    const { count, error } = await supabase
+      .from("user_contacts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", profileId);
+    if (error) {
+      console.error("Error fetching contacts count:", error);
+    } else {
+      setContactsCount(count || 0);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+  }, [profileId]);
+
+  // Re-fetch contacts count when profileId changes
+  useEffect(() => {
+    fetchContactsCount();
   }, [profileId]);
 
   if (isLoading) {
@@ -97,24 +117,24 @@ export default function Profil() {
                   <ProfileHeader
                     name={profileData.full_name}
                     role={`${profileData.title}${profileData.school ? ` på ${profileData.school}` : ''}`}
-                    followers={192}
+                    contactsCount={contactsCount}
                     reviews={54}
                     imageUrl={profileData.avatar_url}
                     onProfileUpdate={fetchProfile}
                     isCurrentUser={isCurrentUser}
                   />
 
-                  <AboutSection 
-                    userId={profileId} 
+                  <AboutSection
+                    userId={profileId}
                     onProfileUpdate={fetchProfile}
                   />
 
-                  <ExperienceSection 
+                  <ExperienceSection
                     userId={profileId}
                   />
 
-                  <UploadedMaterials 
-                    userId={profileId || ''} 
+                  <UploadedMaterials
+                    userId={profileId || ''}
                     isCurrentUser={isCurrentUser}
                   />
                 </div>

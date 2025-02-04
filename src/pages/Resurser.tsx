@@ -6,6 +6,7 @@ import { ResourceCard } from "@/components/resources/ResourceCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface Resource {
   id: string;
@@ -59,7 +60,16 @@ export default function Resurser() {
 
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
-          <CreateResourceDialog />
+          {/* Use the custom trigger element to render the big full-width ole-green button */}
+          <CreateResourceDialog
+            triggerElement={
+              <Button
+                className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6"
+              >
+                Dela material
+              </Button>
+            }
+          />
 
           <ScrollArea className="h-[calc(100vh-40px)]">
             {isLoading ? (

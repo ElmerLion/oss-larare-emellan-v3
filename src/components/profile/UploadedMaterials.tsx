@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button";
+// UploadedMaterials.tsx
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ResourceCard } from "@/components/resources/ResourceCard";
+import { CreateResourceDialog } from "@/components/CreateResourceDialog";
+import { Button } from "@/components/ui/button";
 
 interface Resource {
   id: string;
@@ -64,10 +66,15 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Uppladdade Material</h2>
         {isCurrentUser && (
-          <Button variant="outline" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Ladda upp material
-          </Button>
+          // Use CreateResourceDialog and supply your own trigger element so it looks like the old button.
+          <CreateResourceDialog
+            triggerElement={
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Ladda upp material
+              </Button>
+            }
+          />
         )}
       </div>
 

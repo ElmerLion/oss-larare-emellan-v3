@@ -52,14 +52,6 @@ export function Footer() {
             <h3 className="text-gray-800 font-medium mb-4">Följ Oss</h3>
             <div className="flex gap-4">
               <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 hover:text-green-600"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
                 href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/"
                 target="_blank"
                 rel="noopener noreferrer"

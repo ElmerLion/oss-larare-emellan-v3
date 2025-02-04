@@ -123,13 +123,13 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
           <p className="text-gray-700">{resource.description}</p>
 
           <div className="flex flex-wrap gap-2">
-            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
+            <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
               {resource.subject}
             </span>
-            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+            <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
               {resource.grade}
             </span>
-            <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+            <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
               {difficultyMap[resource.difficulty]}
             </span>
           </div>
@@ -138,7 +138,7 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
             <div className="mt-6 space-y-4">
               <Button 
                 onClick={handleDownload}
-                className="w-full bg-sage-500 hover:bg-sage-600"
+                className="w-full bg-[var(--ole-green)] hover:bg-[var(--hover-green)]"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Ladda ner {resource.file_name}

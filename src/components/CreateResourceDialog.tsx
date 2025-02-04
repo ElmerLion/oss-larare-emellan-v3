@@ -1,3 +1,4 @@
+// CreateResourceDialog.tsx
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -8,8 +9,14 @@ import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React from "react";
 
-export function CreateResourceDialog() {
+interface CreateResourceDialogProps {
+  // If provided, this element will be used as the trigger
+  triggerElement?: React.ReactNode;
+}
+
+export function CreateResourceDialog({ triggerElement }: CreateResourceDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -28,10 +35,10 @@ export function CreateResourceDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         toast({
           title: "Error",
@@ -107,11 +114,11 @@ export function CreateResourceDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6"
-        >
-          Dela material
-        </Button>
+        {triggerElement ? triggerElement : (
+          <Button variant="outline" size="sm">
+            Dela material
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
         <DialogHeader>

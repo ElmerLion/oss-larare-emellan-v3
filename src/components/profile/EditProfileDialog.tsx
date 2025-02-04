@@ -72,7 +72,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Pencil className="w-4 h-4 mr-2" />
-          Edit Profile
+          Ändra Profil
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg">
@@ -82,7 +82,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">För- och efternamn</Label>
               <Input
                 id="fullName"
                 value={formData.full_name || ''}
@@ -90,7 +90,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">Jobbtitel</Label>
               <Input
                 id="title"
                 value={formData.title || ''}
@@ -100,7 +100,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="school">School</Label>
+            <Label htmlFor="school">Skola</Label>
             <Input
               id="school"
               value={formData.school || ''}
@@ -109,16 +109,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio || ''}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="purpose">Purpose</Label>
+            <Label htmlFor="purpose">Syfte</Label>
             <Textarea
               id="purpose"
               value={formData.purpose || ''}
@@ -138,7 +129,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contribution">Contribution</Label>
+            <Label htmlFor="contribution">Bidrag</Label>
             <Textarea
               id="contribution"
               value={formData.contribution || ''}
@@ -149,9 +140,9 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              Avbryt
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button className="bg-[var(--ole-green)] hover:bg-[var(--hover-green)]" type="submit">Spara ändringar</Button>
           </div>
         </form>
       </DialogContent>

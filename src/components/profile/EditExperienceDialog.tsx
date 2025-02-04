@@ -78,17 +78,17 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="w-4 h-4 mr-2" />
-          Add Experience
+          Lägg till erfarenhet
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg">
         <DialogHeader>
-          <DialogTitle>Add Experience</DialogTitle>
+          <DialogTitle>Lägg till erfarenhet</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="company">Company/School</Label>
+              <Label htmlFor="company">Skola/Företag</Label>
               <Input
                 id="company"
                 value={formData.company}
@@ -97,7 +97,7 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">Roll</Label>
               <Input
                 id="role"
                 value={formData.role}
@@ -109,7 +109,7 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate">Start Datum</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -119,7 +119,7 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="endDate">Slut Datum</Label>
               <Input
                 id="endDate"
                 type="date"
@@ -139,24 +139,24 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
                 setFormData({ ...formData, isCurrent: checked as boolean })
               }
             />
-            <Label htmlFor="isCurrent">I currently work here</Label>
+            <Label htmlFor="isCurrent">Jag jobbar här nu</Label>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Beskrivning</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe your role and responsibilities..."
+              placeholder="Beskriv din roll och dina ansvarsområden..."
             />
           </div>
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              Avbryt
             </Button>
-            <Button type="submit">Add Experience</Button>
+            <Button className="bg-[var(--ole-green)] hover:bg-[var(--hover-green)]" type="submit">Lägg till erfarenhet</Button>
           </div>
         </form>
       </DialogContent>

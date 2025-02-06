@@ -12,7 +12,7 @@ export function ProfileCard() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('id, full_name, title, purpose, motivation, contribution, avatar_url, visits')
+        .select('id, full_name, title, school, purpose, motivation, contribution, avatar_url, visits')
         .eq('id', user.id)
         .single();
 
@@ -56,6 +56,12 @@ export function ProfileCard() {
 
   if (!profile) return null;
 
+  // Combine title and school:
+  const titleSchool =
+    profile.title && profile.school
+      ? `${profile.title} på ${profile.school}`
+      : profile.title || profile.school || "Lärare";
+
   return (
     <Card className="p-6 border border-gray-200 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Min Profil</h2>
@@ -72,15 +78,15 @@ export function ProfileCard() {
         </div>
       </div>
 
-      {/* Profile Name and Title */}
+      {/* Profile Name and Title/School */}
       <h3 className="font-semibold mt-8">{profile.full_name || "Unnamed User"}</h3>
-      <p className="text-sm text-gray-500 mb-2">{profile.title || "Lärare"}</p>
+      <p className="text-sm text-gray-500 mb-2">{titleSchool}</p>
 
       {/* Bio */}
       <p className="text-sm text-gray-700 mb-6">
         Jag är här för att {profile.purpose?.toLowerCase()}.<br />
         Jag jobbar som lärare för att {profile.motivation?.toLowerCase()}.<br />
-        På Oss Lärare Emellan bidrar jag med {profile.contribution?.toLowerCase()}
+        Med mig kan du diskutera {profile.contribution?.toLowerCase()}.
       </p>
 
       {/* Stats */}
@@ -96,11 +102,7 @@ export function ProfileCard() {
               stroke="currentColor"
               strokeWidth="2"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4v16m8-8H4"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
           </div>
           <div>
@@ -121,11 +123,7 @@ export function ProfileCard() {
                 stroke="currentColor"
                 strokeWidth="2"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12zm-7.5 9a15.978 15.978 0 0115 0M4.5 21c-.333-.444-1.5-1.556-1.5-3 0-2.5 2-4 4.5-4s4.5 1.5 4.5 4c0 1.444-1.167 2.556-1.5 3H4.5z"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12zm-7.5 9a15.978 15.978 0 0115 0M4.5 21c-.333-.444-1.5-1.556-1.5-3 0-2.5 2-4 4.5-4s4.5 1.5 4.5 4c0 1.444-1.167 2.556-1.5 3H4.5z" />
               </svg>
             </div>
           </div>

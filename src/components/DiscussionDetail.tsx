@@ -113,25 +113,6 @@ const DiscussionDetail = () => {
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
             <p className="text-gray-700 mb-8">{discussion?.description}</p>
 
-            {/* Answer Form */}
-            <form onSubmit={handleAddAnswer} className="mt-8 mb-8 space-y-4">
-              <textarea
-                value={newAnswer}
-                onChange={(e) => {
-                  setNewAnswer(e.target.value);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                placeholder="Skriv ditt svar här..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
-                rows={1}
-                required
-              />
-              <Button type="submit" className="w-full bg-[color:var(--ole-green)] text-white">
-                Svara
-              </Button>
-            </form>
-
             {/* Answers Section */}
             {discussion.answers.length > 0 ? (
               discussion.answers.map((answer) => {
@@ -140,7 +121,7 @@ const DiscussionDetail = () => {
                 return (
                   <div
                     key={answer.id}
-                    className="bg-white p-4 rounded-md border border-gray-200 flex flex-col gap-4"
+                    className="bg-white p-4 mb-4 rounded-md border border-gray-200 flex flex-col gap-4"
                   >
                     {/* Mini Profile */}
                     <div className="flex items-start gap-4">
@@ -165,6 +146,24 @@ const DiscussionDetail = () => {
             ) : (
               <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
             )}
+            {/* Answer Form */}
+            <form onSubmit={handleAddAnswer} className="mt-4 mb-8 space-y-4">
+              <textarea
+                value={newAnswer}
+                onChange={(e) => {
+                  setNewAnswer(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                placeholder="Skriv ditt svar här..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
+                rows={1}
+                required
+              />
+              <Button type="submit" className="w-full bg-[color:var(--ole-green)] text-white">
+                Svara
+              </Button>
+            </form>
             </div>
 
 

@@ -72,7 +72,7 @@ export function AboutSection({ userId, onProfileUpdate }: AboutSectionProps) {
           <p className="text-gray-800">{profileData.motivation || "Inte angivet än"}</p>
         </div>
         <div>
-          <h3 className="text-sm font-medium text-gray-600 mb-2">På Oss Lärare Emellan bidrar jag med</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-2">Med mig kan du diskutera</h3>
           <p className="text-gray-800">{profileData.contribution || "Inte angivet än"}</p>
         </div>
       </div>

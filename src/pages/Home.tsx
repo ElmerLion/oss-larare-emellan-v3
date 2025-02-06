@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import { Feed } from "@/components/Feed";
@@ -8,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
+  const [firstName, setFirstName] = useState("");
   const { data: stats } = useQuery({
     queryKey: ["home-stats"],
     queryFn: async () => {
@@ -35,15 +37,35 @@ const Home = () => {
     },
   });
 
+  // Fetch the current user's first name
+  useEffect(() => {
+    const fetchUserFirstName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+        if (!error && profile?.full_name) {
+          const first = profile.full_name.split(" ")[0];
+          setFirstName(first);
+        }
+      }
+    };
+    fetchUserFirstName();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
-      <Header />
 
-      <main className="pl-64 pt-16">
+      <main className="pl-64 pt-8">
         <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
           <div className="col-span-2">
-            <h1 className="text-2xl font-semibold mb-2">Välkommen tillbaka Elmer!</h1>
+            <h1 className="text-2xl font-semibold mb-2">
+              Välkommen tillbaka {firstName || "-"}!
+            </h1>
             <p className="text-gray-600 mb-8">Detta är vad som hänt senaste veckan</p>
 
             <div className="grid grid-cols-4 gap-4 mb-8">
@@ -90,7 +112,7 @@ const Home = () => {
 
           <div className="space-y-6">
             <ProfileCard />
-            <LatestDiscussions /> {/* Use the new component */}
+            <LatestDiscussions /> {/* Use the component */}
           </div>
         </div>
       </main>

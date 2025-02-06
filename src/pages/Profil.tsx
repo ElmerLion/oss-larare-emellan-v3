@@ -93,8 +93,7 @@ export default function Profil() {
       <div className="min-h-screen flex bg-[#F6F6F7]">
         <AppSidebar />
         <div className="flex-1 ml-64">
-          <Header />
-          <main className="mt-16 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
+          <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
             <div className="p-6">
               <div>Laddar...</div>
             </div>
@@ -108,8 +107,7 @@ export default function Profil() {
     <div className="min-h-screen flex bg-[#F6F6F7]">
       <AppSidebar />
       <div className="flex-1 ml-64">
-        <Header />
-        <main className="mt-16 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
+        <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
           <div className="p-6">
             <div className="max-w-[2800px] mx-auto">
               <div className="grid grid-cols-3 gap-6">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileCompletion } from "@/components/auth/ProfileCompletion";
 import { Session } from "@supabase/supabase-js";
@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLocation } from "react-router-dom";
-import { LandingPageHeader } from "@/components/landingPage/LandingPageHeader"
+import { LandingPageHeader } from "@/components/landingPage/LandingPageHeader";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,85 +18,103 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  // New state variables for school and job title
+  const [school, setSchool] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [acceptPolicy, setAcceptPolicy] = useState(false); // State for the checkbox
-  const location = useLocation();
+  const constLocation = useLocation();
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(constLocation.search);
     if (params.get("register") === "true") {
       setIsRegistering(true);
     }
-  }, [location]);
+  }, [constLocation]);
 
   const toggleMode = () => {
     setIsRegistering(!isRegistering);
     navigate(`/login${!isRegistering ? "?register=true" : ""}`);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (isRegistering && !acceptPolicy) {
-      toast.error("Du måste acceptera integritetspolicyn för att fortsätta.");
-      return;
-    }
+  if (isRegistering && !acceptPolicy) {
+    toast.error("Du måste acceptera integritetspolicyn för att fortsätta.");
+    return;
+  }
 
-    try {
-      if (isRegistering) {
-        if (password !== confirmPassword) {
-          toast.error("Lösenorden matchar inte");
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        const session = await supabase.auth.getSession();
-        if (!session.data.session?.user?.id) {
-          toast.error("Ett fel uppstod. Försök igen senare.");
-          return;
-        }
-
-        const user = session.data.session.user;
-
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ full_name: fullName })
-          .eq("id", user.id);
-
-        if (updateError) {
-          console.error("Profile Update Error:", updateError);
-          toast.error("Ett fel uppstod när vi uppdaterade profilen");
-          return;
-        }
-
-        toast.success(
-          "Registrering lyckades! Kontrollera din e-post för verifiering."
-        );
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+  try {
+    if (isRegistering) {
+      if (password !== confirmPassword) {
+        toast.error("Lösenorden matchar inte");
+        return;
       }
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      toast.error(
-        error.message === "Invalid login credentials"
-          ? "Felaktiga inloggningsuppgifter"
-          : "Ett fel uppstod, försök igen senare"
-      );
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      // Check for duplicate account error immediately
+      if (error) {
+        // Supabase typically returns a duplicate key error with code "23505"
+        if (
+          error.code === "23505" ||
+          (error.message && error.message.toLowerCase().includes("duplicate"))
+        ) {
+          toast.error("Kontot finns redan");
+          return;
+        }
+        throw error;
+      }
+
+      // Get the user session to obtain the user ID
+      const sessionResult = await supabase.auth.getSession();
+      if (!sessionResult.data.session?.user?.id) {
+        toast.error("Ett fel uppstod. Försök igen senare.");
+        return;
+      }
+
+      const user = sessionResult.data.session.user;
+
+      // Update the profile with full_name, school, and job title.
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          school: school,
+          title: jobTitle, // "title" column stores the job title
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error("Profile Update Error:", updateError);
+        toast.error("Ett fel uppstod när vi uppdaterade profilen");
+        return;
+      }
+
+      toast.success("Registrering lyckades! Kontrollera din e-post för verifiering.");
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
     }
-  };
+  } catch (error: any) {
+    console.error("Auth error:", error);
+    toast.error(
+      error.message === "Invalid login credentials"
+        ? "Felaktiga inloggningsuppgifter"
+        : "Ett fel uppstod, försök igen senare"
+    );
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
-       <div className="p-8 border-b border-gray-200 bg-white">
+      <div className="p-8 border-b border-gray-200 bg-white">
         <LandingPageHeader />
       </div>
 
@@ -108,16 +125,40 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegistering && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">För- och efternamn</Label>
-              <Input
-                id="fullName"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">För- och efternamn</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+              {/* New input for school */}
+              <div className="space-y-2">
+                <Label htmlFor="school">Skola</Label>
+                <Input
+                  id="school"
+                  type="text"
+                  value={school}
+                  onChange={(e) => setSchool(e.target.value)}
+                  required
+                />
+              </div>
+              {/* New input for job title */}
+              <div className="space-y-2">
+                <Label htmlFor="jobTitle">Jobbtitel</Label>
+                <Input
+                  id="jobTitle"
+                  type="text"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                />
+              </div>
+            </>
           )}
 
           <div className="space-y-2">

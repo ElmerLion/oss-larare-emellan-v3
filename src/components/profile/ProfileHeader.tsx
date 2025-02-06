@@ -27,6 +27,7 @@ export function ProfileHeader({
         <ProfileAvatar
           imageUrl={imageUrl}
           name={name}
+          isCurrentUser={isCurrentUser}
           onProfileUpdate={isCurrentUser ? onProfileUpdate : undefined}
         />
         <div className="flex-1">

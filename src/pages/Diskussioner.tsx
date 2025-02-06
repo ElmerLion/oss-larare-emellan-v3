@@ -3,18 +3,40 @@ import { Header } from "@/components/Header";
 import { ProfileCard } from "@/components/ProfileCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import LatestDiscussions from "@/components/LatestDiscussions";
 import MiniProfile from "@/components/profile/MiniProfile";
+import { MoreVertical, Trash2 } from "lucide-react";
 
 const Diskussioner = () => {
   const queryClient = useQueryClient();
   const [newDiscussion, setNewDiscussion] = useState("");
   const [newDescription, setNewDescription] = useState(""); // State for description
   const [isCreating, setIsCreating] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null); // Menu state
+                const menuRef = useRef<HTMLDivElement | null>(null);
+
+                useEffect(() => {
+                    const handleClickOutside = (event: MouseEvent) => {
+                      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                        setMenuOpen(null);
+                      }
+                    };
+                    document.addEventListener("mousedown", handleClickOutside);
+                    return () => document.removeEventListener("mousedown", handleClickOutside);
+                  }, [menuOpen]);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const { data: discussions } = useQuery({
     queryKey: ["discussions"],
@@ -86,6 +108,23 @@ const Diskussioner = () => {
     createDiscussionMutation.mutate();
   };
 
+    const deleteDiscussion = async (discussionId: string) => {
+      const { error } = await supabase.from("discussions").delete().eq("id", discussionId);
+      if (error) return alert("Error deleting discussion");
+
+      queryClient.invalidateQueries(["discussions"]);
+    };
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+          setMenuOpen(null);
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
@@ -137,13 +176,13 @@ const Diskussioner = () => {
             <div className="space-y-6">
               {discussions?.map((discussion) => {
                 const latestAnswer = discussion.latest_answers?.[discussion.latest_answers.length - 1];
+                const isOwner = discussion.creator_id === currentUserId;
 
                 // Extract users from answers
                 const answerUsers = discussion.latest_answers
                   ? new Map(discussion.latest_answers.map((answer: any) => [answer.user_id, answer.user]))
                   : new Map();
 
-                // ✅ Include the discussion creator
                 if (discussion.creator) {
                   answerUsers.set(discussion.creator.id, discussion.creator);
                 }
@@ -163,8 +202,32 @@ const Diskussioner = () => {
                 return (
                   <div
                     key={discussion.slug}
-                    className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+                    className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 relative"
                   >
+                    {/* Three Dots Menu - Correct Positioning */}
+                      {isOwner && (
+                        <div ref={menuRef} className="absolute top-3 right-3">
+                          <button
+                            onClick={() => setMenuOpen(menuOpen === discussion.id ? null : discussion.id)}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <MoreVertical className="w-5 h-5" />
+                          </button>
+
+                          {/* Menu Content */}
+                          {menuOpen === discussion.id && (
+                            <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-[170px]">
+                              <button
+                                onClick={() => deleteDiscussion(discussion.id)}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              >
+                                <Trash2 className="mr-2 mb-1 h-4 w-4 inline-block" />
+                                Ta bort diskussion
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     <a
                       href={`/diskussioner/${discussion.slug}`}
                       className="text-xl font-semibold text-gray-800 hover:text-[color:var(--hover-green)]"

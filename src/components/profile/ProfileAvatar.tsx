@@ -13,66 +13,84 @@ import { Button } from "@/components/ui/button";
 interface ProfileAvatarProps {
   imageUrl: string;
   name: string;
+  isCurrentUser?: boolean; // Use this instead of fetching user info
   onProfileUpdate?: () => void;
 }
 
-export function ProfileAvatar({ imageUrl, name, onProfileUpdate }: ProfileAvatarProps) {
+export function ProfileAvatar({ imageUrl, name, isCurrentUser = false, onProfileUpdate }: ProfileAvatarProps) {
   const [uploading, setUploading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
-    try {
-      setUploading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+ const handleImageUpload = async (file: File) => {
+   try {
+     setUploading(true);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+     // Get current user
+     const { data: { user }, error: userError } = await supabase.auth.getUser();
+     if (userError || !user) throw new Error("User not authenticated");
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+     // Generate file path
+     const fileExt = file.name.split('.').pop();
+     const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+     const filePath = `avatars/${fileName}`;
 
-      if (uploadError) throw uploadError;
+     // Upload file
+     const { error: uploadError } = await supabase.storage
+       .from("avatars")
+       .upload(filePath, file, { upsert: true });
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+     if (uploadError) throw uploadError;
 
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
+     // Get public URL
+     const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+     const publicUrl = data.publicUrl;
 
-      if (updateError) throw updateError;
+     // Update user profile with new avatar URL
+     const { error: updateError } = await supabase
+       .from("profiles")
+       .update({ avatar_url: publicUrl })
+       .eq("id", user.id);
 
-      toast.success('Profile picture updated successfully');
-      if (onProfileUpdate) onProfileUpdate();
-      setShowDialog(false);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to update profile picture');
-    } finally {
-      setUploading(false);
-    }
-  };
+     if (updateError) throw updateError;
+
+     // Show success message
+     toast.success("Profile picture updated successfully");
+
+     // Trigger profile update in parent component
+     if (onProfileUpdate) onProfileUpdate();
+
+     // Close dialog
+     setShowDialog(false);
+   } catch (error) {
+     console.error("Error uploading image:", error);
+     toast.error("Failed to update profile picture");
+   } finally {
+     setUploading(false);
+   }
+ };
 
   return (
     <>
-      <div className="relative group cursor-pointer" onClick={() => setShowDialog(true)}>
+      <div
+        className={`relative ${isCurrentUser ? 'group cursor-pointer' : ''}`}
+        onClick={isCurrentUser ? () => setShowDialog(true) : undefined}
+      >
         <img
           src={imageUrl}
           alt={name}
-          className="w-28 h-28 rounded-full border-4 border-white object-cover transition-opacity group-hover:opacity-75"
+          className="w-28 h-28 rounded-full border-4 border-white object-cover transition-opacity"
         />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <Camera className="w-8 h-8 text-white drop-shadow-lg" />
-        </div>
+
+        {/* Only show the camera icon if it's the current user */}
+        {isCurrentUser && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Camera className="w-8 h-8 text-white drop-shadow-lg" />
+          </div>
+        )}
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-lg shadow-lg">
           <DialogHeader>
             <DialogTitle>Update Profile Picture</DialogTitle>
           </DialogHeader>
@@ -90,7 +108,7 @@ export function ProfileAvatar({ imageUrl, name, onProfileUpdate }: ProfileAvatar
             <Button
               onClick={() => document.getElementById('avatar-upload')?.click()}
               disabled={uploading}
-              className="w-full"
+              className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
             >
               {uploading ? 'Uploading...' : 'Choose Image'}
             </Button>

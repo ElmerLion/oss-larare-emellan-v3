@@ -138,6 +138,8 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
               onCheckedChange={(checked) => 
                 setFormData({ ...formData, isCurrent: checked as boolean })
               }
+              className="w-5 h-5 border-gray-400 data-[state=checked]:bg-[color:var(--ole-green)] data-[state=checked]:border-[color:var(--ole-green)]
+ focus:ring-[color:var(--ole-green)]"
             />
             <Label htmlFor="isCurrent">Jag jobbar här nu</Label>
           </div>

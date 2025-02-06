@@ -29,44 +29,57 @@ const DiscussionDetail = () => {
   }, []);
 
   // Fetch discussion and answers
-  const { data: discussion, isLoading, error } = useQuery({
-    queryKey: ["discussion", slug],
-    queryFn: async () => {
-      if (!slug) {
-        throw new Error("Slug is undefined");
-      }
+    const { data: discussion, isLoading, error } = useQuery({
+      queryKey: ["discussion", slug],
+      queryFn: async () => {
+        if (!slug) {
+          throw new Error("Slug is undefined");
+        }
 
-      const { data: discussion, error: discussionError } = await supabase
-        .from("discussions")
-        .select("slug, question, description")
-        .eq("slug", slug)
-        .single();
+        const { data: discussion, error: discussionError } = await supabase
+          .from("discussions")
+          .select(`
+            slug,
+            question,
+            description,
+            creator:profiles(
+              id,
+              full_name,
+              avatar_url,
+              title,
+              school
+            )
+          `)
+          .eq("slug", slug)
+          .single();
 
-      if (discussionError) throw discussionError;
+        if (discussionError) throw discussionError;
 
-      const { data: answers, error: answersError } = await supabase
-        .from("answers")
-        .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          user:profiles(
-            full_name,
-            avatar_url,
-            title,
-            school
-          )
-        `)
-        .eq("discussion_slug", slug)
-        .order("created_at", { ascending: false }); // Newest answers first
+        const { data: answers, error: answersError } = await supabase
+          .from("answers")
+          .select(`
+            id,
+            content,
+            created_at,
+            user_id,
+            user:profiles(
+              full_name,
+              avatar_url,
+              title,
+              school
+            )
+          `)
+          .eq("discussion_slug", slug)
+          .order("created_at", { ascending: false }); // Newest answers first
 
-      if (answersError) throw answersError;
+        if (answersError) throw answersError;
 
-      return { ...discussion, answers };
-    },
-    enabled: !!slug, // Only execute the query if slug is defined
-  });
+        return { ...discussion, answers };
+      },
+      enabled: !!slug,
+    });
+
+
 
   // Add a new answer
   const addAnswerMutation = useMutation({
@@ -113,6 +126,40 @@ const DiscussionDetail = () => {
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
             <p className="text-gray-700 mb-8">{discussion?.description}</p>
 
+            {/* Diskussion skapad av */}
+            {discussion?.creator && (
+              <div className="flex flex-col gap-2 text-gray-600 text-sm mb-8 -mt-2">
+                <span>Diskussion skapad av</span>
+                    <MiniProfile
+                      id={discussion.creator.id}
+                      name={discussion.creator.full_name}
+                      avatarUrl={discussion.creator.avatar_url}
+                      title={discussion.creator.title}
+                      school={discussion.creator.school}
+                      size="small"
+                    />
+              </div>
+            )}
+
+            {/* Answer Form */}
+            <form onSubmit={handleAddAnswer} className="mt-4 mb-4 space-y-4">
+              <textarea
+                value={newAnswer}
+                onChange={(e) => {
+                  setNewAnswer(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                placeholder="Skriv ditt svar här..."
+                className="w-full px-4 py-2 -mb-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
+                rows={1}
+                required
+              />
+              <Button type="submit" className="w-full bg-[color:var(--ole-green)] text-white">
+                Svara
+              </Button>
+            </form>
+
             {/* Answers Section */}
             {discussion.answers.length > 0 ? (
               discussion.answers.map((answer) => {
@@ -146,24 +193,7 @@ const DiscussionDetail = () => {
             ) : (
               <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
             )}
-            {/* Answer Form */}
-            <form onSubmit={handleAddAnswer} className="mt-4 mb-8 space-y-4">
-              <textarea
-                value={newAnswer}
-                onChange={(e) => {
-                  setNewAnswer(e.target.value);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                placeholder="Skriv ditt svar här..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
-                rows={1}
-                required
-              />
-              <Button type="submit" className="w-full bg-[color:var(--ole-green)] text-white">
-                Svara
-              </Button>
-            </form>
+
             </div>
 
 

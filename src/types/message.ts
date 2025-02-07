@@ -1,4 +1,3 @@
-
 export interface Message {
   id: string;
   sender_id: string;
@@ -12,15 +11,6 @@ export interface Message {
       id: string;
       title: string;
       file_path: string;
-    };
-  }[];
-  files?: {
-    file_id: string;
-    resources: {
-      id: string;
-      title: string;
-      file_path: string;
-      created_at: string;
     };
   }[];
 }

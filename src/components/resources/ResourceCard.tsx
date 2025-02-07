@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
 import { useState } from "react";
@@ -5,10 +6,18 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ResourceDetailsDialog } from "./ResourceDetailsDialog";
 import { SaveToListDialog } from "../SaveToListDialog";
-import type { Material } from "@/types/material";
 
-interface ResourceCardProps {
-  resource: Material;
+interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  grade: string;
+  type: string;
+  difficulty: "easy" | "medium" | "hard";
+  file_path: string;
+  file_name: string;
+  author_id: string;
 }
 
 const difficultyMap = {
@@ -17,7 +26,7 @@ const difficultyMap = {
   hard: "Svår",
 };
 
-export function ResourceCard({ resource }: ResourceCardProps) {
+export function ResourceCard({ resource }: { resource: Resource }) {
   const { toast } = useToast();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);

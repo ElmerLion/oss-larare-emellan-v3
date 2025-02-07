@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { LinkMaterialDialog } from "@/components/LinkMaterialDialog";
 import type { Material } from "@/types/material";
-import type { Profile } from "@/types/profile";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 interface ChatInputProps {
   newMessage: string;

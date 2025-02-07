@@ -18,42 +18,42 @@ import IntegritetsPolicy from "./pages/IntegritetsPolicy";
 import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
-import Funktioner from "./pages/Funktioner";
+import Funktioner from  "./pages/Funktioner";
+
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsAuthenticated(true);
-        setCurrentUserId(session.user.id);
-      } else {
-        setIsAuthenticated(false);
-        setCurrentUserId(null);
-      }
-    };
+useEffect(() => {
+  const checkSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setIsAuthenticated(true);
+      setCurrentUserId(session.user.id); // Always set the current user ID
+    } else {
+      setIsAuthenticated(false);
+      setCurrentUserId(null);
+    }
+  };
 
-    checkSession();
+  checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setIsAuthenticated(true);
-        setCurrentUserId(session.user.id);
-      } else {
-        setIsAuthenticated(false);
-        setCurrentUserId(null);
-      }
-    });
+  const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (session) {
+      setIsAuthenticated(true);
+      setCurrentUserId(session.user.id); // Update user ID on login
+    } else {
+      setIsAuthenticated(false);
+      setCurrentUserId(null); // Clear user ID on logout
+    }
+  });
 
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []);
+  return () => subscription.unsubscribe();
+}, []);
+
 
   if (isAuthenticated === null) {
     return null; // or a loading spinner

@@ -1,3 +1,4 @@
+
 import { AppSidebar } from "@/components/AppSidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FilterSidebar, ResourceFilters } from "@/components/FilterSidebar";
@@ -36,16 +37,36 @@ export default function Resurser() {
     queryFn: async () => {
       let query = supabase.from("resources").select("*");
 
-      if (filters.type !== "all") query = query.eq("type", filters.type);
-      if (filters.subject !== "all") query = query.eq("subject", filters.subject);
-      if (filters.grade !== "all") query = query.eq("grade", filters.grade);
-      if (filters.difficulty !== "all") query = query.eq("difficulty", filters.difficulty);
+      // Apply filters
+      if (filters.type !== "all") {
+        query = query.eq("type", filters.type);
+      }
+      if (filters.subject !== "all") {
+        query = query.eq("subject", filters.subject);
+      }
+      if (filters.grade !== "all") {
+        query = query.eq("grade", filters.grade);
+      }
+      if (filters.difficulty !== "all") {
+        query = query.eq("difficulty", filters.difficulty);
+      }
 
+      // Apply search query
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
 
-      query = query.order("created_at", { ascending: false });
+      // Apply ordering
+      switch (filters.orderBy) {
+        case "downloads":
+          query = query.order("downloads", { ascending: false });
+          break;
+        case "rating":
+          query = query.order("rating", { ascending: false });
+          break;
+        default:
+          query = query.order("created_at", { ascending: false });
+      }
 
       const { data, error } = await query;
       if (error) throw error;
@@ -60,12 +81,9 @@ export default function Resurser() {
 
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Use the custom trigger element to render the big full-width ole-green button */}
           <CreateResourceDialog
             triggerElement={
-              <Button
-                className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6"
-              >
+              <Button className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6">
                 Dela material
               </Button>
             }

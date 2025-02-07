@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
 import { useState } from "react";
@@ -73,6 +74,9 @@ export function ResourceCard({ resource }: { resource: Resource }) {
 
         <div className="flex flex-wrap gap-2">
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
+            {resource.type}
+          </span>
+          <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
             {resource.subject}
           </span>
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
@@ -101,14 +105,12 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         </div>
       </div>
 
-      {/* Resource Details Dialog */}
       <ResourceDetailsDialog
         resource={resource}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />
 
-      {/* Save to List Dialog */}
       <SaveToListDialog
         open={isSaveDialogOpen}
         onOpenChange={setIsSaveDialogOpen}

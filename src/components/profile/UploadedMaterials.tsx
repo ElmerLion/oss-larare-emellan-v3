@@ -1,4 +1,4 @@
-// UploadedMaterials.tsx
+
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
@@ -6,8 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResourceCard } from "@/components/resources/ResourceCard";
 import { CreateResourceDialog } from "@/components/CreateResourceDialog";
 import { Button } from "@/components/ui/button";
-
-interface Resource extends Material {}
+import type { Material } from "@/types/material";
 
 interface UploadedMaterialsProps {
   userId: string;
@@ -25,22 +24,22 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Resource[];
+      return data as Material[];
     },
   });
 
-  const handleDownload = async (resource: Resource) => {
+  const handleDownload = async (resource: Material) => {
     try {
       const { data, error } = await supabase.storage
         .from('resources')
-        .download(resource.file_path);
+        .download(resource.file_path!);
 
       if (error) throw error;
 
       const url = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = url;
-      link.download = resource.file_name;
+      link.download = resource.file_name || 'download';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -77,9 +76,6 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
               <ResourceCard
                 key={resource.id}
                 resource={resource}
-                onSelect={() => {}}
-                onDownload={handleDownload}
-                onSave={() => {}}
               />
             ))}
           </div>

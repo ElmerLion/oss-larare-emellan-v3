@@ -29,57 +29,55 @@ const DiscussionDetail = () => {
   }, []);
 
   // Fetch discussion and answers
-    const { data: discussion, isLoading, error } = useQuery({
-      queryKey: ["discussion", slug],
-      queryFn: async () => {
-        if (!slug) {
-          throw new Error("Slug is undefined");
-        }
+  const { data: discussion, isLoading, error } = useQuery({
+    queryKey: ["discussion", slug],
+    queryFn: async () => {
+      if (!slug) {
+        throw new Error("Slug is undefined");
+      }
 
-        const { data: discussion, error: discussionError } = await supabase
-          .from("discussions")
-          .select(`
-            slug,
-            question,
-            description,
-            creator:profiles(
-              id,
-              full_name,
-              avatar_url,
-              title,
-              school
-            )
-          `)
-          .eq("slug", slug)
-          .single();
-
-        if (discussionError) throw discussionError;
-
-        const { data: answers, error: answersError } = await supabase
-          .from("answers")
-          .select(`
+      const { data: discussion, error: discussionError } = await supabase
+        .from("discussions")
+        .select(`
+          slug,
+          question,
+          description,
+          creator:profiles(
             id,
-            content,
-            created_at,
-            user_id,
-            user:profiles(
-              full_name,
-              avatar_url,
-              title,
-              school
-            )
-          `)
-          .eq("discussion_slug", slug)
-          .order("created_at", { ascending: false }); // Newest answers first
+            full_name,
+            avatar_url,
+            title,
+            school
+          )
+        `)
+        .eq("slug", slug)
+        .single();
 
-        if (answersError) throw answersError;
+      if (discussionError) throw discussionError;
 
-        return { ...discussion, answers };
-      },
-      enabled: !!slug,
-    });
+      const { data: answers, error: answersError } = await supabase
+        .from("answers")
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          user:profiles(
+            full_name,
+            avatar_url,
+            title,
+            school
+          )
+        `)
+        .eq("discussion_slug", slug)
+        .order("created_at", { ascending: false }); // Newest answers first
 
+      if (answersError) throw answersError;
 
+      return { ...discussion, answers };
+    },
+    enabled: !!slug,
+  });
 
   // Add a new answer
   const addAnswerMutation = useMutation({
@@ -99,7 +97,7 @@ const DiscussionDetail = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["discussion", slug]);
+      queryClient.invalidateQueries({ queryKey: ["discussion", slug] });
       setNewAnswer("");
     },
   });

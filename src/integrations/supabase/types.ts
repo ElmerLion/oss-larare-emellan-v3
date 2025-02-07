@@ -9,6 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      answers: {
+        Row: {
+          content: string
+          created_at: string | null
+          discussion_slug: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          discussion_slug?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          discussion_slug?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_discussion_slug_fkey"
+            columns: ["discussion_slug"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "answers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beta_testers: {
+        Row: {
+          email: string | null
+          id: number
+        }
+        Insert: {
+          email?: string | null
+          id?: number
+        }
+        Update: {
+          email?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
+      discussions: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          question: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          question: string
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          question?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           company: string
@@ -52,6 +138,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      files: {
+        Row: {
+          author_id: string
+          created_at: string | null
+          file_path: string
+          id: string
+          title: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string | null
+          file_path: string
+          id?: string
+          title: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string | null
+          file_path?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
       }
       list_saved_posts: {
         Row: {
@@ -121,6 +231,76 @@ export type Database = {
             columns: ["resource_id"]
             isOneToOne: false
             referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_files: {
+        Row: {
+          file_id: string
+          id: string
+          message_id: string
+        }
+        Insert: {
+          file_id: string
+          id?: string
+          message_id: string
+        }
+        Update: {
+          file_id?: string
+          id?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_message_files_file"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_message_files_message"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_materials: {
+        Row: {
+          material_id: string
+          message_id: string
+        }
+        Insert: {
+          material_id: string
+          message_id: string
+        }
+        Update: {
+          material_id?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_material_id"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_materials_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
@@ -338,42 +518,6 @@ export type Database = {
           },
         ]
       }
-      profile_visits: {
-        Row: {
-          id: string
-          profile_id: string
-          visited_at: string | null
-          visitor_id: string
-        }
-        Insert: {
-          id?: string
-          profile_id: string
-          visited_at?: string | null
-          visitor_id: string
-        }
-        Update: {
-          id?: string
-          profile_id?: string
-          visited_at?: string | null
-          visitor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profile_visits_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_visits_visitor_id_fkey"
-            columns: ["visitor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -388,6 +532,7 @@ export type Database = {
           title: string | null
           updated_at: string
           username: string | null
+          visits: number | null
         }
         Insert: {
           avatar_url?: string | null
@@ -402,6 +547,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           username?: string | null
+          visits?: number | null
         }
         Update: {
           avatar_url?: string | null
@@ -416,6 +562,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           username?: string | null
+          visits?: number | null
         }
         Relationships: []
       }
@@ -461,6 +608,7 @@ export type Database = {
           created_at: string
           description: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
+          downloads: number | null
           file_name: string | null
           file_path: string | null
           grade: string
@@ -475,6 +623,7 @@ export type Database = {
           created_at?: string
           description: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
+          downloads?: number | null
           file_name?: string | null
           file_path?: string | null
           grade: string
@@ -489,6 +638,7 @@ export type Database = {
           created_at?: string
           description?: string
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          downloads?: number | null
           file_name?: string | null
           file_path?: string | null
           grade?: string

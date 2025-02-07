@@ -77,7 +77,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
             {resource.type}
           </span>
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
-            {resource.subject}
+            {resource.subject} {resource.subject_level}
           </span>
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
             {resource.grade}

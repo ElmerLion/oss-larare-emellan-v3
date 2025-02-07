@@ -1,4 +1,3 @@
-
 import { AppSidebar } from "@/components/AppSidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FilterSidebar, ResourceFilters } from "@/components/FilterSidebar";
@@ -20,14 +19,18 @@ interface Resource {
   file_path: string;
   file_name: string;
   author_id: string;
+  // Optionally, you can add subject_level if needed in TypeScript:
+  subject_level?: string | null;
 }
 
 export default function Resurser() {
   const [filters, setFilters] = useState<ResourceFilters>({
     orderBy: "created_at",
     type: "all",
-    subject: "all",
-    grade: "all",
+    school: "",         // e.g. "Gymnasiet" or "Grundskola"
+    subject: "all",     // For Grundskola: subject; for Gymnasiet: course subject
+    grade: "all",       // For Grundskola only
+    courseLevel: "all", // For Gymnasiet only
     difficulty: "all",
   });
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,18 +40,56 @@ export default function Resurser() {
     queryFn: async () => {
       let query = supabase.from("resources").select("*");
 
-      // Apply filters
+      // Apply filters for type and difficulty
       if (filters.type !== "all") {
         query = query.eq("type", filters.type);
       }
-      if (filters.subject !== "all") {
-        query = query.eq("subject", filters.subject);
-      }
-      if (filters.grade !== "all") {
-        query = query.eq("grade", filters.grade);
-      }
       if (filters.difficulty !== "all") {
         query = query.eq("difficulty", filters.difficulty);
+      }
+
+      // Apply school-level filtering
+      if (filters.school) {
+        if (filters.school === "Gymnasiet") {
+          // Ensure only Gymnasiet resources are returned by checking grade.
+          query = query.eq("grade", "Gymnasiet");
+          // For Gymnasiet, if a course level is selected, filter by subject_level.
+          if (filters.courseLevel !== "all") {
+            query = query.eq("subject_level", filters.courseLevel);
+          } else if (filters.subject !== "all") {
+            // If only a course subject is selected, perform a prefix search on subject.
+            query = query.ilike("subject", `${filters.subject}%`);
+          }
+        } else if (filters.school === "Grundskola") {
+          // For Grundskola, filter the grade column.
+          if (filters.grade === "all") {
+            query = query.in("grade", [
+              "Årskurs 1",
+              "Årskurs 2",
+              "Årskurs 3",
+              "Årskurs 4",
+              "Årskurs 5",
+              "Årskurs 6",
+              "Årskurs 7",
+              "Årskurs 8",
+              "Årskurs 9",
+            ]);
+          } else {
+            query = query.eq("grade", filters.grade);
+          }
+          // Also filter subject exactly if provided.
+          if (filters.subject !== "all") {
+            query = query.eq("subject", filters.subject);
+          }
+        }
+      } else {
+        // If no school filter is set, allow filtering by grade or subject if chosen.
+        if (filters.grade !== "all") {
+          query = query.eq("grade", filters.grade);
+        }
+        if (filters.subject !== "all") {
+          query = query.eq("subject", filters.subject);
+        }
       }
 
       // Apply search query

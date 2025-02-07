@@ -69,7 +69,7 @@ export function ProfileCard() {
       {/* Green Background with Avatar */}
       <div className="relative w-full h-[120px] bg-[var(--ole-green)] rounded-md">
         <div className="absolute inset-x-0 bottom-10 transform translate-y-1/2 flex justify-center">
-          <Avatar className="h-[140px] w-[140px] rounded-full border-2 border-white">
+          <Avatar className="h-[120px] w-[120px] rounded-full border-2 border-white">
             <AvatarImage
               src={profile.avatar_url || "/placeholder.svg"}
               alt={profile.full_name || "Profile Picture"}

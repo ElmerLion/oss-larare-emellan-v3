@@ -1,4 +1,3 @@
-// CreateResourceDialog.tsx
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -10,18 +9,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import React from "react";
+import {
+  subjectOptionsForGrundskola,
+  gradeOptionsGrundskola,
+  courseSubjectOptionsForGymnasiet,
+  courseLevelsMapping,
+  resourceTypeOptions, // <-- Import the type options
+} from "@/types/resourceOptions";
 
-interface CreateResourceDialogProps {
-  // If provided, this element will be used as the trigger
-  triggerElement?: React.ReactNode;
-}
-
-export function CreateResourceDialog({ triggerElement }: CreateResourceDialogProps) {
+export function CreateResourceDialog({ triggerElement }: { triggerElement?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [subject, setSubject] = useState("");
-  const [grade, setGrade] = useState("");
+  // School-level UI (only used for controlling the UI, not stored in the table)
+  const [school, setSchool] = useState("");
+  // For Grundskola: subject; for Gymnasiet: course subject.
+  const [subject, setSubject] = useState("all");
+  // For Grundskola: grade; for Gymnasiet: course level.
+  const [grade, setGrade] = useState("all");
+  const [courseLevel, setCourseLevel] = useState("all");
   const [type, setType] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [file, setFile] = useState<File | null>(null);
@@ -36,9 +42,53 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields.
+    if (!title.trim()) {
+      toast.error("Ange en titel.");
+      return;
+    }
+    if (!description.trim()) {
+      toast.error("Ange en beskrivning.");
+      return;
+    }
+    if (!school) {
+      toast.error("Välj skolnivå.");
+      return;
+    }
+    if (!type.trim() || type === "all") {
+      toast.error("Välj resurstyp.");
+      return;
+    }
+    if (!difficulty || difficulty === "all") {
+      toast.error("Välj svårighetsgrad.");
+      return;
+    }
+    if (school === "Grundskola") {
+      if (grade === "all") {
+        toast.error("Välj årskurs.");
+        return;
+      }
+      if (subject === "all") {
+        toast.error("Välj ämne.");
+        return;
+      }
+    } else if (school === "Gymnasiet") {
+      if (subject === "all") {
+        toast.error("Välj kursämne.");
+        return;
+      }
+      if (courseLevelsMapping[subject] && courseLevelsMapping[subject].length > 0 && courseLevel === "all") {
+        toast.error("Välj kursnivå.");
+        return;
+      }
+    }
+    if (!file) {
+      toast.error("Välj en fil att ladda upp.");
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
-
       if (!user) {
         toast({
           title: "Error",
@@ -48,51 +98,47 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
         return;
       }
 
-      if (!file) {
-        toast({
-          title: "Error",
-          description: "Du måste välja en fil att ladda upp",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Upload file to storage
       const fileExt = file.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
-
       const { error: uploadError } = await supabase.storage
         .from('resources')
         .upload(filePath, file);
-
       if (uploadError) throw uploadError;
 
-      // Create resource record
+      // Build resourceData.
+      const resourceData: any = {
+        author_id: user.id,
+        title,
+        description,
+        type,
+        difficulty,
+        file_path: filePath,
+        file_name: file.name,
+      };
+
+      if (school === "Gymnasiet") {
+        resourceData["subject"] = courseLevel; // e.g. "Matematik 3c"
+        resourceData["grade"] = "Gymnasiet";
+        resourceData["subject_level"] = courseLevel;
+      } else if (school === "Grundskola") {
+        resourceData["subject"] = subject;
+        resourceData["grade"] = grade;
+        resourceData["subject_level"] = null;
+      }
+
       const { error: resourceError } = await supabase
         .from('resources')
-        .insert({
-          author_id: user.id,
-          title,
-          description,
-          subject,
-          grade,
-          type,
-          difficulty,
-          file_path: filePath,
-          file_name: file.name
-        });
-
+        .insert(resourceData);
       if (resourceError) throw resourceError;
 
       toast({
         title: "Material uppladdat",
         description: "Ditt material har delats!",
       });
-
       setIsOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Ett problem uppstod:', error);
+      console.error("Ett problem uppstod:", error);
       toast({
         title: "Error",
         description: "Kunde inte ladda upp materialet. Försök igen.",
@@ -101,11 +147,14 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
     }
   };
 
+  // Reset only the dependent fields; we do not reset the school selection.
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setSubject("");
-    setGrade("");
+    // Preserve the selected school; reset its dependents.
+    setSubject("all");
+    setGrade("all");
+    setCourseLevel("all");
     setType("");
     setDifficulty("medium");
     setFile(null);
@@ -115,9 +164,7 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {triggerElement ? triggerElement : (
-          <Button variant="outline" size="sm">
-            Dela material
-          </Button>
+          <Button variant="outline" size="sm">Dela material</Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
@@ -135,7 +182,6 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
               required
             />
           </div>
-          
           <div className="space-y-2">
             <Label htmlFor="description">Beskrivning</Label>
             <Textarea
@@ -147,48 +193,32 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
               required
             />
           </div>
-
+          {/* New Filters using shared options */}
           <div className="grid grid-cols-2 gap-4">
+            {/* Skolnivå */}
             <div className="space-y-2">
-              <Label htmlFor="subject">Ämne</Label>
-              <Select value={subject} onValueChange={setSubject} required>
+              <Label htmlFor="school">Skolnivå</Label>
+              <Select
+                value={school}
+                onValueChange={(val) => {
+                  setSchool(val);
+                  // Reset only dependent fields when school changes.
+                  setSubject("all");
+                  setGrade("all");
+                  setCourseLevel("all");
+                }}
+                required
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Välj ämne" />
+                  <SelectValue placeholder="Välj skolnivå" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Matematik">Matematik</SelectItem>
-                  <SelectItem value="Svenska">Svenska</SelectItem>
-                  <SelectItem value="Engelska">Engelska</SelectItem>
-                  <SelectItem value="Programmering">Programmering</SelectItem>
-                  <SelectItem value="Samhällskunskap">Samhällskunskap</SelectItem>
-                  <SelectItem value="Fysik">Fysik</SelectItem>
+                  <SelectItem value="Grundskola">Grundskola</SelectItem>
+                  <SelectItem value="Gymnasiet">Gymnasiet</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="grade">Årskurs</Label>
-              <Select value={grade} onValueChange={setGrade} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Välj årskurs" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Årskurs 1">Årskurs 1</SelectItem>
-                  <SelectItem value="Årskurs 2">Årskurs 2</SelectItem>
-                  <SelectItem value="Årskurs 3">Årskurs 3</SelectItem>
-                  <SelectItem value="Årskurs 4">Årskurs 4</SelectItem>
-                  <SelectItem value="Årskurs 5">Årskurs 5</SelectItem>
-                  <SelectItem value="Årskurs 6">Årskurs 6</SelectItem>
-                  <SelectItem value="Årskurs 7">Årskurs 7</SelectItem>
-                  <SelectItem value="Årskurs 8">Årskurs 8</SelectItem>
-                  <SelectItem value="Årskurs 9">Årskurs 9</SelectItem>
-                  <SelectItem value="Gymnasiet 1">Gymnasiet 1</SelectItem>
-                  <SelectItem value="Gymnasiet 2">Gymnasiet 2</SelectItem>
-                  <SelectItem value="Gymnasiet 3">Gymnasiet 3</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
+            {/* Resurstyp */}
             <div className="space-y-2">
               <Label htmlFor="type">Resurstyp</Label>
               <Select value={type} onValueChange={setType} required>
@@ -196,17 +226,94 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
                   <SelectValue placeholder="Välj typ" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Prov">Prov</SelectItem>
-                  <SelectItem value="Anteckningar">Anteckningar</SelectItem>
-                  <SelectItem value="Lektionsplanering">Lektionsplanering</SelectItem>
-                  <SelectItem value="Quiz">Quiz</SelectItem>
+                  {resourceTypeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-
+            {/* Conditional Filters for Grundskola */}
+            {school === "Grundskola" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="grade">Årskurs</Label>
+                  <Select value={grade} onValueChange={setGrade} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Välj årskurs" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Välj årskurs</SelectItem>
+                      {gradeOptionsGrundskola.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Ämne</Label>
+                  <Select value={subject} onValueChange={setSubject} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Välj ämne" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Välj ämne</SelectItem>
+                      {subjectOptionsForGrundskola.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            {/* Conditional Filters for Gymnasiet */}
+            {school === "Gymnasiet" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Kursämne</Label>
+                  <Select value={subject} onValueChange={setSubject} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Välj kursämne" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Välj kursämne</SelectItem>
+                      {courseSubjectOptionsForGymnasiet.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {subject !== "all" && courseLevelsMapping[subject] && courseLevelsMapping[subject].length > 0 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="courseLevel">Kursnivå</Label>
+                    <Select value={courseLevel} onValueChange={setCourseLevel} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj kursnivå" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Välj kursnivå</SelectItem>
+                        {courseLevelsMapping[subject].map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
+            )}
+            {/* Difficulty */}
             <div className="space-y-2">
               <Label htmlFor="difficulty">Svårighetsgrad</Label>
-              <Select value={difficulty} onValueChange={(value: "easy" | "medium" | "hard") => setDifficulty(value)} required>
+              <Select value={difficulty} onValueChange={setDifficulty} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Välj svårighetsgrad" />
                 </SelectTrigger>
@@ -218,7 +325,6 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
               </Select>
             </div>
           </div>
-
           <div className="space-y-2">
             <Label>Fil</Label>
             <div className="flex gap-2">
@@ -230,7 +336,6 @@ export function CreateResourceDialog({ triggerElement }: CreateResourceDialogPro
               />
             </div>
           </div>
-
           <div className="pt-4 flex justify-end">
             <Button type="submit" className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)]">
               <Upload className="w-4 h-4 mr-2" />

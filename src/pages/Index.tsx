@@ -29,7 +29,7 @@ const Index = () => {
         <FeatureSection></FeatureSection>
 
         {/* Testimonials Section */}
-        <TestimonialsSection></TestimonialsSection>
+
 
       {/* CTA Section */}
     <Element name="cta" id="cta">

@@ -67,9 +67,9 @@ export function ProfileCard() {
       <h2 className="text-lg font-semibold mb-4">Min Profil</h2>
 
       {/* Green Background with Avatar */}
-      <div className="relative w-full h-[120px] bg-[#8da685] rounded-md">
+      <div className="relative w-full h-[120px] bg-[var(--ole-green)] rounded-md">
         <div className="absolute inset-x-0 bottom-10 transform translate-y-1/2 flex justify-center">
-          <Avatar className="h-24 w-24 rounded-full border-2 border-white">
+          <Avatar className="h-[140px] w-[140px] rounded-full border-2 border-white">
             <AvatarImage
               src={profile.avatar_url || "/placeholder.svg"}
               alt={profile.full_name || "Profile Picture"}

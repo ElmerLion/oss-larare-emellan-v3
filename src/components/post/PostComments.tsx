@@ -215,11 +215,11 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
 
   return (
     <div className="space-y-4">
-      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[120px]'} overflow-hidden`}>
+      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[110px]'} overflow-hidden`}>
         {comments.map((commentItem) => {
           const timeAgo = formatDistanceToNow(new Date(commentItem.created_at), { addSuffix: true });
           return (
-            <div key={commentItem.id} className="relative bg-gray-50 rounded-lg p-3">
+            <div key={commentItem.id} className="relative border border-gray-200 rounded-lg p-3">
               <div className="flex flex-col">
                 {/* MiniProfile on top (vertical layout) */}
                 <MiniProfile

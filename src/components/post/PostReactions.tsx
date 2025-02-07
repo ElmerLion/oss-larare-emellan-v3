@@ -14,13 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
 const reactionEmojis: Record<ReactionType, { emoji: string; label: string }> = {
-  inspiring: { emoji: "✨", label: "Inspiring" },
-  creative: { emoji: "🎨", label: "Creative" },
-  helpful: { emoji: "🛠️", label: "Helpful" },
-  insightful: { emoji: "💡", label: "Insightful" },
-  encouraging: { emoji: "🌟", label: "Encouraging" },
-  innovative: { emoji: "🚀", label: "Innovative" },
-  fun: { emoji: "🎉", label: "Fun" },
+  inspiring: { emoji: "✨", label: "Inspirerande" },
+  creative: { emoji: "🎨", label: "Kreativt" },
+  helpful: { emoji: "🛠️", label: "Hjälpsamt" },
+  insightful: { emoji: "💡", label: "Insiktsfullt" },
+  encouraging: { emoji: "🌟", label: "Uppmuntrande" },
+  innovative: { emoji: "🚀", label: "Innovativt" },
+  fun: { emoji: "🎉", label: "Roligt" },
 };
 
 interface PostReactionsProps {
@@ -148,7 +148,7 @@ const handleReaction = async (reactionType: ReactionType) => {
           >
             <span className="text-xl">{emoji}</span>
             <span>{label}</span>
-            {userReaction === key && <span className="ml-2 text-sm text-gray-500">(Click to remove)</span>}
+            {userReaction === key && <span className="ml-2 text-sm text-gray-500">(Klicka för att ta bort)</span>}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

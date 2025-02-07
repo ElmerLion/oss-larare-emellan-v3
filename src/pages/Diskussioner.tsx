@@ -204,7 +204,7 @@ const Diskussioner = () => {
                     key={discussion.slug}
                     className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 relative"
                   >
-                    {/* Three Dots Menu - Correct Positioning */}
+                    {/* Three Dots Menu */}
                       {isOwner && (
                         <div ref={menuRef} className="absolute top-3 right-3">
                           <button
@@ -277,7 +277,7 @@ const Diskussioner = () => {
                             {distinctUsers.slice(0, 3).map((user: any, index: number) => (
                               <img
                                 key={index}
-                                src={user?.avatar_url || "/placeholder-avatar.png"}
+                                src={user?.avatar_url || "/placeholder.svg"}
                                 alt={user?.full_name || "User"}
                                 className="w-8 h-8 rounded-full border-2 border-white"
                               />

@@ -5,15 +5,19 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import MiniProfile from "@/components/profile/MiniProfile";
+import { formatDistanceToNow } from "date-fns";
 
 interface Comment {
   id: string;
   content: string;
   created_at: string;
-  user_id: string; // ensure this field is selected from the backend
+  user_id: string;
   profiles: {
     full_name: string | null;
     avatar_url: string | null;
+    title?: string | null;
+    school?: string | null;
   };
 }
 
@@ -56,7 +60,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
     fetchCurrentUser();
   }, []);
 
-  // Query for comments. Ensure the query returns user_id.
+  // Query for comments. Now select title and school from the profiles.
   const { data: comments = [] } = useQuery({
     queryKey: ['comments', postId, showAllComments],
     queryFn: async () => {
@@ -69,7 +73,9 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
           user_id,
           profiles (
             full_name,
-            avatar_url
+            avatar_url,
+            title,
+            school
           )
         `)
         .eq('post_id', postId)
@@ -126,15 +132,16 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
         return;
       }
 
-      // Create an optimistic new comment
+      // Create an optimistic new comment object
       const newComment: Comment = {
         id: 'temp-' + Date.now(), // temporary id
         content: comment,
         created_at: new Date().toISOString(),
         user_id: user.id,
         profiles: {
-          full_name: user.email, // fallback; ideally you'd use the user's full name from their profile
-          avatar_url: userAvatar || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"
+          full_name: user.email, // fallback; ideally use the user's full name from profile
+          avatar_url: userAvatar || "/placeholder.svg",
+          // title and school could also be fetched if available; otherwise, they might be undefined
         }
       };
 
@@ -143,7 +150,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
         old ? [newComment, ...old] : [newComment]
       );
 
-      // Optimistically update the displayed comment count
+      // Increment the displayed comment count
       setDisplayedCount(prev => prev + 1);
 
       // Insert the new comment into the database
@@ -162,7 +169,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
         description: "Comment added successfully",
       });
 
-      // Optionally refetch comments to get the actual comment IDs from the backend
+      // Refetch comments to get actual comment IDs from the backend
       queryClient.invalidateQueries({ queryKey: ['comments', postId] });
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -185,7 +192,6 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
         title: "Kommentar borttagen",
         description: "Din kommentar har tagits bort",
       });
-      // Optimistically decrement the displayed count
       setDisplayedCount(prev => prev - 1);
       queryClient.invalidateQueries({ queryKey: ['comments', postId] });
     } catch (error) {
@@ -209,46 +215,53 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
 
   return (
     <div className="space-y-4">
-      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[200px]'} overflow-hidden`}>
-        {comments.map((commentItem) => (
-          <div key={commentItem.id} className="flex gap-3 relative">
-            <img
-              src={commentItem.profiles.avatar_url || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
-              alt={commentItem.profiles.full_name || "User"}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-            <div className="flex-1 bg-gray-50 rounded-lg p-3">
-              <div className="flex justify-between">
-                <div className="font-medium text-sm">{commentItem.profiles.full_name || "Unknown User"}</div>
-                {/* Render three dots only if this comment was sent by the current user */}
-                {currentUserId === commentItem.user_id && (
-                  <div className="relative" ref={menuRef}>
-                    <button
-                      onClick={() => setOpenCommentMenu(commentItem.id)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
-                    {openCommentMenu === commentItem.id && (
-                      <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-40">
-                        <button
-                          onClick={() => handleDeleteComment(commentItem.id)}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        >
-                          Ta bort kommentar
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[120px]'} overflow-hidden`}>
+        {comments.map((commentItem) => {
+          const timeAgo = formatDistanceToNow(new Date(commentItem.created_at), { addSuffix: true });
+          return (
+            <div key={commentItem.id} className="relative bg-gray-50 rounded-lg p-3">
+              <div className="flex flex-col">
+                {/* MiniProfile on top (vertical layout) */}
+                <MiniProfile
+                  id={commentItem.user_id}
+                  name={commentItem.profiles.full_name || "Unknown User"}
+                  avatarUrl={commentItem.profiles.avatar_url || "/placeholder.svg"}
+                  title={commentItem.profiles.title}
+                  school={commentItem.profiles.school}
+                  timeAgo={timeAgo}
+                  size="small"
+                />
+                {/* Comment content below the MiniProfile */}
+                <div className="mt-3">
+                  <p className="mx-10 text-sm text-gray-700">{commentItem.content}</p>
+                </div>
               </div>
-              <p className="text-sm text-gray-700">{commentItem.content}</p>
+              {currentUserId === commentItem.user_id && (
+                <div className="absolute top-2 right-2" ref={menuRef}>
+                  <button
+                    onClick={() => setOpenCommentMenu(commentItem.id)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                  {openCommentMenu === commentItem.id && (
+                    <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-40">
+                      <button
+                        onClick={() => handleDeleteComment(commentItem.id)}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Ta bort kommentar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {displayedCount > 2 && (
+      {displayedCount > 1 && (
         <Button
           variant="link"
           onClick={() => setShowAllComments(!showAllComments)}
@@ -260,7 +273,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
 
       <div className="flex gap-3">
         <img
-          src={userAvatar || "/lovable-uploads/0d20194f-3eb3-4f5f-ba83-44b21f1060ed.png"}
+          src={userAvatar || "/placeholder.svg"}
           alt="Your avatar"
           className="w-8 h-8 rounded-full object-cover"
         />

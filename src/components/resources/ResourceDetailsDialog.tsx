@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
@@ -123,6 +124,9 @@ export function ResourceDetailsDialog({ resource, open, onOpenChange }: Resource
           <p className="text-gray-700">{resource.description}</p>
 
           <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
+              {resource.type}
+            </span>
             <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
               {resource.subject}
             </span>

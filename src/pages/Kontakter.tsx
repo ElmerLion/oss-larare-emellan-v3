@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,13 +16,11 @@ export default function Kontakter() {
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null); // State for viewing material
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [linkedMaterials, setLinkedMaterials] = useState<Material[]>([]);
   const [linkedFiles, setLinkedFiles] = useState<Material[]>([]);
-
-
 
   // Fetch current user
   useEffect(() => {
@@ -34,7 +32,6 @@ export default function Kontakter() {
     };
     fetchUser();
   }, []);
-
 
   // Fetch contacts
   const { data: profiles } = useQuery({
@@ -75,38 +72,33 @@ export default function Kontakter() {
   }, [searchParams, profiles]);
 
   // Fetch messages for selected conversation
-    const { data: messages, refetch: refetchMessages } = useQuery({
-      queryKey: ["messages", selectedUser?.id],
-      queryFn: async () => {
-        if (!selectedUser?.id || !currentUserId) return [];
+  const { data: messages, refetch: refetchMessages } = useQuery({
+    queryKey: ["messages", selectedUser?.id],
+    queryFn: async () => {
+      if (!selectedUser?.id || !currentUserId) return [];
 
-        const { data, error } = await supabase
-          .from("messages")
-          .select(`
-            *,
-            materials:message_materials(
-              material_id,
-              resources!message_materials_material_id_fkey(id, title, file_path, description)
-            ),
-            files:message_files(
-              file_id,
-              resources:files(id, title, file_path, created_at)
-            )
-          `)
-          .or(
-            `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
+      const { data, error } = await supabase
+        .from("messages")
+        .select(`
+          *,
+          materials:message_materials(
+            material_id,
+            resources!message_materials_material_id_fkey(id, title, file_path, description)
+          ),
+          files:message_files(
+            file_id,
+            resources:files(id, title, file_path, created_at)
           )
-          .order("created_at", { ascending: true });
+        `)
+        .or(
+          `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
+        )
+        .order("created_at", { ascending: true });
 
-
-
-        return data;
-      },
-      enabled: !!selectedUser && !!currentUserId,
-    });
-
-
-
+      return data;
+    },
+    enabled: !!selectedUser && !!currentUserId,
+  });
 
   // Set up real-time subscription for new messages
   useEffect(() => {
@@ -124,7 +116,6 @@ export default function Kontakter() {
         (payload) => {
           refetchMessages();
         }
-
       )
       .subscribe();
 
@@ -133,66 +124,67 @@ export default function Kontakter() {
     };
   }, [selectedUser, refetchMessages]);
 
-  const handleLinkMaterial = (material: Material) => setLinkedMaterial(material);
+  const handleLinkMaterial = (material: Material) => {
+    if (!linkedMaterials.some(m => m.id === material.id)) {
+      setLinkedMaterials([...linkedMaterials, material]);
+    }
+  };
 
-  const handleClearLinkedMaterial = () => setLinkedMaterial(null);
+  const handleClearLinkedMaterial = () => setLinkedMaterials([]);
 
-    const handleSendMessage = async (linkedMaterialIds: string[] = [], linkedFileIds: string[] = []) => {
-        if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+  const handleSendMessage = async (linkedMaterialIds: string[] = [], linkedFileIds: string[] = []) => {
+    if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
+    try {
+      // Insert new message
+      const { data: messageData, error: messageError } = await supabase
+        .from("messages")
+        .insert({
+          sender_id: currentUserId,
+          receiver_id: selectedUser.id,
+          content: newMessage,
+        })
+        .select()
+        .single();
 
-        try {
-            // Insert new message
-            const { data: messageData, error: messageError } = await supabase
-                .from("messages")
-                .insert({
-                    sender_id: currentUserId,
-                    receiver_id: selectedUser.id,
-                    content: newMessage,
-                })
-                .select()
-                .single();
+      if (messageError) throw messageError;
 
-            if (messageError) throw messageError;
+      console.log("New message created:", messageData);
 
-            console.log("New message created:", messageData);
+      // Insert linked materials
+      if (linkedMaterialIds.length > 0) {
+        const materialEntries = linkedMaterialIds.map((materialId) => ({
+          message_id: messageData.id,
+          material_id: materialId,
+        }));
 
-            // Insert linked materials
-            if (linkedMaterialIds.length > 0) {
-                const materialEntries = linkedMaterialIds.map((materialId) => ({
-                    message_id: messageData.id,
-                    material_id: materialId,
-                }));
+        await supabase.from("message_materials").insert(materialEntries);
+      }
 
-                await supabase.from("message_materials").insert(materialEntries);
-            }
+      // Insert linked files
+      if (linkedFileIds.length > 0) {
+        const fileEntries = linkedFileIds.map((fileId) => ({
+          message_id: messageData.id,
+          file_id: fileId,
+        }));
 
-            // Insert linked files
-            if (linkedFileIds.length > 0) {
-                const fileEntries = linkedFileIds.map((fileId) => ({
-                    message_id: messageData.id,
-                    file_id: fileId,
-                }));
+        await supabase.from("message_files").insert(fileEntries);
+      }
 
-                await supabase.from("message_files").insert(fileEntries);
-            }
-
-            // Reset inputs
-            setNewMessage("");
-            setLinkedMaterials([]);
-            setLinkedFiles([]);
-            refetchMessages();
-        } catch (error) {
-            console.error("Error inserting/updating materials and files:", error);
-            toast({
-                title: "Error",
-                description: error.message || "An unexpected error occurred",
-                variant: "destructive",
-            });
-        }
-    };
-
-
+      // Reset inputs
+      setNewMessage("");
+      setLinkedMaterials([]);
+      setLinkedFiles([]);
+      refetchMessages();
+    } catch (error) {
+      console.error("Error inserting/updating materials and files:", error);
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleViewMaterial = async (materialId: string) => {
     try {
@@ -225,39 +217,33 @@ export default function Kontakter() {
           selectedUser={selectedUser}
           onSelectUser={setSelectedUser}
         />
-              <ChatWindow
-                  selectedUser={selectedUser}
-                  messages={messages}
-                  newMessage={newMessage}
-                  currentUserId={currentUserId}
-                  onNewMessageChange={setNewMessage}
-                  onSendMessage={(linkedMaterialIds, linkedFileIds) => handleSendMessage(linkedMaterialIds, linkedFileIds)}
-                  linkedMaterials={linkedMaterials}
-                  linkedFiles={linkedFiles} 
-                  onClearLinkedMaterial={(index) => {
-                      const updatedMaterials = [...linkedMaterials];
-                      updatedMaterials.splice(index, 1);
-                      setLinkedMaterials(updatedMaterials);
-                  }}
-                  onClearLinkedFile={(index) => {
-                      const updatedFiles = [...linkedFiles];
-                      updatedFiles.splice(index, 1);
-                      setLinkedFiles(updatedFiles);
-                  }}
-                  onLinkMaterial={(material) => {
-                      if (!linkedMaterials.some((m) => m.id === material.id)) {
-                          setLinkedMaterials([...linkedMaterials, material]);
-                      }
-                  }}
-                  onLinkFile={(file) => {
-                      if (!linkedFiles.some((f) => f.id === file.id)) {
-                          setLinkedFiles([...linkedFiles, file]);
-                      }
-                  }}
-                  onViewMaterial={handleViewMaterial}
-              />
-
-
+        <ChatWindow
+          selectedUser={selectedUser}
+          messages={messages}
+          newMessage={newMessage}
+          currentUserId={currentUserId}
+          onNewMessageChange={setNewMessage}
+          onSendMessage={(linkedMaterialIds, linkedFileIds) => handleSendMessage(linkedMaterialIds, linkedFileIds)}
+          linkedMaterials={linkedMaterials}
+          linkedFiles={linkedFiles} 
+          onClearLinkedMaterial={(index) => {
+            const updatedMaterials = [...linkedMaterials];
+            updatedMaterials.splice(index, 1);
+            setLinkedMaterials(updatedMaterials);
+          }}
+          onClearLinkedFile={(index) => {
+            const updatedFiles = [...linkedFiles];
+            updatedFiles.splice(index, 1);
+            setLinkedFiles(updatedFiles);
+          }}
+          onLinkMaterial={handleLinkMaterial}
+          onLinkFile={(file) => {
+            if (!linkedFiles.some((f) => f.id === file.id)) {
+              setLinkedFiles([...linkedFiles, file]);
+            }
+          }}
+          onViewMaterial={handleViewMaterial}
+        />
 
         {selectedMaterial && (
           <ResourceDetailsDialog

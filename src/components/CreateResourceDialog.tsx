@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +14,7 @@ import {
   gradeOptionsGrundskola,
   courseSubjectOptionsForGymnasiet,
   courseLevelsMapping,
-  resourceTypeOptions, // <-- Import the type options
+  resourceTypeOptions,
 } from "@/types/resourceOptions";
 
 export function CreateResourceDialog({ triggerElement }: { triggerElement?: React.ReactNode }) {
@@ -31,59 +31,73 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
   const [type, setType] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        toast.error("Filen får inte vara större än 50 MB.");
+        // Clear any previously selected file and preview.
+        setFile(null);
+        setPreviewUrl(null);
+        return;
+      }
+      setFile(selectedFile);
+      // If the file is an audio file (e.g. MP3), create a preview URL.
+      if (selectedFile.type.startsWith("audio/")) {
+        const url = URL.createObjectURL(selectedFile);
+        setPreviewUrl(url);
+      } else {
+        setPreviewUrl(null);
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields.
+    // Build a combined error message string.
+    let errorMessage = "";
     if (!title.trim()) {
-      toast.error("Ange en titel.");
-      return;
+      errorMessage += "Ange en titel. ";
     }
     if (!description.trim()) {
-      toast.error("Ange en beskrivning.");
-      return;
+      errorMessage += "Ange en beskrivning. ";
     }
     if (!school) {
-      toast.error("Välj skolnivå.");
-      return;
+      errorMessage += "Välj skolnivå. ";
     }
     if (!type.trim() || type === "all") {
-      toast.error("Välj resurstyp.");
-      return;
+      errorMessage += "Välj resurstyp. ";
     }
     if (!difficulty || difficulty === "all") {
-      toast.error("Välj svårighetsgrad.");
-      return;
+      errorMessage += "Välj svårighetsgrad. ";
     }
     if (school === "Grundskola") {
       if (grade === "all") {
-        toast.error("Välj årskurs.");
-        return;
+        errorMessage += "Välj årskurs. ";
       }
       if (subject === "all") {
-        toast.error("Välj ämne.");
-        return;
+        errorMessage += "Välj ämne. ";
       }
     } else if (school === "Gymnasiet") {
       if (subject === "all") {
-        toast.error("Välj kursämne.");
-        return;
+        errorMessage += "Välj kursämne. ";
       }
       if (courseLevelsMapping[subject] && courseLevelsMapping[subject].length > 0 && courseLevel === "all") {
-        toast.error("Välj kursnivå.");
-        return;
+        errorMessage += "Välj kursnivå. ";
       }
     }
     if (!file) {
-      toast.error("Välj en fil att ladda upp.");
+      errorMessage += "Välj en fil att ladda upp.";
+    }
+
+    if (errorMessage.trim()) {
+      toast.error(errorMessage.trim());
       return;
     }
 
@@ -106,6 +120,10 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
       if (uploadError) throw uploadError;
 
       // Build resourceData.
+      // For Gymnasiet, insert the selected course subject into the subject column,
+      // and the selected course level into the subject_level column.
+      // Also, set the grade column to "Gymnasiet".
+      // For Grundskola, use the selected subject and grade as-is.
       const resourceData: any = {
         author_id: user.id,
         title,
@@ -117,9 +135,12 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
       };
 
       if (school === "Gymnasiet") {
-        resourceData["subject"] = courseLevel; // e.g. "Matematik 3c"
+        resourceData["subject"] = subject; // course subject (e.g. "Matematik")
         resourceData["grade"] = "Gymnasiet";
-        resourceData["subject_level"] = courseLevel;
+        resourceData["subject_level"] =
+          courseLevelsMapping[subject] && courseLevelsMapping[subject].length > 0 && courseLevel !== "all"
+            ? `${subject} ${courseLevel}` // e.g. "Matematik 3c"
+            : null;
       } else if (school === "Grundskola") {
         resourceData["subject"] = subject;
         resourceData["grade"] = grade;
@@ -158,18 +179,19 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
     setType("");
     setDifficulty("medium");
     setFile(null);
+    setPreviewUrl(null);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {triggerElement ? triggerElement : (
-          <Button variant="outline" size="sm">Dela material</Button>
+          <Button variant="outline" size="sm">Dela Resurs</Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
         <DialogHeader>
-          <DialogTitle>Dela material</DialogTitle>
+          <DialogTitle>Dela Resurs</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -178,7 +200,7 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ange en titel för materialet"
+              placeholder="Ange en titel för resursen"
               required
             />
           </div>
@@ -188,7 +210,7 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Beskriv materialet"
+              placeholder="Beskriv resursen"
               className="min-h-[100px]"
               required
             />
@@ -336,6 +358,14 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
               />
             </div>
           </div>
+          {/* If an audio file is selected, show an audio preview */}
+          {previewUrl && file && file.type.startsWith("audio/") && (
+            <div className="mt-2">
+              <audio controls src={previewUrl}>
+                Din webbläsare stödjer inte audio.
+              </audio>
+            </div>
+          )}
           <div className="pt-4 flex justify-end">
             <Button type="submit" className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)]">
               <Upload className="w-4 h-4 mr-2" />

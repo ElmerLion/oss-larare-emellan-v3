@@ -108,7 +108,7 @@ export function ChatMessages({
                 >
                   <Paperclip className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600 flex-1 text-left">
-                    {material.resources.title}
+                    {material.resources?.title}
                   </span>
                 </button>
               ))}
@@ -126,7 +126,7 @@ export function ChatMessages({
                 >
                   <Upload className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600 flex-1 text-left">
-                    {file.resources.title}
+                    {file.resources?.title}
                   </span>
                 </a>
               ))}

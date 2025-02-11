@@ -109,32 +109,32 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="purpose">Syfte</Label>
+            <Label htmlFor="purpose">Jag är här för att...</Label>
             <Textarea
               id="purpose"
               value={formData.purpose || ''}
               onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
-              placeholder="Why are you here?"
+              placeholder="Varför är du här?"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="motivation">Motivation</Label>
+            <Label htmlFor="motivation">Jag jobbar som lärare för att...</Label>
             <Textarea
               id="motivation"
               value={formData.motivation || ''}
               onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
-              placeholder="What motivates you as a teacher?"
+              placeholder="Vad motiverar dig som lärare?"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contribution">Bidrag</Label>
+            <Label htmlFor="contribution">Med mig kan du diskutera</Label>
             <Textarea
               id="contribution"
               value={formData.contribution || ''}
               onChange={(e) => setFormData({ ...formData, contribution: e.target.value })}
-              placeholder="How do you contribute to the community?"
+              placeholder="Vad kan någon diskutera med dig?"
             />
           </div>
 

@@ -3,17 +3,19 @@ import { PostReactions } from "./post/PostReactions";
 import { PostComments } from "./post/PostComments";
 import { PostMaterial } from "./PostMaterial";
 import { PostTags } from "./PostTags";
-import { Database } from "@/integrations/supabase/types";
 import { SaveToListDialog } from "./SaveToListDialog";
 import { useState } from "react";
+import { Database } from "@/integrations/supabase/types";
 
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
-interface Author {
+interface Profile {
   id?: string;
   name: string;
   avatar: string;
-  timeAgo: string;
+  title: string;
+  school: string;
+  created_at: string;
 }
 
 interface Material {
@@ -23,7 +25,7 @@ interface Material {
 
 interface PostProps {
   id: string;
-  author: Author;
+  profile: Profile;
   content: string;
   reactions: number;
   comments: number;
@@ -34,7 +36,7 @@ interface PostProps {
 
 export function Post({
   id,
-  author,
+  profile,
   content,
   reactions,
   comments,
@@ -48,7 +50,7 @@ export function Post({
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="mb-4">
         <PostHeader
-          author={author}
+          profile={profile}
           postId={id}
           onSave={() => setShowSaveDialog(true)}
           disableProfileClick={false}
@@ -70,11 +72,7 @@ export function Post({
             compact={true}
           />
         </div>
-        <PostComments
-          postId={id}
-          totalComments={comments}
-          showCommentForm={true}
-        />
+        <PostComments postId={id} totalComments={comments} showCommentForm={true} />
       </div>
 
       <SaveToListDialog

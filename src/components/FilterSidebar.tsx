@@ -40,7 +40,9 @@ export function FilterSidebar({ onFilterChange, onSearchChange }: FilterSidebarP
   };
 
   return (
-    <div className="w-64 bg-white p-6 border-r border-gray-300 ml-[255px]">
+    // Here we add "sticky top-0" to have the filters stick at the top when scrolling,
+    // and "min-h-screen" to ensure the white background fills the entire vertical space.
+    <div className="w-64 bg-white p-6 border-r border-l border-gray-300 min-h-screen sticky top-0">
       <h1 className="text-2xl font-semibold pb-4">Resurser</h1>
 
       {/* Search Bar */}
@@ -170,26 +172,28 @@ export function FilterSidebar({ onFilterChange, onSearchChange }: FilterSidebarP
               </select>
             </div>
             {/* Only show Kursnivå if a specific course subject is selected */}
-            {currentCourseSubject !== "all" && courseLevelsMapping[currentCourseSubject] && courseLevelsMapping[currentCourseSubject].length > 0 && (
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">Kursnivå</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white"
-                  onChange={(e) => {
-                    const selectedCourseLevel = e.target.value;
-                    setCurrentCourseLevel(selectedCourseLevel);
-                    handleFilterChange('courseLevel', selectedCourseLevel);
-                  }}
-                >
-                  <option value="all">Alla nivåer</option>
-                  {courseLevelsMapping[currentCourseSubject].map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {currentCourseSubject !== "all" &&
+              courseLevelsMapping[currentCourseSubject] &&
+              courseLevelsMapping[currentCourseSubject].length > 0 && (
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 mb-2 block">Kursnivå</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+                    onChange={(e) => {
+                      const selectedCourseLevel = e.target.value;
+                      setCurrentCourseLevel(selectedCourseLevel);
+                      handleFilterChange('courseLevel', selectedCourseLevel);
+                    }}
+                  >
+                    <option value="all">Alla nivåer</option>
+                    {courseLevelsMapping[currentCourseSubject].map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
           </>
         )}
 

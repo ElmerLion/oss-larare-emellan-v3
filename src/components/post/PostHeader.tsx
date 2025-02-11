@@ -5,25 +5,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import MiniProfile from "@/components/profile/MiniProfile";
 
-interface Author {
+interface Profile {
   id?: string;
   name: string;
   avatar: string;
-  timeAgo: string;
+  title: string;
+  school: string;
+  created_at: string; // raw timestamp from the post (passed in from Feed)
 }
 
 interface PostHeaderProps {
-  author: Author;
+  profile: Profile;
   postId: string;
   onSave: () => void;
   disableProfileClick?: boolean;
 }
 
-export function PostHeader({ author, postId, onSave, disableProfileClick }: PostHeaderProps) {
+export function PostHeader({ profile, postId, onSave, disableProfileClick }: PostHeaderProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false); // State for menu visibility
+  const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +36,6 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
     getCurrentUser();
   }, []);
 
-  // Close the menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -48,14 +49,11 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
   const handleDeletePost = async () => {
     try {
       const { error } = await supabase.from("posts").delete().eq("id", postId);
-
       if (error) throw error;
-
       toast({
         title: "Inlägg borttagen",
         description: "Inlägget har tagits bort",
       });
-
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     } catch (error) {
       toast({
@@ -68,17 +66,16 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
 
   return (
     <div className="flex items-start justify-between mb-4 relative">
-      {/* Author Info with MiniProfile */}
       <MiniProfile
-        id={author.id || ""}
-        name={author.name || "Unnamed User"}
-        avatarUrl={author.avatar}
-        timeAgo={author.timeAgo}
+        id={profile.id || ""}
+        name={profile.name || "Unnamed User"}
+        avatarUrl={profile.avatar}
+        title={profile.title}
+        school={profile.school}
+        created_at={profile.created_at}
         size="medium"
         showLink={!disableProfileClick}
       />
-
-      {/* Menu Trigger */}
       <div ref={menuRef} className="relative">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -86,8 +83,6 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
         >
           <MoreVertical className="w-6 h-6" />
         </button>
-
-        {/* Menu Content */}
         {menuOpen && (
           <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-40">
             <button
@@ -97,7 +92,7 @@ export function PostHeader({ author, postId, onSave, disableProfileClick }: Post
               <Save className="mr-2 h-4 w-4 inline-block" />
               Spara post
             </button>
-            {author.id === currentUserId && (
+            {profile.id === currentUserId && (
               <button
                 onClick={handleDeletePost}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"

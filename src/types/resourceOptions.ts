@@ -193,10 +193,12 @@ export const courseLevelsMapping = {
 };
 
 export const resourceTypeOptions = [
+  { value: "Uppgift", label: "Uppgift" },
   { value: "Prov", label: "Prov" },
   { value: "Anteckningar", label: "Anteckningar" },
   { value: "Lektionsplanering", label: "Lektionsplanering" },
   { value: "Quiz", label: "Quiz" },
+  { value: "Genomgång", label: "Genomgång" },
 ];
 
 export const gymnasietGrades = ["Gymnasiet 1", "Gymnasiet 2", "Gymnasiet 3"];

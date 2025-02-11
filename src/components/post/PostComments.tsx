@@ -228,7 +228,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
                   avatarUrl={commentItem.profiles.avatar_url || "/placeholder.svg"}
                   title={commentItem.profiles.title}
                   school={commentItem.profiles.school}
-                  timeAgo={timeAgo}
+                  created_at={commentItem.created_at}
                   size="small"
                 />
                 {/* Comment content below the MiniProfile */}

@@ -163,7 +163,6 @@ const DiscussionDetail = () => {
             {/* Answers Section */}
             {discussion.answers.length > 0 ? (
               discussion.answers.map((answer) => {
-                const timeAgo = formatDistanceToNow(new Date(answer.created_at), { addSuffix: true });
 
                 return (
                   <div
@@ -178,7 +177,7 @@ const DiscussionDetail = () => {
                         avatarUrl={answer.user?.avatar_url}
                         title={answer.user?.title}
                         school={answer.user?.school}
-                        timeAgo={timeAgo}
+                        created_at={answer.created_at}
                         size="medium"
                       />
                     </div>

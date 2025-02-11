@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ResourceDetailsDialog } from "./ResourceDetailsDialog";
@@ -18,6 +17,7 @@ interface Resource {
   file_path: string;
   file_name: string;
   author_id: string;
+  subject_level?: string | null;
 }
 
 const difficultyMap = {
@@ -31,18 +31,50 @@ export function ResourceCard({ resource }: { resource: Resource }) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 
+  // Local resource state to allow realtime updates
+  const [localResource, setLocalResource] = useState<Resource>(resource);
+
+  // Update local resource if the prop changes.
+  useEffect(() => {
+    setLocalResource(resource);
+  }, [resource]);
+
+  // Subscribe to realtime changes on this resource.
+  useEffect(() => {
+    if (!resource) return;
+    const channel = supabase
+      .channel(`resource-${resource.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'resources',
+          filter: `id=eq.${resource.id}`,
+        },
+        (payload) => {
+          if (payload.new) {
+            setLocalResource(payload.new);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [resource]);
+
   const handleDownload = async () => {
     try {
       const { data, error } = await supabase.storage
         .from("resources")
-        .download(resource.file_path);
-
+        .download(localResource.file_path);
       if (error) throw error;
-
       const url = window.URL.createObjectURL(data);
       const link = document.createElement("a");
       link.href = url;
-      link.download = resource.file_name;
+      link.download = localResource.file_name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -69,21 +101,21 @@ export function ResourceCard({ resource }: { resource: Resource }) {
           <Bookmark className="h-5 w-5" />
         </Button>
 
-        <h3 className="text-lg font-semibold mb-2">{resource.title}</h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{resource.description}</p>
+        <h3 className="text-lg font-semibold mb-2">{localResource.title}</h3>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{localResource.description}</p>
 
         <div className="flex flex-wrap gap-2">
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
-            {resource.type}
+            {localResource.grade}
           </span>
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
-            {resource.subject} {resource.subject_level}
+            {localResource.subject} {localResource.subject_level}
           </span>
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
-            {resource.grade}
+            {localResource.type}
           </span>
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">
-            {difficultyMap[resource.difficulty]}
+            {difficultyMap[localResource.difficulty]}
           </span>
         </div>
 
@@ -106,15 +138,16 @@ export function ResourceCard({ resource }: { resource: Resource }) {
       </div>
 
       <ResourceDetailsDialog
-        resource={resource}
+        resource={localResource}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
+        onResourceUpdate={(updatedResource) => setLocalResource(updatedResource)}
       />
 
       <SaveToListDialog
         open={isSaveDialogOpen}
         onOpenChange={setIsSaveDialogOpen}
-        itemId={resource.id}
+        itemId={localResource.id}
         itemType="resource"
       />
     </>

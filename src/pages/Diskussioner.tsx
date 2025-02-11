@@ -249,6 +249,7 @@ const Diskussioner = () => {
                             avatarUrl={latestAnswer.user?.avatar_url}
                             title={latestAnswer.user?.title}
                             school={latestAnswer.user?.school}
+                            created_at={latestAnswer.created_at}
                             size="small"
                           />
                           <div className="mt-4">

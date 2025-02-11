@@ -1,14 +1,55 @@
 import { Link } from "react-router-dom";
 
 interface MiniProfileProps {
-  id: string; // Profile ID for linking
-  name: string; // Full name
-  avatarUrl: string; // Avatar image URL
-  title?: string; // Optional title
-  school?: string; // Optional school
-  timeAgo?: string; // Optional time ago display
+  id: string;           // Profile ID for linking
+  name: string;         // Full name
+  avatarUrl: string;    // Avatar image URL
+  title?: string;       // Optional title
+  school?: string;      // Optional school
+  created_at?: string;  // A date string representing when the post was published
   size?: "small" | "medium" | "large"; // For different avatar sizes
-  showLink?: boolean; // Whether to wrap with a profile link
+  showLink?: boolean;   // Whether to wrap the output in a link to the profile
+}
+
+/**
+ * Custom function to format a raw timestamp into a Swedish "time ago" string.
+ */
+function formatTimeAgo(created_at: string): string {
+  const date = new Date(created_at);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "nyss";
+  }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return diffInMinutes === 1 ? "1 minut sen" : `${diffInMinutes} minuter sen`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return diffInHours === 1 ? "1 timme sen" : `${diffInHours} timmar sen`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return diffInDays === 1 ? "1 dag sen" : `${diffInDays} dagar sen`;
+  }
+
+  if (diffInDays < 30) {
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    return diffInWeeks === 1 ? "1 vecka sen" : `${diffInWeeks} veckor sen`;
+  }
+
+  if (diffInDays < 365) {
+    const diffInMonths = Math.floor(diffInDays / 30);
+    return diffInMonths === 1 ? "1 månad sen" : `${diffInMonths} månader sen`;
+  }
+
+  const diffInYears = Math.floor(diffInDays / 365);
+  return diffInYears === 1 ? "1 år sen" : `${diffInYears} år sen`;
 }
 
 export const MiniProfile = ({
@@ -17,65 +58,59 @@ export const MiniProfile = ({
   avatarUrl,
   title,
   school,
-  timeAgo,
+  created_at,
   size = "medium",
   showLink = true,
 }: MiniProfileProps) => {
-  const avatarSize = {
+  // Define the avatar size based on the provided size prop.
+  const avatarSizeClass = {
     small: "w-8 h-8",
     medium: "w-10 h-10",
     large: "w-16 h-16",
   }[size];
 
-  const textContainerPadding = {
+  // Add some left padding for the text so that it doesn't collide with the avatar.
+  const paddingClass = {
     small: "pl-2",
     medium: "pl-3",
     large: "pl-4",
   }[size];
 
-  const combinedTitleSchool = title && school ? `${title} på ${school}` : title || school;
+  // Combine title and school if both are provided.
+  const combinedTitleSchool =
+    title && school ? `${title} på ${school}` : title || school || "";
 
-  return (
-    <div className="flex items-center -mb-2">
+  const content = (
+    <div className="flex items-center">
       {/* Avatar */}
-      <Link to={`/profil/${id}`} className="flex-shrink-0">
+      <div className="flex-shrink-0">
         <img
           src={avatarUrl || "/placeholder.svg"}
           alt={name || "Unnamed User"}
-          className={`${avatarSize} rounded-full object-cover`}
+          className={`${avatarSizeClass} rounded-full object-cover`}
         />
-      </Link>
-
-      {/* Profile Info */}
-      <div className={`flex flex-col ${textContainerPadding} justify-center`}>
-        {/* Name */}
-        <Link
-          to={`/profil/${id}`}
-          className="font-medium text-sm hover:underline truncate"
-          style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-        >
-          {name || "Unnamed User"}
-        </Link>
-        {/* Title and School */}
+      </div>
+      {/* Profile Information */}
+      <div className={`flex flex-col ${paddingClass}`}>
+        <div className="font-medium text-sm">{name || "Unnamed User"}</div>
         {combinedTitleSchool && (
-          <p
-            className="text-xs text-gray-500 truncate"
-            style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-          >
-            {combinedTitleSchool}
-          </p>
+          <div className="text-xs text-gray-500">{combinedTitleSchool}</div>
         )}
-        {/* Time Ago */}
-        {timeAgo && (
-          <p
-            className="text-xs text-gray-400 truncate"
-            style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-          >
-            {timeAgo}
-          </p>
+        {created_at && (
+          <div className="text-xs text-gray-400">
+            {formatTimeAgo(created_at)}
+          </div>
         )}
       </div>
     </div>
+  );
+
+  return showLink ? (
+    <Link to={`/profil/${id}`} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
   );
 };
 

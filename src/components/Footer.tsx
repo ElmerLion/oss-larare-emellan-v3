@@ -2,17 +2,25 @@ import { Mail, Instagram, Linkedin } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
+    <footer className="bg-gray-50 border-t border-gray-200 mt-auto md:ml-64">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Use a responsive grid that stacks on small screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Logo and Mission Statement */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <img src="/Images/OLELogga.png" alt="OLE Logo" className="h-8 w-auto" />
-              <span className="text-gray-600 font-semibold">Oss Lärare Emellan</span>
+              <img
+                src="/Images/OLELogga.png"
+                alt="OLE Logo"
+                className="h-8 w-auto"
+              />
+              <span className="text-gray-600 font-semibold">
+                Oss Lärare Emellan
+              </span>
             </div>
             <p className="text-sm text-gray-500">
-              Vi förenar lärare för att förbättra utbildningen i Sverige genom samarbete och inspiration.
+              Vi förenar lärare för att förbättra utbildningen i Sverige genom
+              samarbete och inspiration.
             </p>
           </div>
 
@@ -21,16 +29,27 @@ export function Footer() {
             <h3 className="text-gray-800 font-medium mb-4">Snabblänkar</h3>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>
-                <a href="/omoss" className="hover:text-green-600">Om Oss</a>
+                <a href="/omoss" className="hover:text-green-600">
+                  Om Oss
+                </a>
               </li>
               <li>
-                <a href="#features" className="hover:text-green-600">Funktioner</a>
+                <a href="#features" className="hover:text-green-600">
+                  Funktioner
+                </a>
               </li>
               <li>
-                <a href="#testimonials" className="hover:text-green-600">Omdömen</a>
+                <a href="#testimonials" className="hover:text-green-600">
+                  Omdömen
+                </a>
               </li>
               <li>
-                <a href="/Integritets-policy" className="hover:text-green-600">Integritetspolicy</a>
+                <a
+                  href="/Integritets-policy"
+                  className="hover:text-green-600"
+                >
+                  Integritetspolicy
+                </a>
               </li>
             </ul>
           </div>
@@ -59,6 +78,7 @@ export function Footer() {
               >
                 <Linkedin className="h-5 w-5" />
               </a>
+              {/* You can add other social links here */}
             </div>
           </div>
         </div>

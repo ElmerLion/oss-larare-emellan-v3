@@ -26,7 +26,7 @@ export function ProfileCard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      // Fetch resources uploaded by the user
+      // Fetch resources uploaded by the user (if needed)
       const { data: resources, error } = await supabase
         .from('resources')
         .select('downloads')
@@ -83,11 +83,17 @@ export function ProfileCard() {
       <p className="text-sm text-gray-500 mb-2">{titleSchool}</p>
 
       {/* Bio */}
-      <p className="text-sm text-gray-700 mb-6">
-        Jag är här för att {profile.purpose?.toLowerCase()}.<br />
-        Jag jobbar som lärare för att {profile.motivation?.toLowerCase()}.<br />
-        Med mig kan du diskutera {profile.contribution?.toLowerCase()}.
-      </p>
+      <div className="text-sm text-gray-700 mb-6">
+        {profile.purpose && (
+          <p>Jag är här för att {profile.purpose.toLowerCase()}.</p>
+        )}
+        {profile.motivation && (
+          <p>Jag jobbar som lärare för att {profile.motivation.toLowerCase()}.</p>
+        )}
+        {profile.contribution && (
+          <p>Med mig kan du diskutera {profile.contribution.toLowerCase()}.</p>
+        )}
+      </div>
 
       {/* Stats */}
       <div className="flex space-x-4 justify-evenly">

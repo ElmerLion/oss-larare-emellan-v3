@@ -129,7 +129,7 @@ const DiscussionDetail = () => {
             {/* Diskussion skapad av */}
             {discussion?.creator && (
               <div className="flex flex-col gap-2 text-gray-600 text-sm mb-8 -mt-2">
-                <span>Diskussion skapad av</span>
+                <span>Samtal skapat av</span>
                     <MiniProfile
                       id={discussion.creator.id}
                       name={discussion.creator.full_name}

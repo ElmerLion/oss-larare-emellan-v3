@@ -52,7 +52,7 @@ export function ProfileActions() {
   // Always navigate to the chat window for this profile.
   const handleSendMessage = () => {
     if (profileId) {
-      navigate(`/kontakter?chat=${profileId}`);
+      navigate(`/meddelanden?chat=${profileId}`);
     }
   };
 

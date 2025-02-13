@@ -132,9 +132,9 @@ const Diskussioner = () => {
       <main className="pl-64">
         <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
           <div className="col-span-2">
-            <h1 className="text-2xl font-semibold mb-2">Diskussioner</h1>
+            <h1 className="text-2xl font-semibold mb-2">Forum</h1>
             <p className="text-gray-600 mb-8">
-              Utforska pågående diskussioner och delta med dina idéer.
+              Utforska pågående samtal och delta med dina idéer.
             </p>
 
             {/* Button to start a new discussion */}
@@ -143,14 +143,14 @@ const Diskussioner = () => {
                 className="bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white w-full"
                 onClick={() => setIsCreating(!isCreating)}
               >
-                {isCreating ? "Avbryt" : "Starta en ny diskussion"}
+                {isCreating ? "Avbryt" : "Starta ett nytt samtal"}
               </Button>
               {isCreating && (
                 <form onSubmit={handleCreateDiscussion} className="mt-4 space-y-4">
                   <Input
                     value={newDiscussion}
                     onChange={(e) => setNewDiscussion(e.target.value)}
-                    placeholder="Skriv din diskussionsfråga här"
+                    placeholder="Skriv din samtalsfråga här"
                     className="w-full"
                     required
                   />
@@ -195,8 +195,8 @@ const Diskussioner = () => {
                   const firstName = distinctUsers[0]?.full_name?.split(" ")[0] || "";
                   discussionText =
                     distinctUsers.length > 1
-                      ? `${firstName} och ${distinctUsers.length - 1} fler diskuterar detta`
-                      : `${firstName} diskuterar detta`;
+                      ? `${firstName} och ${distinctUsers.length - 1} fler skriver om detta`
+                      : `${firstName} skriver om detta`;
                 }
 
                 return (
@@ -222,14 +222,14 @@ const Diskussioner = () => {
                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                               >
                                 <Trash2 className="mr-2 mb-1 h-4 w-4 inline-block" />
-                                Ta bort diskussion
+                                Ta bort samtal
                               </button>
                             </div>
                           )}
                         </div>
                       )}
                     <a
-                      href={`/diskussioner/${discussion.slug}`}
+                      href={`/forum/${discussion.slug}`}
                       className="text-xl font-semibold text-gray-800 hover:text-[color:var(--hover-green)]"
                     >
                       {discussion.question}
@@ -267,7 +267,7 @@ const Diskussioner = () => {
                         variant="link"
                         className="text-white hover:bg-[color:var(--hover-secondary2)] bg-[color:var(--secondary2)] w-full no-underline hover:no-underline"
                         onClick={() =>
-                          (window.location.href = `/diskussioner/${discussion.slug}`)
+                          (window.location.href = `/forum/${discussion.slug}`)
                         }
                       >
                         Läs mer

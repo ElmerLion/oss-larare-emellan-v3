@@ -71,7 +71,7 @@ useEffect(() => {
                 <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
                 <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Index />} />
                 <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
-                <Route path="/kontakter" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
+                <Route path="/meddelanden" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
                 <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
                 <Route path="/mitt-bibliotek" element={isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />} />
                 <Route path="/profil/:id" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
@@ -79,8 +79,8 @@ useEffect(() => {
                 <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
                 <Route path="/omoss" element={<OmOss />} />
                 <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
-                <Route path="/diskussioner" element={<Diskussioner />} />
-                <Route path="/diskussioner/:slug" element={<DiscussionDetail />} />
+                <Route path="/forum" element={<Diskussioner />} />
+                <Route path="/forum/:slug" element={<DiscussionDetail />} />
                 <Route path="/installningar" element={<Installningar />} />
                 <Route path="/funktioner" element={<Funktioner />} />
               </Routes>

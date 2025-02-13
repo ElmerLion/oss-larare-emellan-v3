@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import type { ExtendedProfile } from "@/types/profile";
 
 interface ContactListProps {
@@ -20,24 +21,128 @@ export function ContactList({
   selectedUser,
   onSelectUser,
 }: ContactListProps) {
-  // Filter profiles based on the search query
+  // State for unread counts, keyed by sender id.
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  // State for the current user's id.
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Fetch current user id.
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error);
+      } else {
+        setCurrentUserId(user?.id || null);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Fetch unread message counts for the current user.
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const fetchUnreadCounts = async () => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("sender_id", { count: "exact", head: false })
+        .eq("receiver_id", currentUserId)
+        .eq("is_read", false);
+      if (error) {
+        console.error("Error fetching unread messages:", error);
+      } else {
+        const counts: Record<string, number> = {};
+        data.forEach((msg: any) => {
+          const sender = msg.sender_id;
+          counts[sender] = (counts[sender] || 0) + 1;
+        });
+        setUnreadCounts(counts);
+      }
+    };
+
+    fetchUnreadCounts();
+
+    // Realtime subscription to update counts.
+    const channel = supabase
+      .channel("unread-messages-list")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          if (
+            payload.new.receiver_id === currentUserId &&
+            payload.new.is_read === false
+          ) {
+            setUnreadCounts((prev) => {
+              const newCount = (prev[payload.new.sender_id] || 0) + 1;
+              return { ...prev, [payload.new.sender_id]: newCount };
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        (payload) => {
+          if (payload.new.receiver_id === currentUserId) {
+            // When a message is marked read.
+            if (
+              payload.old.is_read === false &&
+              payload.new.is_read === true
+            ) {
+              setUnreadCounts((prev) => {
+                const newCount = Math.max((prev[payload.new.sender_id] || 1) - 1, 0);
+                return { ...prev, [payload.new.sender_id]: newCount };
+              });
+            }
+            // When a message is marked unread again.
+            if (
+              payload.old.is_read === true &&
+              payload.new.is_read === false
+            ) {
+              setUnreadCounts((prev) => {
+                const newCount = (prev[payload.new.sender_id] || 0) + 1;
+                return { ...prev, [payload.new.sender_id]: newCount };
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId]);
+
+  // Filter profiles based on the search query.
   const filteredProfiles = useMemo(() => {
-    return profiles?.filter(profile =>
-      profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.school?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (profile.title && profile.title.toLowerCase().includes(searchQuery.toLowerCase()))
-    ) || [];
+    return (
+      profiles?.filter((profile) =>
+        profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        profile.school?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (profile.title &&
+          profile.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      ) || []
+    );
   }, [profiles, searchQuery]);
 
-  // Compute sorted profiles with messages (these go under "Senaste meddelanden")
+  // Compute sorted profiles with messages ("Senaste meddelanden")
   const sortedProfilesWithMessages = useMemo(() => {
-    return [...filteredProfiles.filter(profile => !!profile.lastMessageTime)]
-      .sort((a, b) => new Date(b.lastMessageTime!).getTime() - new Date(a.lastMessageTime!).getTime());
+    return [...filteredProfiles.filter((profile) => !!profile.lastMessageTime)].sort(
+      (a, b) =>
+        new Date(b.lastMessageTime!).getTime() -
+        new Date(a.lastMessageTime!).getTime()
+    );
   }, [filteredProfiles]);
 
-  // Compute profiles without messages (for "Övriga kontakter")
+  // Compute profiles without messages ("Dina kontakter")
   const sortedProfilesWithoutMessages = useMemo(() => {
-    return [...filteredProfiles.filter(profile => !profile.lastMessageTime)];
+    return [...filteredProfiles.filter((profile) => !profile.lastMessageTime)];
   }, [filteredProfiles]);
 
   return (
@@ -64,14 +169,16 @@ export function ContactList({
           <div className="space-y-4">
             {sortedProfilesWithMessages.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Senaste meddelanden</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                  Senaste meddelanden
+                </h3>
                 <div className="space-y-2">
                   {sortedProfilesWithMessages.map((profile) => (
                     <div
                       key={profile.id}
                       onClick={() => onSelectUser(profile)}
                       className={cn(
-                        "p-3 rounded-lg cursor-pointer hover:bg-gray-50",
+                        "p-3 rounded-lg cursor-pointer hover:bg-gray-50 flex items-center justify-between",
                         selectedUser?.id === profile.id && "bg-blue-50",
                         profile.isContact && "border-l-4 border-sage-400"
                       )}
@@ -82,7 +189,7 @@ export function ContactList({
                           alt={profile.full_name}
                           className="w-10 h-10 rounded-full object-cover"
                         />
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 overflow-hidden">
                           <Link
                             to={`/profil/${profile.id}`}
                             className="font-medium hover:underline"
@@ -91,11 +198,18 @@ export function ContactList({
                             {profile.full_name || "Unnamed User"}
                           </Link>
                           {profile.lastMessage && (
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-gray-500 truncate w-48">
                               {profile.lastMessage}
                             </p>
                           )}
                         </div>
+                      </div>
+                      <div className="w-24 flex-shrink-0 flex items-center justify-end gap-2">
+                        {unreadCounts[profile.id] > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                            {unreadCounts[profile.id]}
+                          </span>
+                        )}
                         {profile.lastMessageTime && (
                           <div className="text-xs text-gray-400">
                             {new Date(profile.lastMessageTime).toLocaleString("sv-SE", {
@@ -116,14 +230,16 @@ export function ContactList({
 
             {sortedProfilesWithoutMessages.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Övriga kontakter</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                  Dina kontakter
+                </h3>
                 <div className="space-y-2">
                   {sortedProfilesWithoutMessages.map((profile) => (
                     <div
                       key={profile.id}
                       onClick={() => onSelectUser(profile)}
                       className={cn(
-                        "p-3 rounded-lg cursor-pointer hover:bg-gray-50",
+                        "p-3 rounded-lg cursor-pointer hover:bg-gray-50 flex items-center justify-between",
                         selectedUser?.id === profile.id && "bg-blue-50",
                         profile.isContact && "border-l-4 border-sage-400"
                       )}
@@ -134,7 +250,7 @@ export function ContactList({
                           alt={profile.full_name}
                           className="w-10 h-10 rounded-full object-cover"
                         />
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 overflow-hidden">
                           <Link
                             to={`/profil/${profile.id}`}
                             className="font-medium hover:underline"
@@ -146,6 +262,13 @@ export function ContactList({
                             {profile.title} {profile.school ? `på ${profile.school}` : ""}
                           </p>
                         </div>
+                      </div>
+                      <div className="w-24 flex-shrink-0 flex items-center justify-end">
+                        {unreadCounts[profile.id] > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                            {unreadCounts[profile.id]}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}

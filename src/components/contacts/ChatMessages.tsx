@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { format } from "date-fns";
 import { Paperclip, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -22,33 +23,24 @@ async function downloadFile(filePath: string, fileName: string) {
     return;
   }
 
-  // Fetch the file as a Blob from the signed URL
   try {
     const response = await fetch(data.signedUrl);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const blob = await response.blob();
-
-    // Create an object URL from the blob
     const objectUrl = URL.createObjectURL(blob);
-
-    // Create a temporary anchor element to trigger the download
     const a = document.createElement("a");
     a.href = objectUrl;
-    a.download = fileName; // This forces the download with the specified file name
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
-    // Revoke the object URL after a short delay to free up memory
     setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
   } catch (fetchError) {
     console.error("Error fetching the file for download:", fetchError);
   }
 }
-
-
 
 interface ChatMessagesProps {
   selectedUser: Profile;
@@ -63,6 +55,30 @@ export function ChatMessages({
   currentUserId,
   onViewMaterial,
 }: ChatMessagesProps) {
+  // When the chat is opened, mark unread messages (sent by selectedUser) as read.
+useEffect(() => {
+  if (!selectedUser || !currentUserId) return;
+
+  const markMessagesAsRead = async () => {
+    const { data, error } = await supabase
+      .from("messages")
+      .update({ is_read: true })
+      .eq("receiver_id", currentUserId)
+      .eq("sender_id", selectedUser.id)
+      .eq("is_read", false)
+      .select(); // add this line to return updated rows
+
+    if (error) {
+      console.error("Error marking messages as read:", error);
+    } else {
+      console.log("Marked messages as read:", data);
+    }
+  };
+
+  markMessagesAsRead();
+}, [selectedUser, currentUserId]);
+
+
   return (
     <>
       <div className="p-4 border-b flex items-center gap-3">

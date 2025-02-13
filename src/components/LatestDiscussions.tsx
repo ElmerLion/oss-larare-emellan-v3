@@ -18,29 +18,29 @@ const LatestDiscussions = () => {
   });
 
   if (isLoading) {
-    return <p className="text-sm text-gray-500">Laddar senaste diskussioner...</p>;
+    return <p className="text-sm text-gray-500">Laddar senaste samtalen...</p>;
   }
 
   if (error) {
-    return <p className="text-sm text-gray-500">Kunde inte hämta diskussioner.</p>;
+    return <p className="text-sm text-gray-500">Kunde inte hämta samtal.</p>;
   }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="font-semibold mb-4">Senaste Diskussioner</h2>
+      <h2 className="font-semibold mb-4">Senaste Samtalen</h2>
       <div className="space-y-2">
         {latestDiscussions?.length > 0 ? (
           latestDiscussions.map((discussion) => (
             <a
               key={discussion.slug}
-              href={`/diskussioner/${discussion.slug}`}
+              href={`/forum/${discussion.slug}`}
               className="block text-sm text-gray-600 hover:text-sage-500"
             >
               {discussion.question}
             </a>
           ))
         ) : (
-          <p className="text-sm text-gray-500">Inga diskussioner ännu.</p>
+          <p className="text-sm text-gray-500">Inga samtal ännu.</p>
         )}
       </div>
     </div>

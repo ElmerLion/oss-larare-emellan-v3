@@ -49,8 +49,9 @@ export function ProfileActions() {
     setIsContact(!isContact);
   };
 
+  // Always navigate to the chat window for this profile.
   const handleSendMessage = () => {
-    if (isContact && profileId) {
+    if (profileId) {
       navigate(`/kontakter?chat=${profileId}`);
     }
   };
@@ -59,16 +60,14 @@ export function ProfileActions() {
 
   return (
     <div className="flex flex-col gap-2">
-      {isContact && (
-        <Button
-          variant="default"
-          className="bg-sage-400 hover:bg-sage-500"
-          onClick={handleSendMessage}
-        >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          Meddela
-        </Button>
-      )}
+      <Button
+        variant="default"
+        className="bg-sage-400 hover:bg-sage-500"
+        onClick={handleSendMessage}
+      >
+        <MessageCircle className="w-4 h-4 mr-2" />
+        Meddela
+      </Button>
       <Button
         variant="outline"
         className="border-sage-200 hover:bg-sage-50"

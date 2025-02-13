@@ -155,7 +155,7 @@ const DiscussionDetail = () => {
                 rows={1}
                 required
               />
-              <Button type="submit" className="w-full bg-[color:var(--ole-green)] text-white">
+              <Button type="submit" className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white">
                 Svara
               </Button>
             </form>

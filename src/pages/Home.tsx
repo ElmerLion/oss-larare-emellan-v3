@@ -94,7 +94,7 @@ const Home = () => {
                     {stats?.sharedMaterials || 0}
                   </div>
                 </div>
-                <div className="text-sm text-gray-500 text-center">Material delade</div>
+                <div className="text-sm text-gray-500 text-center">Resurser delade</div>
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col items-center mb-3">
@@ -103,7 +103,7 @@ const Home = () => {
                     {stats?.totalDownloads || 0}
                   </div>
                 </div>
-                <div className="text-sm text-gray-500 text-center">Material nedladdade</div>
+                <div className="text-sm text-gray-500 text-center">Resurser nedladdade</div>
               </div>
             </div>
 

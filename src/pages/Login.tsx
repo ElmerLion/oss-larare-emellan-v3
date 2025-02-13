@@ -18,10 +18,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  // New state variables for school and job title
   const [school, setSchool] = useState("");
   const [jobTitle, setJobTitle] = useState("");
-  const [acceptPolicy, setAcceptPolicy] = useState(false); // State for the checkbox
+  const [acceptPolicy, setAcceptPolicy] = useState(false);
   const constLocation = useLocation();
 
   useEffect(() => {
@@ -36,81 +35,79 @@ export default function Login() {
     navigate(`/login${!isRegistering ? "?register=true" : ""}`);
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (isRegistering && !acceptPolicy) {
-    toast.error("Du måste acceptera integritetspolicyn för att fortsätta.");
-    return;
-  }
+    if (isRegistering && !acceptPolicy) {
+      toast({ title: "Du måste acceptera integritetspolicyn för att fortsätta." });
+      return;
+    }
 
-  try {
-    if (isRegistering) {
-      if (password !== confirmPassword) {
-        toast.error("Lösenorden matchar inte");
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      // Check for duplicate account error immediately
-      if (error) {
-        // Supabase typically returns a duplicate key error with code "23505"
-        if (
-          error.code === "23505" ||
-          (error.message && error.message.toLowerCase().includes("duplicate"))
-        ) {
-          toast.error("Kontot finns redan");
+    try {
+      if (isRegistering) {
+        if (password !== confirmPassword) {
+          toast({ title: "Lösenorden matchar inte" });
           return;
         }
-        throw error;
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) {
+          if (
+            error.code === "23505" ||
+            (error.message && error.message.toLowerCase().includes("duplicate"))
+          ) {
+            toast({ title: "Kontot finns redan" });
+            return;
+          }
+          throw error;
+        }
+
+        const sessionResult = await supabase.auth.getSession();
+        if (!sessionResult.data.session?.user?.id) {
+          toast({ title: "Ett fel uppstod. Försök igen senare." });
+          return;
+        }
+
+        const user = sessionResult.data.session.user;
+
+        // Update the profile with full name, school, job title, and set default avatar
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            full_name: fullName,
+            school: school,
+            title: jobTitle,
+            avatar_url: "/Images/DefaultProfile.png", // Default avatar image
+          })
+          .eq("id", user.id);
+
+        if (updateError) {
+          console.error("Profile Update Error:", updateError);
+          toast({ title: "Ett fel uppstod när vi uppdaterade profilen" });
+          return;
+        }
+
+        toast({ title: "Registrering lyckades! Kontrollera din e-post för verifiering." });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
       }
-
-      // Get the user session to obtain the user ID
-      const sessionResult = await supabase.auth.getSession();
-      if (!sessionResult.data.session?.user?.id) {
-        toast.error("Ett fel uppstod. Försök igen senare.");
-        return;
-      }
-
-      const user = sessionResult.data.session.user;
-
-      // Update the profile with full_name, school, and job title.
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName,
-          school: school,
-          title: jobTitle, // "title" column stores the job title
-        })
-        .eq("id", user.id);
-
-      if (updateError) {
-        console.error("Profile Update Error:", updateError);
-        toast.error("Ett fel uppstod när vi uppdaterade profilen");
-        return;
-      }
-
-      toast.success("Registrering lyckades! Kontrollera din e-post för verifiering.");
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      toast({
+        title: error.message === "Invalid login credentials"
+          ? "Felaktiga inloggningsuppgifter"
+          : "Ett fel uppstod, försök igen senare",
       });
-      if (error) throw error;
     }
-  } catch (error: any) {
-    console.error("Auth error:", error);
-    toast.error(
-      error.message === "Invalid login credentials"
-        ? "Felaktiga inloggningsuppgifter"
-        : "Ett fel uppstod, försök igen senare"
-    );
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,7 +133,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                   required
                 />
               </div>
-              {/* New input for school */}
               <div className="space-y-2">
                 <Label htmlFor="school">Skola</Label>
                 <Input
@@ -147,7 +143,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                   required
                 />
               </div>
-              {/* New input for job title */}
               <div className="space-y-2">
                 <Label htmlFor="jobTitle">Jobbtitel</Label>
                 <Input

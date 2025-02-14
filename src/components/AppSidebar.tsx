@@ -9,7 +9,8 @@ import {
   UserPlus,
   Library,
   MessageSquare,
-} from "lucide-react"; // Added MessageSquare for Diskussioner
+  Menu, // For the hamburger button
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Listen for authentication changes.
   useEffect(() => {
@@ -91,11 +93,9 @@ export function AppSidebar() {
         { event: "UPDATE", schema: "public", table: "messages" },
         (payload) => {
           if (payload.new.receiver_id === userId) {
-            // When a message changes from unread to read, decrease count.
             if (payload.old.is_read === false && payload.new.is_read === true) {
               setUnreadCount((prev) => Math.max(prev - 1, 0));
             }
-            // Optionally, if a message is marked unread again, increase the count.
             if (payload.old.is_read === true && payload.new.is_read === false) {
               setUnreadCount((prev) => prev + 1);
             }
@@ -128,67 +128,100 @@ export function AppSidebar() {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen p-4 fixed left-0 top-0">
-      <div className="flex items-center gap-2 group mb-8">
-        <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg">
-          <button onClick={() => navigate("/home")} className="flex items-center gap-2">
-            <img src="/Images/OLELogga.png" alt="OLE Logo" className="w-full h-full object-contain" />
+    <>
+      {/* Hamburger button for mobile (hidden on desktop and when sidebar is open) */}
+      {!isSidebarOpen && (
+        <div className="md:hidden fixed top-4 left-4 z-50">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 bg-white rounded shadow"
+          >
+            <Menu className="w-6 h-6" />
           </button>
         </div>
-        <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
-          Oss Lärare Emellan
-        </span>
-      </div>
+      )}
 
-      <nav className="space-y-1">
-        {menuItems.map((item) => (
-          <Link
-            key={item.label}
-            to={item.path}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
-              location.pathname === item.path && "bg-sage-50 text-sage-500"
-            )}
-          >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
-            {item.label === "Meddelanden" && unreadCount > 0 && (
-              <span className="ml-auto bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
-                {unreadCount}
-              </span>
-            )}
-          </Link>
-        ))}
-      </nav>
+      {/* Overlay on mobile when sidebar is open */}
+      {isSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black opacity-50 z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
 
-      <div className="absolute bottom-8 left-4 right-4 space-y-2">
-        {session ? (
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 transition-colors w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Logga ut</span>
-          </button>
-        ) : (
-          <>
-            <Link
-              to="/login"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
-            >
-              <LogIn className="w-5 h-5" />
-              <span>Logga in</span>
-            </Link>
-            <Link
-              to="/login"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
-            >
-              <UserPlus className="w-5 h-5" />
-              <span>Registrera</span>
-            </Link>
-          </>
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "md:translate-x-0" // Always show sidebar on desktop
         )}
+      >
+        <div className="flex items-center gap-2 group mb-8">
+          <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg">
+            <button onClick={() => navigate("/home")} className="flex items-center gap-2">
+              <img
+                src="/Images/OLELogga.png"
+                alt="OLE Logo"
+                className="w-full h-full object-contain"
+              />
+            </button>
+          </div>
+          <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
+            Oss Lärare Emellan
+          </span>
+        </div>
+
+        <nav className="space-y-1">
+          {menuItems.map((item) => (
+            <Link
+              key={item.label}
+              to={item.path}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+                location.pathname === item.path && "bg-sage-50 text-sage-500"
+              )}
+            >
+              <item.icon className="w-5 h-5" />
+              <span>{item.label}</span>
+              {item.label === "Meddelanden" && unreadCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="absolute bottom-8 left-4 right-4 space-y-2">
+          {session ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 transition-colors w-full"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Logga ut</span>
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+              >
+                <LogIn className="w-5 h-5" />
+                <span>Logga in</span>
+              </Link>
+              <Link
+                to="/login"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+              >
+                <UserPlus className="w-5 h-5" />
+                <span>Registrera</span>
+              </Link>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-// HomeStats.tsx
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,11 +10,12 @@ const HomeStats = () => {
   const { data: stats } = useQuery({
     queryKey: ["home-stats"],
     queryFn: async () => {
+      // Query for the counts:
       const [
         { count: activeTeachers },
         { count: newTeachers },
         { count: sharedMaterials },
-        { count: totalDownloads },
+        { data: resourcesData },
       ] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase
@@ -26,14 +26,18 @@ const HomeStats = () => {
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
           ),
         supabase.from("resources").select("*", { count: "exact", head: true }),
-        supabase.from("resource_downloads").select("*", { count: "exact", head: true }),
+        supabase.from("resources").select("downloads"),
       ]);
+
+      // Sum up downloads from each resource
+      const totalDownloads =
+        resourcesData?.reduce((sum, resource) => sum + (resource.downloads || 0), 0) || 0;
 
       return {
         activeTeachers: activeTeachers || 0,
         newTeachers: newTeachers || 0,
         sharedMaterials: sharedMaterials || 0,
-        totalDownloads: totalDownloads || 0,
+        totalDownloads,
       };
     },
   });
@@ -43,7 +47,7 @@ const HomeStats = () => {
   const [userListTitle, setUserListTitle] = useState("");
   const [userList, setUserList] = useState<any[]>([]); // Replace 'any' with your ExtendedProfile type if available
 
-  // Fetch all active teachers (for this example, we just fetch all profiles)
+  // Fetch all active teachers
   const fetchActiveTeachers = async () => {
     const { data, error } = await supabase.from("profiles").select("*");
     if (error) {
@@ -84,7 +88,7 @@ const HomeStats = () => {
   return (
     <>
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <Button onClick={handleActiveTeachers} className="block">
+        <Button onClick={handleActiveTeachers} className="block p-0">
           <div className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95">
             <div className="flex flex-col items-center mb-3">
               <Users className="w-5 h-5 text-[var(--secondary2)]" />
@@ -92,11 +96,11 @@ const HomeStats = () => {
                 {stats?.activeTeachers || 0}
               </div>
             </div>
-            <div className="text-sm text-gray-500 text-center">Aktiva Lärare</div>
+            <div className="text-sm text-gray-500 text-center">Aktiva medlemmar</div>
           </div>
         </Button>
 
-        <Button onClick={handleNewTeachers} className="block">
+        <Button onClick={handleNewTeachers} className="block p-0">
           <div className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95">
             <div className="flex flex-col items-center mb-3">
               <UserPlus className="w-5 h-5 text-[var(--secondary)]" />
@@ -104,7 +108,7 @@ const HomeStats = () => {
                 {stats?.newTeachers || 0}
               </div>
             </div>
-            <div className="text-sm text-gray-500 text-center">Nya lärare</div>
+            <div className="text-sm text-gray-500 text-center">Nya medlemmar</div>
           </div>
         </Button>
 

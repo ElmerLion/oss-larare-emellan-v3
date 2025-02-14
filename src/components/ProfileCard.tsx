@@ -20,39 +20,44 @@ export function ProfileCard() {
     },
   });
 
-  const { data: stats } = useQuery({
-    queryKey: ['profile-stats'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+const { data: stats } = useQuery({
+  queryKey: ['profile-stats'],
+  queryFn: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
 
-      // Fetch resources uploaded by the user (if needed)
-      const { data: resources, error } = await supabase
-        .from('resources')
-        .select('downloads')
-        .eq('id', user.id); // Use `id` instead of `user_id`
+    // Fetch resources uploaded by the user using the "author_id" column.
+    const { data: resources, error } = await supabase
+      .from('resources')
+      .select('downloads')
+      .eq('author_id', user.id); // Changed from 'id' to 'author_id'
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // Calculate total downloads
-      const totalDownloads = resources?.reduce((sum, resource) => sum + (resource.downloads || 0), 0) || 0;
+    // Calculate total downloads
+    const totalDownloads =
+      resources?.reduce(
+        (sum, resource) => sum + (resource.downloads || 0),
+        0
+      ) || 0;
 
-      // Fetch the profile to get visits
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('visits')
-        .eq('id', user.id)
-        .single();
+    // Fetch the profile to get visits
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('visits')
+      .eq('id', user.id)
+      .single();
 
-      if (profileError) throw profileError;
+    if (profileError) throw profileError;
 
-      return {
-        downloads: totalDownloads,
-        profileViews: profile?.visits || 0,
-      };
-    },
-    enabled: !!profile,
-  });
+    return {
+      downloads: totalDownloads,
+      profileViews: profile?.visits || 0,
+    };
+  },
+  enabled: !!profile,
+});
+
 
   if (!profile) return null;
 

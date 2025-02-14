@@ -18,6 +18,7 @@ interface Resource {
   file_name: string;
   author_id: string;
   subject_level?: string | null;
+  downloads?: number;
 }
 
 const difficultyMap = {
@@ -67,6 +68,21 @@ export function ResourceCard({ resource }: { resource: Resource }) {
 
   const handleDownload = async () => {
     try {
+      // Get the current user.
+      const { data: { user } } = await supabase.auth.getUser();
+      // If the current user is not the owner, update the downloads count.
+      if (user && user.id !== localResource.author_id) {
+        const currentDownloads = localResource.downloads || 0;
+        const { error: updateError } = await supabase
+          .from("resources")
+          .update({ downloads: currentDownloads + 1 })
+          .eq("id", localResource.id);
+        if (updateError) throw updateError;
+        // Update local state so the UI reflects the new downloads count.
+        setLocalResource({ ...localResource, downloads: currentDownloads + 1 });
+      }
+
+      // Proceed to download the file.
       const { data, error } = await supabase.storage
         .from("resources")
         .download(localResource.file_path);
@@ -102,7 +118,9 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         </Button>
 
         <h3 className="text-lg font-semibold mb-2">{localResource.title}</h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{localResource.description}</p>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          {localResource.description}
+        </p>
 
         <div className="flex flex-wrap gap-2">
           <span className="px-2 py-1 bg-[var(--secondary2)] text-white rounded text-xs">

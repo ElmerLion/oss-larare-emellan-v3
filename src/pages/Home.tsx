@@ -7,6 +7,7 @@ import { Users, UserPlus, FileText, Download } from "lucide-react";
 import LatestDiscussions from "@/components/LatestDiscussions"; // Import the component
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import HomeStats from "@/components/home/HomeStats";
 
 const Home = () => {
   const [firstName, setFirstName] = useState("");
@@ -68,44 +69,7 @@ const Home = () => {
             </h1>
             <p className="text-gray-600 mb-8">Detta är vad som hänt senaste veckan</p>
 
-            <div className="grid grid-cols-4 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <Users className="w-5 h-5 text-[var(--secondary2)]" />
-                  <div className="text-3xl font-semibold text-[var(--secondary2)]">
-                    {stats?.activeTeachers || 0}
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Aktiva Lärare</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <UserPlus className="w-5 h-5 text-[var(--secondary)]" />
-                  <div className="text-3xl font-semibold text-[var(--secondary)]">
-                    {stats?.newTeachers || 0}
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Nya lärare</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <FileText className="w-5 h-5 text-[var(--secondary2)]" />
-                  <div className="text-3xl font-semibold text-[var(--secondary2)]">
-                    {stats?.sharedMaterials || 0}
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Resurser delade</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex flex-col items-center mb-3">
-                  <Download className="w-5 h-5 text-[var(--secondary)]" />
-                  <div className="text-3xl font-semibold text-[var(--secondary)]">
-                    {stats?.totalDownloads || 0}
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">Resurser nedladdade</div>
-              </div>
-            </div>
+            <HomeStats />
 
             <Feed />
           </div>

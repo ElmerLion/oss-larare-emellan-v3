@@ -53,7 +53,7 @@ export function LibraryList({ list, onDelete }: LibraryListProps) {
 
       if (error) throw error;
 
-      toast( title: "Listan har tagits bort");
+      toast.success("Listan har tagits bort");
       onDelete?.();
     } catch (error) {
       console.error("Error deleting list:", error);

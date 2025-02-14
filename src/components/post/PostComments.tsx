@@ -215,7 +215,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
 
   return (
     <div className="space-y-4">
-      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[110px]'} overflow-hidden`}>
+      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[110px]'} overflow-hidden -mb-4`}>
         {comments.map((commentItem) => {
           const timeAgo = formatDistanceToNow(new Date(commentItem.created_at), { addSuffix: true });
           return (

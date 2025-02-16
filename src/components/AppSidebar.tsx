@@ -10,6 +10,7 @@ import {
   Library,
   MessageSquare,
   Menu, // For the hamburger button
+  CircleHelp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, Link, useNavigate } from "react-router-dom";
@@ -17,6 +18,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { FeedbackDialog } from "@/components/settings/FeedbackDialog";
+
 
 const menuItems = [
   { icon: Home, label: "Hem", path: "/" },
@@ -191,6 +194,17 @@ export function AppSidebar() {
               )}
             </Link>
           ))}
+
+          <FeedbackDialog
+              triggerElement={
+                <button
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+                >
+                  <CircleHelp className="w-5 h-5" />
+                  <span>Skicka Feedback</span>
+                </button>
+              }
+            />
         </nav>
 
         <div className="absolute bottom-8 left-4 right-4 space-y-2">

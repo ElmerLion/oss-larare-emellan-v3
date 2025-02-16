@@ -84,7 +84,7 @@ export default function RegisterInterestsForm({ onComplete }: RegisterInterestsF
       {educationLevel && (
         <div className="mb-4">
           <h3 className="text-lg font-medium mb-2">
-            {educationLevel === "grundskola" ? "Ämnen" : "Kurser"}
+            {educationLevel === "grundskola" ? "Ämnen jag arbetar med" : "Kurser jag arbetar med"}
           </h3>
           <div className="flex flex-wrap gap-2">
             {(educationLevel === "grundskola"

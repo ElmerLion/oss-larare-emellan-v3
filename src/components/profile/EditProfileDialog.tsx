@@ -72,7 +72,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Pencil className="w-4 h-4 mr-2" />
-          Ändra Profil
+          Ändra
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg">

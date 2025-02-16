@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function ProfileCard() {
   const { data: profile } = useQuery({
-    queryKey: ['profile'],
+    queryKey: ['profileCard'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;

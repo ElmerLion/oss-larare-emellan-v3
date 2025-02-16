@@ -1,7 +1,9 @@
+// src/pages/Profil.tsx
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AboutSection } from "@/components/profile/AboutSection";
+import ProfileInterests from "@/components/profile/ProfileInterests"; // Import the new component
 import { ExperienceSection } from "@/components/profile/ExperienceSection";
 import { UploadedMaterials } from "@/components/profile/UploadedMaterials";
 import { RecommendedContacts } from "@/components/profile/RecommendedContacts";
@@ -18,6 +20,9 @@ export default function Profil() {
     title: "",
     school: "",
     avatar_url: "/placeholder.svg",
+    subjects: [],         // Add these fields if not present already
+    interests: [],
+    education_level: "",
   });
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,8 +31,6 @@ export default function Profil() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-
-      // Get current user and check the target ID
       const { data: { user } } = await supabase.auth.getUser();
       const targetId = profileId || user?.id;
 
@@ -37,7 +40,7 @@ export default function Profil() {
         return;
       }
 
-      // Fetch profile
+      // Fetch profile including subjects, interests, and education_level.
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -55,6 +58,9 @@ export default function Profil() {
         title: data.title || "",
         school: data.school || "",
         avatar_url: data.avatar_url || "/placeholder.svg",
+        subjects: data.subjects || [],
+        interests: data.interests || [],
+        education_level: data.education_level || "",
       });
 
       setIsCurrentUser(user?.id === targetId);
@@ -65,7 +71,6 @@ export default function Profil() {
     }
   };
 
-  // Function to fetch contacts count on the fly
   const fetchContactsCount = async () => {
     if (!profileId) return;
     const { count, error } = await supabase
@@ -83,7 +88,6 @@ export default function Profil() {
     fetchProfile();
   }, [profileId]);
 
-  // Re-fetch contacts count when profileId changes
   useEffect(() => {
     fetchContactsCount();
   }, [profileId]);
@@ -94,9 +98,7 @@ export default function Profil() {
         <AppSidebar />
         <div className="flex-1 ml-64">
           <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
-            <div className="p-6">
-              <div>Laddar...</div>
-            </div>
+            <div className="p-6">Laddar...</div>
           </main>
         </div>
       </div>
@@ -121,24 +123,22 @@ export default function Profil() {
                     onProfileUpdate={fetchProfile}
                     isCurrentUser={isCurrentUser}
                   />
+                  <AboutSection userId={profileId} onProfileUpdate={fetchProfile} />
 
-                  <AboutSection
-                    userId={profileId}
-                    onProfileUpdate={fetchProfile}
-                  />
-
-                  <ExperienceSection
-                    userId={profileId}
-                  />
-
-                  <UploadedMaterials
-                    userId={profileId || ''}
+                  {/* New component showing subjects and interests */}
+                  <ProfileInterests
+                    subjects={profileData.subjects}
+                    interests={profileData.interests}
+                    educationLevel={profileData.education_level}
                     isCurrentUser={isCurrentUser}
+                    onComplete={fetchProfile}
                   />
-                </div>
 
+                  <ExperienceSection userId={profileId} />
+                  <UploadedMaterials userId={profileId || ''} isCurrentUser={isCurrentUser} />
+                </div>
                 <div className="col-span-1">
-                  <RecommendedContacts/>
+                  <RecommendedContacts />
                 </div>
               </div>
             </div>

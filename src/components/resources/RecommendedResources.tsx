@@ -1,0 +1,113 @@
+// src/components/RecommendedResources.tsx
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ResourceCard } from "@/components/resources/ResourceCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CreateResourceDialog } from "@/components/CreateResourceDialog";
+
+const grundskolaGrades = [
+  "Årskurs 1",
+  "Årskurs 2",
+  "Årskurs 3",
+  "Årskurs 4",
+  "Årskurs 5",
+  "Årskurs 6",
+  "Årskurs 7",
+  "Årskurs 8",
+  "Årskurs 9",
+];
+
+export function RecommendedResources() {
+  // Fetch the user's profile to get subjects and education_level.
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ["recommendedResourcesProfile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("subjects, education_level")
+        .eq("id", user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch recommended resources based on the user's subjects and education level.
+  const { data: resources, isLoading: resourcesLoading, error: resourcesError } = useQuery({
+    queryKey: ["recommended-resources", profile?.subjects, profile?.education_level],
+    queryFn: async () => {
+      if (!profile || !profile.subjects || profile.subjects.length === 0) return [];
+      let query = supabase.from("resources").select("*").in("subject", profile.subjects);
+      if (profile.education_level === "Gymnasiet") {
+        query = query.eq("grade", "Gymnasiet");
+      } else if (profile.education_level === "Grundskola") {
+        query = query.in("grade", grundskolaGrades);
+      }
+      query = query.order("created_at", { ascending: false }).limit(10);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile,
+  });
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (profileLoading || resourcesLoading) {
+    return <div>Laddar rekommenderade resurser...</div>;
+  }
+  if (profileError || resourcesError) {
+    return <div>Ett fel uppstod vid hämtning av rekommenderade resurser.</div>;
+  }
+  if (!resources || resources.length === 0) {
+    return (
+      <div className="mb-8">
+        <div className="text-center text-gray-500">
+          Inga rekommenderade resurser hittades inom dina ämnen. Dela dina resurser för att hjälpa andra!
+        </div>
+        <div className="flex justify-center mt-4">
+          <CreateResourceDialog triggerElement={<Button variant="outline">Dela resurs</Button>} />
+        </div>
+      </div>
+    );
+  }
+
+  const visibleResources = resources.slice(currentIndex, currentIndex + 2);
+
+  return (
+    <div className="mb-8">
+      <h2 className="text-2xl font-semibold mb-4">Nya resurser inom dina ämnen</h2>
+      <div className="relative">
+        {currentIndex > 0 && (
+          <button
+            onClick={() => setCurrentIndex(currentIndex - 2)}
+            className="absolute left-[-20px] top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
+        <div className="flex justify-center space-x-4">
+          {visibleResources.map((resource: any) => (
+            <div key={resource.id} className="w-full">
+              <ResourceCard resource={resource} />
+            </div>
+          ))}
+        </div>
+        {currentIndex + 2 < resources.length && (
+          <button
+            onClick={() => setCurrentIndex(currentIndex + 2)}
+            className="absolute right-[-20px] top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default RecommendedResources;

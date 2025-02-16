@@ -16,12 +16,17 @@ import {
 import { interestsOptions } from "@/types/interestsOptions";
 
 interface ChangeInterestsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onComplete?: () => void;
 }
 
-export default function ChangeInterestsDialog({ onComplete }: ChangeInterestsDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  // Use proper capitalization for the education level.
+export default function ChangeInterestsDialog({
+  open,
+  onOpenChange,
+  onComplete,
+}: ChangeInterestsDialogProps) {
+  // We no longer use internal state for isOpen, but still for isLoading and selections.
   const [educationLevel, setEducationLevel] = useState<"Grundskola" | "Gymnasiet">("Grundskola");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -49,20 +54,20 @@ export default function ChangeInterestsDialog({ onComplete }: ChangeInterestsDia
       setIsLoading(false);
     };
 
-    if (isOpen) {
+    if (open) {
       fetchProfileData();
     }
-  }, [isOpen]);
+  }, [open]);
 
   const handleToggleSubject = (subject: string) => {
-    setSelectedSubjects(prev =>
-      prev.includes(subject) ? prev.filter(s => s !== subject) : [...prev, subject]
+    setSelectedSubjects((prev) =>
+      prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject]
     );
   };
 
   const handleToggleInterest = (interest: string) => {
-    setSelectedInterests(prev =>
-      prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]
+    setSelectedInterests((prev) =>
+      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
     );
   };
 
@@ -71,7 +76,6 @@ export default function ChangeInterestsDialog({ onComplete }: ChangeInterestsDia
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      // Update the user's profile with subjects, interests, and the education level.
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -83,7 +87,7 @@ export default function ChangeInterestsDialog({ onComplete }: ChangeInterestsDia
       if (error) throw error;
 
       toast.success("Profil uppdaterad. Dina intressen har sparats.");
-      setIsOpen(false);
+      onOpenChange(false);
       if (onComplete) onComplete();
     } catch (error: any) {
       console.error("Error updating interests:", error);
@@ -98,84 +102,79 @@ export default function ChangeInterestsDialog({ onComplete }: ChangeInterestsDia
       : courseSubjectOptionsForGymnasiet;
 
   return (
-    <>
-      <Button variant="outline" onClick={() => setIsOpen(true)} className="mt-4 ml-2">
-        Ändra intressen och ämnen
-      </Button>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl bg-white rounded-lg shadow-lg">
-          <DialogHeader>
-            <DialogTitle>Ändra intressen och ämnen</DialogTitle>
-          </DialogHeader>
-          {isLoading ? (
-            <div className="p-4">Laddar...</div>
-          ) : (
-            <div className="p-4 space-y-4">
-              {/* Education level toggle */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">Välj utbildningsnivå</h3>
-                <div className="flex gap-2">
-                  <Button
-                    variant={educationLevel === "Grundskola" ? "default" : "outline"}
-                    className={educationLevel === "Grundskola" ? "bg-[var(--secondary)] hover:bg-[var(--hover-secondary)]" : ""}
-                    onClick={() => setEducationLevel("Grundskola")}
-                  >
-                    Grundskola
-                  </Button>
-                  <Button
-                    variant={educationLevel === "Gymnasiet" ? "default" : "outline"}
-                    className={educationLevel === "Gymnasiet" ? "bg-[var(--secondary)] hover:bg-[var(--hover-secondary)]" : ""}
-                    onClick={() => setEducationLevel("Gymnasiet")}
-                  >
-                    Gymnasiet
-                  </Button>
-                </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl bg-white rounded-lg shadow-lg">
+        <DialogHeader>
+          <DialogTitle>Ändra intressen och ämnen</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="p-4">Laddar...</div>
+        ) : (
+          <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Education level toggle */}
+            <div>
+              <h3 className="text-lg font-medium mb-2">Välj utbildningsnivå</h3>
+              <div className="flex gap-2">
+                <Button
+                  variant={educationLevel === "Grundskola" ? "default" : "outline"}
+                  className={educationLevel === "Grundskola" ? "bg-[var(--secondary)] hover:bg-[var(--hover-secondary)]" : ""}
+                  onClick={() => setEducationLevel("Grundskola")}
+                >
+                  Grundskola
+                </Button>
+                <Button
+                  variant={educationLevel === "Gymnasiet" ? "default" : "outline"}
+                  className={educationLevel === "Gymnasiet" ? "bg-[var(--secondary)] hover:bg-[var(--hover-secondary)]" : ""}
+                  onClick={() => setEducationLevel("Gymnasiet")}
+                >
+                  Gymnasiet
+                </Button>
               </div>
-              {/* Subjects selection */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  {educationLevel === "Grundskola" ? "Ämnen" : "Kurser"}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {subjectOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={selectedSubjects.includes(option.value) ? "default" : "outline"}
-                      className={selectedSubjects.includes(option.value)
-                        ? "bg-[var(--secondary2)] text-white hover:bg-[var(--hover-secondary2)]"
-                        : ""}
-                      onClick={() => handleToggleSubject(option.value)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              {/* Interests selection */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">Intressen</h3>
-                <div className="flex flex-wrap gap-2">
-                  {interestsOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={selectedInterests.includes(option.value) ? "default" : "outline"}
-                      onClick={() => handleToggleInterest(option.value)}
-                      className={selectedInterests.includes(option.value)
-                        ? "bg-[var(--secondary2)] text-white hover:bg-[var(--hover-secondary2)]"
-                        : ""}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <Button onClick={handleSubmit} className="w-full bg-[var(--ole-green)] hover:bg-[var(--hover-green)] text-white">
-                Spara intressen
-              </Button>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+            {/* Subjects selection */}
+            <div>
+              <h3 className="text-lg font-medium mb-2">
+                {educationLevel === "Grundskola" ? "Ämnen" : "Kurser"}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {subjectOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={selectedSubjects.includes(option.value) ? "default" : "outline"}
+                    className={selectedSubjects.includes(option.value)
+                      ? "bg-[var(--secondary2)] text-white hover:bg-[var(--hover-secondary2)]"
+                      : ""}
+                    onClick={() => handleToggleSubject(option.value)}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {/* Interests selection */}
+            <div>
+              <h3 className="text-lg font-medium mb-2">Intressen</h3>
+              <div className="flex flex-wrap gap-2">
+                {interestsOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={selectedInterests.includes(option.value) ? "default" : "outline"}
+                    onClick={() => handleToggleInterest(option.value)}
+                    className={selectedInterests.includes(option.value)
+                      ? "bg-[var(--secondary2)] text-white hover:bg-[var(--hover-secondary2)]"
+                      : ""}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <Button onClick={handleSubmit} className="w-full bg-[var(--ole-green)] hover:bg-[var(--hover-green)] text-white">
+              Spara intressen
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

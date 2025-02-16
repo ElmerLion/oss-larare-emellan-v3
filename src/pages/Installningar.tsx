@@ -1,11 +1,13 @@
-// src/pages/Installningar.tsx
+import { useState } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Header } from "@/components/Header";
 import { DeleteAccountDialog } from "@/components/settings/DeleteAccountDialog";
 import { ChangePasswordDialog } from "@/components/settings/ChangePasswordDialog";
 import ChangeInterestsDialog from "@/components/settings/ChangeInterestsDialog";
+import { Button } from "@/components/ui/button";
 
 export default function Installningar() {
+  const [isInterestsOpen, setIsInterestsOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
       <AppSidebar />
@@ -18,15 +20,17 @@ export default function Installningar() {
               {/* Account settings section */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                 <h2 className="text-xl font-semibold">Kontoinställningar</h2>
-                <ChangePasswordDialog />
-                <ChangeInterestsDialog />
+                <div className="flex flex-col gap-4">
+                  <ChangePasswordDialog />
+                  <Button variant="outline" onClick={() => setIsInterestsOpen(true)}>
+                    Ändra intressen och ämnen
+                  </Button>
+                </div>
               </div>
 
               {/* Danger zone section */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-red-600 mb-4">
-                  Farozon
-                </h2>
+                <h2 className="text-xl font-semibold text-red-600 mb-4">Farozon</h2>
                 <p className="text-gray-600 mb-4">
                   Åtgärder i detta avsnitt kan inte ångras. Var försiktig.
                 </p>
@@ -36,6 +40,10 @@ export default function Installningar() {
           </div>
         </main>
       </div>
+      <ChangeInterestsDialog
+        open={isInterestsOpen}
+        onOpenChange={setIsInterestsOpen}
+      />
     </div>
   );
 }

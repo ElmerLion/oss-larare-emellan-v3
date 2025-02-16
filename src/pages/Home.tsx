@@ -8,6 +8,7 @@ import LatestDiscussions from "@/components/LatestDiscussions"; // Import the co
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import HomeStats from "@/components/home/HomeStats";
+import RecommendedResources from "@/components/resources/RecommendedResources";
 
 const Home = () => {
   const [firstName, setFirstName] = useState("");
@@ -70,7 +71,7 @@ const Home = () => {
             <p className="text-gray-600 mb-8">Detta är vad som hänt senaste veckan</p>
 
             <HomeStats />
-
+            <RecommendedResources />
             <Feed />
           </div>
 

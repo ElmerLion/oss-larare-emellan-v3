@@ -1,11 +1,12 @@
+// src/components/Post.tsx
 import { PostHeader } from "./post/PostHeader";
 import { PostReactions } from "./post/PostReactions";
 import { PostComments } from "./post/PostComments";
-import { PostMaterial } from "./PostMaterial";
 import { PostTags } from "./PostTags";
 import { SaveToListDialog } from "./SaveToListDialog";
 import { useState } from "react";
 import { Database } from "@/integrations/supabase/types";
+import { ResourceCard } from "./resources/ResourceCard";
 
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
@@ -19,8 +20,18 @@ interface Profile {
 }
 
 interface Material {
+  id: string;
   title: string;
+  description: string;
+  subject: string;
+  grade: string;
   type: string;
+  difficulty: "easy" | "medium" | "hard";
+  file_path: string;
+  file_name: string;
+  author_id: string;
+  subject_level?: string | null;
+  downloads?: number;
 }
 
 interface PostProps {
@@ -60,7 +71,14 @@ export function Post({
       <p className="text-gray-700 mb-4">{content}</p>
 
       {tags && tags.length > 0 && <PostTags tags={tags} />}
-      {materials && materials.length > 0 && <PostMaterial materials={materials} />}
+
+      {materials && materials.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {materials.map((material) => (
+            <ResourceCard key={material.id} resource={material} />
+          ))}
+        </div>
+      )}
 
       <div className="pt-4 border-t border-gray-100">
         <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">

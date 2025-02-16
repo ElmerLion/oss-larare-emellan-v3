@@ -59,6 +59,7 @@ export function CreatePostDialog() {
               post_id: post.id,
               title: material.title,
               type: material.type,
+              resource_id: material.id,
             }))
           );
 
@@ -99,7 +100,7 @@ export function CreatePostDialog() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button 
-            className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6"
+            className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mt-2"
           >
             Dela en tanke
           </Button>

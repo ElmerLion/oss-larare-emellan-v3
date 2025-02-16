@@ -1,8 +1,9 @@
+// App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
@@ -18,42 +19,108 @@ import IntegritetsPolicy from "./pages/IntegritetsPolicy";
 import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
-import Funktioner from  "./pages/Funktioner";
-
+import Funktioner from "./pages/Funktioner";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = ({ isAuthenticated, currentUserId }: { isAuthenticated: boolean; currentUserId: string | null }) => {
+  const location = useLocation();
+  // Check if the URL has the register query parameter
+  const isRegisteringRoute = location.search.includes("register=true");
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          !isAuthenticated || isRegisteringRoute ? (
+            <Login />
+          ) : (
+            <Navigate to="/home" replace />
+          )
+        }
+      />
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/home" replace /> : <Index />}
+      />
+      <Route
+        path="/home"
+        element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/meddelanden"
+        element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/resurser"
+        element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/mitt-bibliotek"
+        element={isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/profil/:id"
+        element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/profil"
+        element={
+          isAuthenticated ? (
+            <Navigate to={`/profil/${currentUserId}`} replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route path="/omoss" element={<OmOss />} />
+      <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
+      <Route path="/forum" element={<Diskussioner />} />
+      <Route path="/forum/:slug" element={<DiscussionDetail />} />
+      <Route
+        path="/installningar"
+        element={isAuthenticated ? <Installningar /> : <Navigate to="/login" replace />}
+      />
+      <Route path="/funktioner" element={<Funktioner />} />
+      <Route
+        path="*"
+        element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />}
+      />
+    </Routes>
+  );
+};
+
 const App = () => {
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-useEffect(() => {
-  const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      setIsAuthenticated(true);
-      setCurrentUserId(session.user.id); // Always set the current user ID
-    } else {
-      setIsAuthenticated(false);
-      setCurrentUserId(null);
-    }
-  };
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAuthenticated(true);
+        setCurrentUserId(session.user.id);
+      } else {
+        setIsAuthenticated(false);
+        setCurrentUserId(null);
+      }
+    };
 
-  checkSession();
+    checkSession();
 
-  const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (session) {
-      setIsAuthenticated(true);
-      setCurrentUserId(session.user.id); // Update user ID on login
-    } else {
-      setIsAuthenticated(false);
-      setCurrentUserId(null); // Clear user ID on logout
-    }
-  });
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setIsAuthenticated(true);
+        setCurrentUserId(session.user.id);
+      } else {
+        setIsAuthenticated(false);
+        setCurrentUserId(null);
+      }
+    });
 
-  return () => subscription.unsubscribe();
-}, []);
-
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (isAuthenticated === null) {
     return null; // or a loading spinner
@@ -67,23 +134,7 @@ useEffect(() => {
           <Sonner />
           <BrowserRouter>
             <div className="flex-grow">
-              <Routes>
-                <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
-                <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Index />} />
-                <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
-                <Route path="/meddelanden" element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />} />
-                <Route path="/resurser" element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />} />
-                <Route path="/mitt-bibliotek" element={isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />} />
-                <Route path="/profil/:id" element={isAuthenticated ? <Profil /> : <Navigate to="/login" replace />} />
-                <Route path="/profil" element={isAuthenticated ? <Navigate to={`/profil/${currentUserId}`} replace /> : <Navigate to="/login" replace />} />
-                <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />} />
-                <Route path="/omoss" element={<OmOss />} />
-                <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
-                <Route path="/forum" element={<Diskussioner />} />
-                <Route path="/forum/:slug" element={<DiscussionDetail />} />
-                <Route path="/installningar" element={<Installningar />} />
-                <Route path="/funktioner" element={<Funktioner />} />
-              </Routes>
+              <AppRoutes isAuthenticated={isAuthenticated} currentUserId={currentUserId} />
             </div>
             <Footer />
           </BrowserRouter>
@@ -91,6 +142,6 @@ useEffect(() => {
       </TooltipProvider>
     </QueryClientProvider>
   );
-}
+};
 
 export default App;

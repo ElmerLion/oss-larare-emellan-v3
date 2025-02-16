@@ -1,7 +1,9 @@
+// src/pages/Installningar.tsx
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import { DeleteAccountDialog } from "@/components/settings/DeleteAccountDialog";
 import { ChangePasswordDialog } from "@/components/settings/ChangePasswordDialog";
+import ChangeInterestsDialog from "@/components/settings/ChangeInterestsDialog";
 
 export default function Installningar() {
   return (
@@ -15,8 +17,9 @@ export default function Installningar() {
 
               {/* Account settings section */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">Kontoinställningar</h2>
+                <h2 className="text-xl font-semibold">Kontoinställningar</h2>
                 <ChangePasswordDialog />
+                <ChangeInterestsDialog />
               </div>
 
               {/* Danger zone section */}

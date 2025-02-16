@@ -52,3 +52,5 @@ export function LandingPageHeader() {
     )
 
 }
+
+export default LandingPageHeader;

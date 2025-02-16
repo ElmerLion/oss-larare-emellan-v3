@@ -50,8 +50,8 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
       if (error) throw error;
 
       toast({
-        title: "Experience added",
-        description: "Your experience has been added successfully.",
+        title: "Erfarenhet tillagd",
+        description: "Din erfarenhet har lagts till.",
       });
       
       onExperienceUpdate();
@@ -67,7 +67,7 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add experience. Please try again.",
+        description: "Misslyckades med att lägga till erfarenhet. Försök igen eller kontakta support.",
         variant: "destructive",
       });
     }

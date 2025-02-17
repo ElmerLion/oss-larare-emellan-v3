@@ -28,58 +28,57 @@ const DiscussionDetail = () => {
     fetchUser();
   }, []);
 
-  // Fetch discussion and answers
-    const { data: discussion, isLoading, error } = useQuery({
-      queryKey: ["discussion", slug],
-      queryFn: async () => {
-        if (!slug) {
-          throw new Error("Slug is undefined");
-        }
+  // Fetch discussion and answers, including tags
+  const { data: discussion, isLoading, error } = useQuery({
+    queryKey: ["discussion", slug],
+    queryFn: async () => {
+      if (!slug) {
+        throw new Error("Slug is undefined");
+      }
 
-        const { data: discussion, error: discussionError } = await supabase
-          .from("discussions")
-          .select(`
-            slug,
-            question,
-            description,
-            creator:profiles(
-              id,
-              full_name,
-              avatar_url,
-              title,
-              school
-            )
-          `)
-          .eq("slug", slug)
-          .single();
-
-        if (discussionError) throw discussionError;
-
-        const { data: answers, error: answersError } = await supabase
-          .from("answers")
-          .select(`
+      const { data: discussion, error: discussionError } = await supabase
+        .from("discussions")
+        .select(`
+          slug,
+          question,
+          description,
+          tags,
+          creator:profiles(
             id,
-            content,
-            created_at,
-            user_id,
-            user:profiles(
-              full_name,
-              avatar_url,
-              title,
-              school
-            )
-          `)
-          .eq("discussion_slug", slug)
-          .order("created_at", { ascending: false }); // Newest answers first
+            full_name,
+            avatar_url,
+            title,
+            school
+          )
+        `)
+        .eq("slug", slug)
+        .single();
 
-        if (answersError) throw answersError;
+      if (discussionError) throw discussionError;
 
-        return { ...discussion, answers };
-      },
-      enabled: !!slug,
-    });
+      const { data: answers, error: answersError } = await supabase
+        .from("answers")
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          user:profiles(
+            full_name,
+            avatar_url,
+            title,
+            school
+          )
+        `)
+        .eq("discussion_slug", slug)
+        .order("created_at", { ascending: false }); // Newest answers first
 
+      if (answersError) throw answersError;
 
+      return { ...discussion, answers };
+    },
+    enabled: !!slug,
+  });
 
   // Add a new answer
   const addAnswerMutation = useMutation({
@@ -124,20 +123,34 @@ const DiscussionDetail = () => {
           <div className="col-span-2">
             {/* Discussion Header */}
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
-            <p className="text-gray-700 mb-8">{discussion?.description}</p>
+            <p className="text-gray-700 mb-4">{discussion?.description}</p>
 
-            {/* Diskussion skapad av */}
+            {/* Display tags if available */}
+            {discussion?.tags?.length > 0 && (
+              <div className="mb-8 flex flex-wrap gap-2">
+                {discussion.tags.map((tag: string, index: number) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-[var(--secondary2)] text-white rounded-full text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Discussion creator */}
             {discussion?.creator && (
               <div className="flex flex-col gap-2 text-gray-600 text-sm mb-8 -mt-2">
                 <span>Samtal skapat av</span>
-                    <MiniProfile
-                      id={discussion.creator.id}
-                      name={discussion.creator.full_name}
-                      avatarUrl={discussion.creator.avatar_url}
-                      title={discussion.creator.title}
-                      school={discussion.creator.school}
-                      size="small"
-                    />
+                <MiniProfile
+                  id={discussion.creator.id}
+                  name={discussion.creator.full_name}
+                  avatarUrl={discussion.creator.avatar_url}
+                  title={discussion.creator.title}
+                  school={discussion.creator.school}
+                  size="small"
+                />
               </div>
             )}
 
@@ -155,7 +168,10 @@ const DiscussionDetail = () => {
                 rows={1}
                 required
               />
-              <Button type="submit" className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white">
+              <Button
+                type="submit"
+                className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+              >
                 Svara
               </Button>
             </form>
@@ -163,7 +179,6 @@ const DiscussionDetail = () => {
             {/* Answers Section */}
             {discussion.answers.length > 0 ? (
               discussion.answers.map((answer) => {
-
                 return (
                   <div
                     key={answer.id}
@@ -192,9 +207,7 @@ const DiscussionDetail = () => {
             ) : (
               <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
             )}
-
-            </div>
-
+          </div>
 
           {/* Sidebar */}
           <div className="space-y-6">

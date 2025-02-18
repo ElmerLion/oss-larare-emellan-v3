@@ -76,7 +76,10 @@ export function AdminCreate(): JSX.Element {
       const creatorId = user.id;
 
       // Ensure "Veckans Hot Topic" is the first tag.
-      const finalTags = ["Veckans Hot Topic", ...tags.filter((tag) => tag !== "Veckans Hot Topic")];
+      const finalTags = [
+        "Veckans Hot Topic",
+        ...tags.filter((tag) => tag !== "Veckans Hot Topic"),
+      ];
 
       // Insert the discussion with the current timestamp.
       const { error } = await supabase.from("discussions").insert({
@@ -100,7 +103,11 @@ export function AdminCreate(): JSX.Element {
       setIsCreatingHotTopic(false);
     },
     onError: (error: any) => {
-      toast.error("Fel vid skapande: " + error.message);
+      toast({
+        title: "Fel vid skapande",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -110,36 +117,6 @@ export function AdminCreate(): JSX.Element {
     createHotTopicMutation.mutate();
   };
 
-  // --- New Broadcast Section ---
-  const [broadcastMessage, setBroadcastMessage] = useState<string>("");
-  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean>(false);
-
-  // Mutation for upserting the broadcast message.
-  const updateBroadcastMutation = useMutation({
-    mutationFn: async () => {
-      // Upsert into the broadcast table; assumes a single row with id = 1.
-      const { error } = await supabase.from("broadcast").upsert({
-        id: 1,
-        message: broadcastMessage,
-        enabled: broadcastEnabled,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Broadcast uppdaterad!");
-      // Optionally, you can invalidate a query if your global layout fetches broadcast info.
-      queryClient.invalidateQueries(["broadcast"]);
-    },
-    onError: (error: any) => {
-      toast.error("Fel vid uppdatering: " + error.message);
-    },
-  });
-
-  const handleUpdateBroadcast = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateBroadcastMutation.mutate();
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
@@ -147,117 +124,88 @@ export function AdminCreate(): JSX.Element {
       <main className="pl-72 p-4">
         <h1 className="text-2xl font-bold mb-4">Admin Skapa</h1>
 
-        {/* Hot Topic Creation Section */}
+        {/* Hot Topic Creation Card */}
         <div className="mb-8">
-          <Button
-            onClick={() => setIsCreatingHotTopic(!isCreatingHotTopic)}
-            className="bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
-          >
-            {isCreatingHotTopic ? "Avbryt" : "Skapa Veckans Hot Topic"}
-          </Button>
-          {isCreatingHotTopic && (
-            <form
-              onSubmit={handleCreateHotTopic}
-              className="mt-4 space-y-4 max-w-lg"
-            >
-              <Input
-                value={hotTopicQuestion}
-                onChange={(e) => setHotTopicQuestion(e.target.value)}
-                placeholder="Skriv din hot topic fråga här"
-                className="w-full"
-                required
-              />
-              <Textarea
-                value={hotTopicDescription}
-                onChange={(e) => setHotTopicDescription(e.target.value)}
-                placeholder="Lägg till en beskrivning"
-                className="w-full"
-                rows={4}
-                required
-              />
-              {/* Tag input area */}
-              <div>
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Lägg till en tagg (valfritt)"
-                  className="w-full"
-                />
-                {tagInput && filteredInterests.length > 0 && (
-                  <div className="border rounded mt-1 bg-white shadow-md">
-                    {filteredInterests.map((interest, index) => (
-                      <div
-                        key={index}
-                        onClick={() => addTag(interest.value)}
-                        className="cursor-pointer hover:bg-gray-100 px-2 py-1"
-                      >
-                        {interest.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="flex items-center px-3 py-1 bg-[var(--secondary2)] text-white rounded-full text-xs"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 text-xs text-white"
-                        >
-                          &times;
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Skapa Veckans Hot Topic</h2>
               <Button
-                type="submit"
-                className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+                onClick={() => setIsCreatingHotTopic(!isCreatingHotTopic)}
+                className="bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
               >
-                Skapa Hot Topic
+                {isCreatingHotTopic ? "Avbryt" : "Starta"}
               </Button>
-            </form>
-          )}
-        </div>
-
-        {/* Broadcast Message Section */}
-        <div className="mb-8 border p-4 rounded-lg bg-white shadow">
-          <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande</h2>
-          <form onSubmit={handleUpdateBroadcast} className="space-y-4 max-w-lg">
-            <Input
-              value={broadcastMessage}
-              onChange={(e) => setBroadcastMessage(e.target.value)}
-              placeholder="Ange meddelande som ska sändas"
-              className="w-full"
-            />
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Aktivera meddelande:</label>
-              <input
-                type="checkbox"
-                checked={broadcastEnabled}
-                onChange={(e) => setBroadcastEnabled(e.target.checked)}
-                className="h-4 w-4"
-              />
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
-            >
-              Uppdatera Broadcast
-            </Button>
-          </form>
+            {isCreatingHotTopic && (
+              <form onSubmit={handleCreateHotTopic} className="space-y-4">
+                <Input
+                  value={hotTopicQuestion}
+                  onChange={(e) => setHotTopicQuestion(e.target.value)}
+                  placeholder="Skriv din hot topic fråga här"
+                  className="w-full"
+                  required
+                />
+                <Textarea
+                  value={hotTopicDescription}
+                  onChange={(e) => setHotTopicDescription(e.target.value)}
+                  placeholder="Lägg till en beskrivning"
+                  className="w-full"
+                  rows={4}
+                  required
+                />
+                {/* Tag Input Area */}
+                <div>
+                  <Input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder="Lägg till en tagg (valfritt)"
+                    className="w-full"
+                  />
+                  {tagInput && filteredInterests.length > 0 && (
+                    <div className="border rounded mt-1 bg-white shadow-md">
+                      {filteredInterests.map((interest, index) => (
+                        <div
+                          key={index}
+                          onClick={() => addTag(interest.value)}
+                          className="cursor-pointer hover:bg-gray-100 px-2 py-1"
+                        >
+                          {interest.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="flex items-center px-3 py-1 bg-[var(--secondary2)] text-white rounded-full text-xs"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-1 text-xs text-white"
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+                >
+                  Skapa Hot Topic
+                </Button>
+              </form>
+            )}
+          </div>
         </div>
 
-        <p className="text-gray-600">
-          Denna funktion skapar ett nytt samtal och markerar det automatiskt med
-          taggen "Veckans Hot Topic". Du kan även lägga till andra taggar.
-        </p>
+
       </main>
     </div>
   );

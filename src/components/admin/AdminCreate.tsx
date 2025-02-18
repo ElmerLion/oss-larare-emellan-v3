@@ -67,14 +67,16 @@ export function AdminCreate(): JSX.Element {
       const slug = await generateUniqueSlug(baseSlug);
 
       // Get the current user.
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("User not authenticated");
       }
       const creatorId = user.id;
 
       // Ensure "Veckans Hot Topic" is the first tag.
-      const finalTags = ["Veckans Hot Topic", ...tags.filter(tag => tag !== "Veckans Hot Topic")];
+      const finalTags = ["Veckans Hot Topic", ...tags.filter((tag) => tag !== "Veckans Hot Topic")];
 
       // Insert the discussion with the current timestamp.
       const { error } = await supabase.from("discussions").insert({
@@ -108,12 +110,44 @@ export function AdminCreate(): JSX.Element {
     createHotTopicMutation.mutate();
   };
 
+  // --- New Broadcast Section ---
+  const [broadcastMessage, setBroadcastMessage] = useState<string>("");
+  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean>(false);
+
+  // Mutation for upserting the broadcast message.
+  const updateBroadcastMutation = useMutation({
+    mutationFn: async () => {
+      // Upsert into the broadcast table; assumes a single row with id = 1.
+      const { error } = await supabase.from("broadcast").upsert({
+        id: 1,
+        message: broadcastMessage,
+        enabled: broadcastEnabled,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Broadcast uppdaterad!");
+      // Optionally, you can invalidate a query if your global layout fetches broadcast info.
+      queryClient.invalidateQueries(["broadcast"]);
+    },
+    onError: (error: any) => {
+      toast.error("Fel vid uppdatering: " + error.message);
+    },
+  });
+
+  const handleUpdateBroadcast = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateBroadcastMutation.mutate();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
       {/* Increase left padding to move content further away from the sidebar */}
       <main className="pl-72 p-4">
         <h1 className="text-2xl font-bold mb-4">Admin Skapa</h1>
+
+        {/* Hot Topic Creation Section */}
         <div className="mb-8">
           <Button
             onClick={() => setIsCreatingHotTopic(!isCreatingHotTopic)}
@@ -191,6 +225,35 @@ export function AdminCreate(): JSX.Element {
             </form>
           )}
         </div>
+
+        {/* Broadcast Message Section */}
+        <div className="mb-8 border p-4 rounded-lg bg-white shadow">
+          <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande</h2>
+          <form onSubmit={handleUpdateBroadcast} className="space-y-4 max-w-lg">
+            <Input
+              value={broadcastMessage}
+              onChange={(e) => setBroadcastMessage(e.target.value)}
+              placeholder="Ange meddelande som ska sändas"
+              className="w-full"
+            />
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Aktivera meddelande:</label>
+              <input
+                type="checkbox"
+                checked={broadcastEnabled}
+                onChange={(e) => setBroadcastEnabled(e.target.checked)}
+                className="h-4 w-4"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+            >
+              Uppdatera Broadcast
+            </Button>
+          </form>
+        </div>
+
         <p className="text-gray-600">
           Denna funktion skapar ett nytt samtal och markerar det automatiskt med
           taggen "Veckans Hot Topic". Du kan även lägga till andra taggar.

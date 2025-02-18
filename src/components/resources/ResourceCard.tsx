@@ -32,8 +32,8 @@ export function ResourceCard({ resource }: { resource: Resource }) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 
-  // Local resource state to allow realtime updates
-  const [localResource, setLocalResource] = useState<Resource>(resource);
+  // Local resource state to allow realtime updates.
+  const [localResource, setLocalResource] = useState<Resource | null>(resource);
 
   // Update local resource if the prop changes.
   useEffect(() => {
@@ -46,15 +46,18 @@ export function ResourceCard({ resource }: { resource: Resource }) {
     const channel = supabase
       .channel(`resource-${resource.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'resources',
+          event: "*",
+          schema: "public",
+          table: "resources",
           filter: `id=eq.${resource.id}`,
         },
         (payload) => {
-          if (payload.new) {
+          if (payload.eventType === "DELETE") {
+            setLocalResource(null);
+            toast.info("Denna resurs finns inte längre");
+          } else if (payload.new) {
             setLocalResource(payload.new);
           }
         }
@@ -64,7 +67,18 @@ export function ResourceCard({ resource }: { resource: Resource }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [resource]);
+  }, [resource, toast]);
+
+  // If the resource doesn't exist anymore, display a fallback message.
+  if (!localResource) {
+    return (
+      <div className="bg-white rounded-lg p-6 shadow-sm">
+        <p className="text-gray-600 text-sm">
+          Denna resurs finns inte längre.
+        </p>
+      </div>
+    );
+  }
 
   const handleDownload = async () => {
     try {

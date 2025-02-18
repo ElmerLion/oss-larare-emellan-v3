@@ -138,6 +138,7 @@ export function AdminCreate(): JSX.Element {
             </div>
             {isCreatingHotTopic && (
               <form onSubmit={handleCreateHotTopic} className="space-y-4">
+              <p>Genom att skapa en hot topic här så skapas en diskussion automatiskt med taggen "Veckans Hot Topic".</p>
                 <Input
                   value={hotTopicQuestion}
                   onChange={(e) => setHotTopicQuestion(e.target.value)}

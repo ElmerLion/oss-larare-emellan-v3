@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const LatestDiscussions = () => {
   // Query to get the current user's profile (and interests)
@@ -30,14 +32,12 @@ const LatestDiscussions = () => {
     if (Array.isArray(profile.interests)) {
       interestsArray = profile.interests;
     } else if (typeof profile.interests === "string") {
-      // Remove curly braces if they exist and split by comma
-      const trimmed = profile.interests.replace(/[\{\}]/g, '');
+      const trimmed = profile.interests.replace(/[\{\}]/g, "");
       interestsArray = trimmed.split(",").map((s) => s.trim());
     }
   }
   // Format as a Postgres array literal, e.g. "{Matematik,Naturvetenskap,...}"
   const formattedInterests = `{${interestsArray.join(",")}}`;
-  console.log("Formatted interests:", formattedInterests);
 
   const {
     data: latestDiscussions,
@@ -46,11 +46,11 @@ const LatestDiscussions = () => {
   } = useQuery({
     queryKey: ["latest-discussions", interestsArray],
     queryFn: async () => {
-      // If we have interests, try fetching discussions that overlap with them.
+      // Include created_at in the select so we can sort by it.
       if (interestsArray.length > 0) {
         const { data, error } = await supabase
           .from("discussions")
-          .select("slug, question")
+          .select("slug, question, tags, created_at")
           .filter("tags", "ov", formattedInterests)
           .order("created_at", { ascending: false })
           .limit(4);
@@ -60,13 +60,13 @@ const LatestDiscussions = () => {
       // Fallback: get the latest discussions overall
       const { data, error } = await supabase
         .from("discussions")
-        .select("slug, question")
+        .select("slug, question, tags, created_at")
         .order("created_at", { ascending: false })
         .limit(4);
       if (error) throw error;
       return data || [];
     },
-    enabled: !profileLoading, // Only run when profile is loaded.
+    enabled: !profileLoading,
   });
 
   if (profileLoading || discussionsLoading) {
@@ -79,19 +79,58 @@ const LatestDiscussions = () => {
     return <p className="text-sm text-gray-500">Kunde inte hämta samtal.</p>;
   }
 
+  // Process discussions: move the most recently created hot topic discussion (if any) to the top.
+  let finalDiscussions = [];
+  if (latestDiscussions) {
+    const hotTopics = latestDiscussions.filter((d: any) =>
+      d.tags?.includes("Veckans Hot Topic")
+    );
+    if (hotTopics.length > 0) {
+      // Sort hot topics by created_at descending (most recent first)
+      const sortedHotTopics = hotTopics.sort(
+        (a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const latestHotTopic = sortedHotTopics[0];
+      const others = latestDiscussions.filter(
+        (d: any) => d.slug !== latestHotTopic.slug
+      );
+      finalDiscussions = [latestHotTopic, ...others];
+    } else {
+      finalDiscussions = latestDiscussions;
+    }
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="font-semibold mb-4">Senaste Samtalen</h2>
-      <div className="space-y-2">
-        {latestDiscussions?.length > 0 ? (
-          latestDiscussions.map((discussion: any) => (
-            <a
-              key={discussion.slug}
-              href={`/forum/${discussion.slug}`}
-              className="block text-sm text-gray-600 hover:text-sage-500"
-            >
-              {discussion.question}
-            </a>
+      <h2 className="font-semibold mb-2">Senaste Samtalen</h2>
+      <div className="space-y-4">
+        {finalDiscussions?.length > 0 ? (
+          finalDiscussions.map((discussion: any) => (
+            <div key={discussion.slug}>
+              <a
+                href={`/forum/${discussion.slug}`}
+                className="block text-sm text-gray-600 hover:text-sage-500"
+              >
+                {discussion.question}
+              </a>
+              {discussion.tags && discussion.tags.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {discussion.tags.map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className={`text-xs px-1 py-0.5 rounded ${
+                        tag === "Veckans Hot Topic"
+                          ? "bg-yellow-400 text-black"
+                          : "bg-[var(--secondary2)] text-white"
+                      }`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           ))
         ) : (
           <p className="text-sm text-gray-500">Inga samtal ännu.</p>

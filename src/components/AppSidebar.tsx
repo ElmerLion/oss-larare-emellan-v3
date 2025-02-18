@@ -20,7 +20,6 @@ import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { FeedbackDialog } from "@/components/settings/FeedbackDialog";
 
-
 const menuItems = [
   { icon: Home, label: "Hem", path: "/" },
   { icon: User, label: "Profil", path: "/profil" },
@@ -36,7 +35,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   // Listen for authentication changes.
   useEffect(() => {
@@ -111,6 +111,33 @@ export function AppSidebar() {
       supabase.removeChannel(channel);
     };
   }, [session]);
+
+  // Fetch the user's role from the "profiles" table.
+useEffect(() => {
+  const fetchUserRole = async () => {
+    if (!session?.user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select('"Role"')
+      .eq("id", session.user.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user role", error);
+      setIsAdmin(false);
+      return;
+    }
+
+    setIsAdmin(data.Role === "Admin");
+  };
+
+  fetchUserRole();
+}, [session]);
+
 
   const handleLogout = async () => {
     try {
@@ -196,15 +223,61 @@ export function AppSidebar() {
           ))}
 
           <FeedbackDialog
-              triggerElement={
-                <button
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
-                >
-                  <CircleHelp className="w-5 h-5" />
-                  <span>Skicka Feedback</span>
-                </button>
-              }
-            />
+            triggerElement={
+              <button className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full">
+                <CircleHelp className="w-5 h-5" />
+                <span>Skicka Feedback</span>
+              </button>
+            }
+          />
+
+          {/* Admin Section */}
+          {isAdmin && (
+            <>
+              <div className="px-4 py-2 mt-4 text-gray-500 uppercase text-xs">
+                Admin
+              </div>
+              <Link
+                to="/admin/oversikt"
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+                  location.pathname === "/admin/oversikt" &&
+                    "bg-sage-50 text-sage-500"
+                )}
+              >
+                <span>Översikt</span>
+              </Link>
+              <Link
+                to="/admin/moderation"
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+                  location.pathname === "/admin/moderation" &&
+                    "bg-sage-50 text-sage-500"
+                )}
+              >
+                <span>Moderation</span>
+              </Link>
+              <Link
+                to="/admin/skapa"
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+                  location.pathname === "/admin/skapa" && "bg-sage-50 text-sage-500"
+                )}
+              >
+                <span>Skapa</span>
+              </Link>
+              <Link
+                to="/admin/feedback"
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+                  location.pathname === "/admin/feedback" &&
+                    "bg-sage-50 text-sage-500"
+                )}
+              >
+                <span>Feedback</span>
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="absolute bottom-8 left-4 right-4 space-y-2">

@@ -1,6 +1,7 @@
 import { Element } from "react-scroll";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { CTASection } from "@/components/landingPage/CTASection";
 
 const features = [
   {
@@ -63,6 +64,8 @@ export function FeatureSection() {
         </div>
       </section>
     </Element>
+
+
   );
 }
 

@@ -26,6 +26,7 @@ import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
 import Funktioner from "./pages/Funktioner";
+import Contact from "@/pages/Contact";
 
 // Import Admin Pages
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -114,6 +115,7 @@ const AppRoutes = ({
       />
       <Route path="/omoss" element={<OmOss />} />
       <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
+      <Route path="/kontakt" element={<Contact />} />
       <Route path="/forum" element={<Diskussioner />} />
       <Route path="/forum/:slug" element={<DiscussionDetail />} />
       <Route

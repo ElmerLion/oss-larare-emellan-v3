@@ -1,4 +1,3 @@
-// src/pages/Profil.tsx
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -20,7 +19,7 @@ export default function Profil() {
     title: "",
     school: "",
     avatar_url: "/placeholder.svg",
-    subjects: [],         // Add these fields if not present already
+    subjects: [],
     interests: [],
     education_level: "",
   });
@@ -96,7 +95,7 @@ export default function Profil() {
     return (
       <div className="min-h-screen flex bg-[#F6F6F7]">
         <AppSidebar />
-        <div className="flex-1 ml-64">
+        <div className="flex-1 ml-0 lg:ml-64">
           <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
             <div className="p-6">Laddar...</div>
           </main>
@@ -108,12 +107,12 @@ export default function Profil() {
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
       <AppSidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-0 lg:ml-64">
         <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
           <div className="p-6">
             <div className="max-w-[2800px] mx-auto">
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
                   <ProfileHeader
                     name={profileData.full_name}
                     role={`${profileData.title}${profileData.school ? ` på ${profileData.school}` : ''}`}
@@ -124,8 +123,6 @@ export default function Profil() {
                     isCurrentUser={isCurrentUser}
                   />
                   <AboutSection userId={profileId} onProfileUpdate={fetchProfile} />
-
-                  {/* New component showing subjects and interests */}
                   <ProfileInterests
                     subjects={profileData.subjects}
                     interests={profileData.interests}
@@ -133,11 +130,10 @@ export default function Profil() {
                     isCurrentUser={isCurrentUser}
                     onComplete={fetchProfile}
                   />
-
                   <ExperienceSection userId={profileId} />
                   <UploadedMaterials userId={profileId || ''} isCurrentUser={isCurrentUser} />
                 </div>
-                <div className="col-span-1">
+                <div className="hidden lg:block">
                   <RecommendedContacts />
                 </div>
               </div>

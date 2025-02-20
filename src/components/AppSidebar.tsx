@@ -113,31 +113,30 @@ export function AppSidebar() {
   }, [session]);
 
   // Fetch the user's role from the "profiles" table.
-useEffect(() => {
-  const fetchUserRole = async () => {
-    if (!session?.user) {
-      setIsAdmin(false);
-      return;
-    }
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!session?.user) {
+        setIsAdmin(false);
+        return;
+      }
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select('"Role"')
-      .eq("id", session.user.id)
-      .single();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select('"Role"')
+        .eq("id", session.user.id)
+        .single();
 
-    if (error) {
-      console.error("Error fetching user role", error);
-      setIsAdmin(false);
-      return;
-    }
+      if (error) {
+        console.error("Error fetching user role", error);
+        setIsAdmin(false);
+        return;
+      }
 
-    setIsAdmin(data.Role === "Admin");
-  };
+      setIsAdmin(data.Role === "Admin");
+    };
 
-  fetchUserRole();
-}, [session]);
-
+    fetchUserRole();
+  }, [session]);
 
   const handleLogout = async () => {
     try {
@@ -159,9 +158,9 @@ useEffect(() => {
 
   return (
     <>
-      {/* Hamburger button for mobile (hidden on desktop and when sidebar is open) */}
+      {/* Hamburger button for mobile/tablet (hidden on desktop and when sidebar is open) */}
       {!isSidebarOpen && (
-        <div className="md:hidden fixed top-4 left-4 z-50">
+        <div className="lg:hidden fixed top-4 left-4 z-50">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 bg-white rounded shadow"
@@ -171,10 +170,10 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Overlay on mobile when sidebar is open */}
+      {/* Overlay on mobile/tablet when sidebar is open */}
       {isSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black opacity-50 z-30"
+          className="lg:hidden fixed inset-0 bg-black opacity-50 z-30"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
@@ -184,7 +183,7 @@ useEffect(() => {
         className={cn(
           "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0" // Always show sidebar on desktop
+          "lg:translate-x-0" // Always show sidebar on large screens
         )}
       >
         <div className="flex items-center gap-2 group mb-8">
@@ -241,21 +240,10 @@ useEffect(() => {
                 to="/admin/oversikt"
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
-                  location.pathname === "/admin/oversikt" &&
-                    "bg-sage-50 text-sage-500"
+                  location.pathname === "/admin/oversikt" && "bg-sage-50 text-sage-500"
                 )}
               >
                 <span>Översikt</span>
-              </Link>
-              <Link
-                to="/admin/moderation"
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
-                  location.pathname === "/admin/moderation" &&
-                    "bg-sage-50 text-sage-500"
-                )}
-              >
-                <span>Moderation</span>
               </Link>
               <Link
                 to="/admin/skapa"
@@ -270,8 +258,7 @@ useEffect(() => {
                 to="/admin/feedback"
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
-                  location.pathname === "/admin/feedback" &&
-                    "bg-sage-50 text-sage-500"
+                  location.pathname === "/admin/feedback" && "bg-sage-50 text-sage-500"
                 )}
               >
                 <span>Feedback</span>

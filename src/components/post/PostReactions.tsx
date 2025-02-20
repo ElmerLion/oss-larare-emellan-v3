@@ -127,7 +127,7 @@ const handleReaction = async (reactionType: ReactionType) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="ghost" 
+          variant="ghost"
           size="sm"
           className={`flex items-center gap-1 text-gray-500 hover:text-gray-700 ${compact ? 'p-0 h-auto' : ''}`}
         >
@@ -136,8 +136,11 @@ const handleReaction = async (reactionType: ReactionType) => {
           ) : (
             <ThumbsUp className={`${compact ? 'w-3 h-3' : 'w-4 h-4'}`} />
           )}
-          <span>{reactionCount} Reaktioner</span>
+          <span>
+            {reactionCount} <span className="hidden sm:inline">Reaktioner</span>
+          </span>
         </Button>
+
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {(Object.entries(reactionEmojis) as [ReactionType, { emoji: string; label: string }][]).map(([key, { emoji, label }]) => (

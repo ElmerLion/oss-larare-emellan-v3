@@ -223,7 +223,9 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
     return (
       <div className="flex items-center gap-1 text-gray-500 text-sm">
         <MessageSquare className="w-4 h-4" />
-        <span>{displayedCount} Kommentarer</span>
+        <span>
+          {displayedCount} <span className="hidden sm:inline">Kommentarer</span>
+        </span>
       </div>
     );
   }
@@ -231,7 +233,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
   return (
     <div className="space-y-4">
       {/* Render top-level comments and their replies */}
-      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'max-h-[110px]'} overflow-hidden -mb-4`}>
+      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'sm:max-h-[110px]'} overflow-hidden -mb-4`}>
         {topLevelComments.map((commentItem) => {
           const timeAgo = formatDistanceToNow(new Date(commentItem.created_at), { addSuffix: true });
           const replies = getReplies(commentItem.id);
@@ -249,11 +251,11 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
                   size="small"
                 />
                 <div className="mt-3">
-                  <p className="mx-10 text-sm text-gray-700">{commentItem.content}</p>
+                  <p className="mx-4 sm:mx-10 text-sm text-gray-700">{commentItem.content}</p>
                 </div>
                 {/* If this comment is top-level, show Reply button */}
                 { !commentItem.parent_id && (
-                  <div className="mx-6">
+                  <div className="mx-4 sm:mx-6">
                     <Button
                       variant="link"
                       onClick={() =>
@@ -267,7 +269,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
                 )}
                 {/* If this comment is being replied to, show reply input */}
                 {replyTo === commentItem.id && (
-                  <div className="flex items-center ml-10 mt-2 mb-2">
+                  <div className="flex items-center ml-4 sm:ml-10 mt-2 mb-2">
                     <Textarea
                       placeholder="Skriv ditt svar..."
                       value={replyContent}
@@ -286,7 +288,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
                 )}
                 {/* Render replies (if any) indented */}
                 {replies.length > 0 && (
-                  <div className="ml-10 space-y-2 border-l border-gray-300 pl-4">
+                  <div className="ml-4 sm:ml-10 space-y-2 border-l border-gray-300 pl-4">
                     {replies.map(reply => {
                       const replyTimeAgo = formatDistanceToNow(new Date(reply.created_at), { addSuffix: true });
                       return (
@@ -301,7 +303,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
                             size="small"
                           />
                           <div className="mt-3">
-                            <p className="mx-10 text-sm text-gray-700">{reply.content}</p>
+                            <p className="mx-4 sm:mx-10 text-sm text-gray-700">{reply.content}</p>
                           </div>
                         </div>
                       );
@@ -346,10 +348,11 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
 
       {/* Main comment input (for new top-level comment) */}
       <div className="flex gap-3">
+        {/* Avatar hidden on phones */}
         <img
           src={userAvatar || "/placeholder.svg"}
           alt="Your avatar"
-          className="w-8 h-8 rounded-full object-cover"
+          className="w-8 h-8 rounded-full object-cover hidden sm:block"
         />
         <div className="flex-1">
           <div className="flex gap-2">

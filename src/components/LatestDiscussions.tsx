@@ -4,12 +4,8 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
 const LatestDiscussions = () => {
-  // Query to get the current user's profile (and interests)
-  const {
-    data: profile,
-    isLoading: profileLoading,
-    error: profileError,
-  } = useQuery({
+  // Query current user’s profile
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["current-profile"],
     queryFn: async () => {
       const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -26,7 +22,7 @@ const LatestDiscussions = () => {
     },
   });
 
-  // Convert profile.interests to a proper JavaScript array
+  // Convert profile.interests to a JavaScript array
   let interestsArray: string[] = [];
   if (profile && profile.interests) {
     if (Array.isArray(profile.interests)) {
@@ -36,7 +32,6 @@ const LatestDiscussions = () => {
       interestsArray = trimmed.split(",").map((s) => s.trim());
     }
   }
-  // Format as a Postgres array literal, e.g. "{Matematik,Naturvetenskap,...}"
   const formattedInterests = `{${interestsArray.join(",")}}`;
 
   const {
@@ -46,7 +41,7 @@ const LatestDiscussions = () => {
   } = useQuery({
     queryKey: ["latest-discussions", interestsArray],
     queryFn: async () => {
-      // Include created_at in the select so we can sort by it.
+      // If the user has interests, filter by them
       if (interestsArray.length > 0) {
         const { data, error } = await supabase
           .from("discussions")
@@ -57,7 +52,7 @@ const LatestDiscussions = () => {
         if (error) throw error;
         if (data && data.length > 0) return data;
       }
-      // Fallback: get the latest discussions overall
+      // Otherwise, fetch latest overall
       const { data, error } = await supabase
         .from("discussions")
         .select("slug, question, tags, created_at")
@@ -79,14 +74,13 @@ const LatestDiscussions = () => {
     return <p className="text-sm text-gray-500">Kunde inte hämta samtal.</p>;
   }
 
-  // Process discussions: move the most recently created hot topic discussion (if any) to the top.
+  // Move "Veckans Hot Topic" to the top if it exists
   let finalDiscussions = [];
   if (latestDiscussions) {
     const hotTopics = latestDiscussions.filter((d: any) =>
       d.tags?.includes("Veckans Hot Topic")
     );
     if (hotTopics.length > 0) {
-      // Sort hot topics by created_at descending (most recent first)
       const sortedHotTopics = hotTopics.sort(
         (a: any, b: any) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -102,7 +96,7 @@ const LatestDiscussions = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 w-full">
       <h2 className="font-semibold mb-2">Senaste Samtalen</h2>
       <div className="space-y-4">
         {finalDiscussions?.length > 0 ? (

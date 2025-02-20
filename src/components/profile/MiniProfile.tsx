@@ -62,18 +62,18 @@ export const MiniProfile = ({
   size = "medium",
   showLink = true,
 }: MiniProfileProps) => {
-  // Define the avatar size based on the provided size prop.
-  const avatarSizeClass = {
-    small: "w-8 h-8",
-    medium: "w-10 h-10",
-    large: "w-16 h-16",
+  // Define responsive avatar size classes:
+  const responsiveAvatarClass = {
+    small: "w-6 h-6 sm:w-8 sm:h-8",
+    medium: "w-8 h-8 sm:w-10 sm:h-10",
+    large: "w-12 h-12 sm:w-16 sm:h-16",
   }[size];
 
-  // Add some left padding for the text so that it doesn't collide with the avatar.
-  const paddingClass = {
-    small: "pl-2",
-    medium: "pl-3",
-    large: "pl-4",
+  // Define responsive padding classes for text:
+  const responsivePaddingClass = {
+    small: "pl-1 sm:pl-2",
+    medium: "pl-2 sm:pl-3",
+    large: "pl-3 sm:pl-4",
   }[size];
 
   // Combine title and school if both are provided.
@@ -87,17 +87,17 @@ export const MiniProfile = ({
         <img
           src={avatarUrl || "/placeholder.svg"}
           alt={name || "Unnamed User"}
-          className={`${avatarSizeClass} rounded-full object-cover`}
+          className={`${responsiveAvatarClass} rounded-full object-cover`}
         />
       </div>
       {/* Profile Information */}
-      <div className={`flex flex-col ${paddingClass}`}>
-        <div className="font-medium text-sm">{name || "Unnamed User"}</div>
+      <div className={`flex flex-col ${responsivePaddingClass}`}>
+        <div className="font-medium text-xs sm:text-sm">{name || "Unnamed User"}</div>
         {combinedTitleSchool && (
-          <div className="text-xs text-gray-500">{combinedTitleSchool}</div>
+          <div className="text-[10px] sm:text-xs text-gray-500">{combinedTitleSchool}</div>
         )}
         {created_at && (
-          <div className="text-xs text-gray-400">
+          <div className="text-[10px] sm:text-xs text-gray-400">
             {formatTimeAgo(created_at)}
           </div>
         )}

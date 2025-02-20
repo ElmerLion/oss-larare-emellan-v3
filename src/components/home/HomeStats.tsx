@@ -89,52 +89,73 @@ const HomeStats = () => {
     <>
       <div className="grid grid-cols-4 gap-4 mb-8">
         <Button onClick={handleActiveTeachers} className="block p-0">
-          <div className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95">
+          <div
+            className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95"
+            title="Aktiva medlemmar"
+          >
             <div className="flex flex-col items-center mb-3">
               <Users className="w-5 h-5 text-[var(--secondary2)]" />
               <div className="text-3xl font-semibold text-[var(--secondary2)]">
                 {stats?.activeTeachers || 0}
               </div>
             </div>
-            <div className="text-sm text-gray-500 text-center">Aktiva medlemmar</div>
+            <div className="text-sm text-gray-500 text-center hidden sm:block">
+              Aktiva medlemmar
+            </div>
           </div>
         </Button>
 
         <Button onClick={handleNewTeachers} className="block p-0">
-          <div className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95">
+          <div
+            className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95"
+            title="Nya medlemmar"
+          >
             <div className="flex flex-col items-center mb-3">
               <UserPlus className="w-5 h-5 text-[var(--secondary)]" />
               <div className="text-3xl font-semibold text-[var(--secondary)]">
                 {stats?.newTeachers || 0}
               </div>
             </div>
-            <div className="text-sm text-gray-500 text-center">Nya medlemmar</div>
+            <div className="text-sm text-gray-500 text-center hidden sm:block">
+              Nya medlemmar
+            </div>
           </div>
         </Button>
 
         <Link to="/resurser" className="block">
-          <div className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95">
+          <div
+            className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95"
+            title="Resurser delade"
+          >
             <div className="flex flex-col items-center mb-3">
               <FileText className="w-5 h-5 text-[var(--secondary2)]" />
               <div className="text-3xl font-semibold text-[var(--secondary2)]">
                 {stats?.sharedMaterials || 0}
               </div>
             </div>
-            <div className="text-sm text-gray-500 text-center">Resurser delade</div>
+            <div className="text-sm text-gray-500 text-center hidden sm:block">
+              Resurser delade
+            </div>
           </div>
         </Link>
 
         <Link to="/resurser" className="block">
-          <div className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95">
+          <div
+            className="bg-white p-4 rounded-lg border border-gray-200 transform transition-transform duration-300 hover:scale-95"
+            title="Resurser nedladdade"
+          >
             <div className="flex flex-col items-center mb-3">
               <Download className="w-5 h-5 text-[var(--secondary)]" />
               <div className="text-3xl font-semibold text-[var(--secondary)]">
                 {stats?.totalDownloads || 0}
               </div>
             </div>
-            <div className="text-sm text-gray-500 text-center">Resurser nedladdade</div>
+            <div className="text-sm text-gray-500 text-center hidden sm:block">
+              Resurser nedladdade
+            </div>
           </div>
         </Link>
+
       </div>
       <UserListPopup
         open={isUserListOpen}

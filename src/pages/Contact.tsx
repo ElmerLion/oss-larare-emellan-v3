@@ -64,11 +64,19 @@ export default function Contact() {
               mejl eller sociala medier. Vi ser fram emot att höra från dig!
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-16 justify-center">
+            {/* Container for Contact Blocks */}
+            <div className="flex flex-col sm:flex-row gap-16 justify-center items-center">
               {/* Email Block */}
               <a
                 href="mailto:osslarareemellan@gmail.com"
-                className="flex items-start gap-4 transition-transform duration-200 hover:scale-110 hover:text-[color:var(--ole-green)]"
+                className="
+                  flex flex-col sm:flex-row
+                  items-center sm:items-start
+                  text-center sm:text-left
+                  gap-4
+                  transition-transform duration-200
+                  hover:scale-110 hover:text-[color:var(--ole-green)]
+                "
               >
                 <div className="p-3 bg-white rounded-full shadow-md">
                   <Mail className="text-[color:var(--ole-green)] h-6 w-6" />
@@ -84,7 +92,14 @@ export default function Contact() {
                 href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-4 transition-transform duration-200 hover:scale-110 hover:text-[color:var(--ole-green)]"
+                className="
+                  flex flex-col sm:flex-row
+                  items-center sm:items-start
+                  text-center sm:text-left
+                  gap-4
+                  transition-transform duration-200
+                  hover:scale-110 hover:text-[color:var(--ole-green)]
+                "
               >
                 <div className="p-3 bg-white rounded-full shadow-md">
                   <Linkedin className="text-[color:var(--ole-green)] h-6 w-6" />

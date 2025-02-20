@@ -1,4 +1,3 @@
-// src/components/Post.tsx
 import { PostHeader } from "./post/PostHeader";
 import { PostReactions } from "./post/PostReactions";
 import { PostComments } from "./post/PostComments";
@@ -58,7 +57,7 @@ export function Post({
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 w-full">
       <div className="mb-4">
         <PostHeader
           profile={profile}

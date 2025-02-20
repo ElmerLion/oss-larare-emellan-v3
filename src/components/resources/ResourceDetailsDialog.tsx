@@ -221,7 +221,7 @@ export function ResourceDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-white rounded-lg shadow-lg">
+      <DialogContent className="w-full sm:max-w-3xl mx-2 max-h-[80vh] overflow-y-auto bg-white rounded-lg shadow-lg">
         <div className="flex items-center justify-between border-b pb-2 mb-4">
           {/* Left: If owner, show small edit and delete buttons */}
           {isOwner && !isEditing && (

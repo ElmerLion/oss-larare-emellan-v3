@@ -10,14 +10,15 @@ import { interestsOptions } from "@/types/interestsOptions";
 
 export function AdminCreate(): JSX.Element {
   const queryClient = useQueryClient();
+
+  // Hot Topic states
   const [isCreatingHotTopic, setIsCreatingHotTopic] = useState<boolean>(false);
   const [hotTopicQuestion, setHotTopicQuestion] = useState<string>("");
   const [hotTopicDescription, setHotTopicDescription] = useState<string>("");
 
-  // States for tags similar to the discussion page
+  // Tag states for hot topic creation
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState<string>("");
-
   const filteredInterests = tagInput
     ? interestsOptions.filter(
         (interest) =>
@@ -25,7 +26,6 @@ export function AdminCreate(): JSX.Element {
           !tags.includes(interest.value)
       )
     : [];
-
   const addTag = (tag: string): void => {
     if (tags.length >= 5) return;
     if (!tags.includes(tag)) {
@@ -33,12 +33,11 @@ export function AdminCreate(): JSX.Element {
       setTagInput("");
     }
   };
-
   const removeTag = (tag: string): void => {
     setTags(tags.filter((t) => t !== tag));
   };
 
-  // Helper function to generate a unique slug from a base string.
+  // Helper to generate unique slug
   const generateUniqueSlug = async (baseSlug: string): Promise<string> => {
     let uniqueSlug = baseSlug;
     let suffix = 0;
@@ -56,32 +55,21 @@ export function AdminCreate(): JSX.Element {
     return uniqueSlug;
   };
 
-  // Mutation for creating a hot topic discussion.
+  // Mutation to create a hot topic discussion
   const createHotTopicMutation = useMutation({
     mutationFn: async () => {
-      // Create a base slug from the discussion title.
       const baseSlug = hotTopicQuestion
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, "")
         .replace(/\s+/g, "-");
       const slug = await generateUniqueSlug(baseSlug);
-
-      // Get the current user.
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
+      if (!user) throw new Error("User not authenticated");
       const creatorId = user.id;
-
       // Ensure "Veckans Hot Topic" is the first tag.
-      const finalTags = [
-        "Veckans Hot Topic",
-        ...tags.filter((tag) => tag !== "Veckans Hot Topic"),
-      ];
-
-      // Insert the discussion with the current timestamp.
+      const finalTags = ["Veckans Hot Topic", ...tags.filter(tag => tag !== "Veckans Hot Topic")];
       const { error } = await supabase.from("discussions").insert({
         question: hotTopicQuestion,
         description: hotTopicDescription,
@@ -90,7 +78,6 @@ export function AdminCreate(): JSX.Element {
         tags: finalTags,
         created_at: new Date().toISOString(),
       });
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -117,10 +104,41 @@ export function AdminCreate(): JSX.Element {
     createHotTopicMutation.mutate();
   };
 
+  // --- Broadcast Section ---
+  const [broadcastMessage, setBroadcastMessage] = useState<string>("");
+  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean>(false);
+  const updateBroadcastMutation = useMutation({
+    mutationFn: async () => {
+      // Upsert into broadcast table with id = 1.
+      const { error } = await supabase.from("broadcast").upsert({
+        id: 1,
+        message: broadcastMessage,
+        enabled: broadcastEnabled,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Broadcast uppdaterad!");
+      queryClient.invalidateQueries(["broadcast"]);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fel vid uppdatering",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleUpdateBroadcast = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateBroadcastMutation.mutate();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
-      {/* Increase left padding to move content further away from the sidebar */}
+      {/* Content offset from sidebar */}
       <main className="pl-72 p-4">
         <h1 className="text-2xl font-bold mb-4">Admin Skapa</h1>
 
@@ -138,7 +156,6 @@ export function AdminCreate(): JSX.Element {
             </div>
             {isCreatingHotTopic && (
               <form onSubmit={handleCreateHotTopic} className="space-y-4">
-              <p>Genom att skapa en hot topic här så skapas en diskussion automatiskt med taggen "Veckans Hot Topic".</p>
                 <Input
                   value={hotTopicQuestion}
                   onChange={(e) => setHotTopicQuestion(e.target.value)}
@@ -154,7 +171,6 @@ export function AdminCreate(): JSX.Element {
                   rows={4}
                   required
                 />
-                {/* Tag Input Area */}
                 <div>
                   <Input
                     value={tagInput}
@@ -206,7 +222,38 @@ export function AdminCreate(): JSX.Element {
           </div>
         </div>
 
+        {/* Broadcast Message Card */}
+        <div className="mb-8 bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande</h2>
+          <form onSubmit={handleUpdateBroadcast} className="space-y-4">
+            <Input
+              value={broadcastMessage}
+              onChange={(e) => setBroadcastMessage(e.target.value)}
+              placeholder="Ange meddelande som ska sändas"
+              className="w-full"
+            />
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Visa meddelande:</label>
+              <input
+                type="checkbox"
+                checked={broadcastEnabled}
+                onChange={(e) => setBroadcastEnabled(e.target.checked)}
+                className="h-4 w-4"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+            >
+              Uppdatera Broadcast
+            </Button>
+          </form>
+        </div>
 
+        <p className="text-gray-600">
+          Denna sida låter dig både skapa ett nytt "Veckans Hot Topic" samt ställa in ett
+          broadcast-meddelande som visas på alla sidor.
+        </p>
       </main>
     </div>
   );

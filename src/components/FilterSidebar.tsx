@@ -40,9 +40,8 @@ export function FilterSidebar({ onFilterChange, onSearchChange }: FilterSidebarP
   };
 
   return (
-    // Here we add "sticky top-0" to have the filters stick at the top when scrolling,
-    // and "min-h-screen" to ensure the white background fills the entire vertical space.
-    <div className="w-64 bg-white p-6 border-r border-l border-gray-300 min-h-screen sticky top-0">
+    // On mobile, take full width; on large screens use fixed width with sticky behavior.
+    <div className="w-full lg:w-64 bg-white p-6 lg:border-r lg:border-l lg:border-gray-300 lg:min-h-screen lg:sticky lg:top-0 lg:-ml-6 lg:-mt-6">
       <h1 className="text-2xl font-semibold pb-4">Resurser</h1>
 
       {/* Search Bar */}
@@ -171,7 +170,7 @@ export function FilterSidebar({ onFilterChange, onSearchChange }: FilterSidebarP
                 ))}
               </select>
             </div>
-            {/* Only show Kursnivå if a specific course subject is selected */}
+            {/* Kursnivå Filter (conditional) */}
             {currentCourseSubject !== "all" &&
               courseLevelsMapping[currentCourseSubject] &&
               courseLevelsMapping[currentCourseSubject].length > 0 && (

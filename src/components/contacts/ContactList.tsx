@@ -146,7 +146,8 @@ export function ContactList({
   }, [filteredProfiles]);
 
   return (
-    <div className="w-[400px] bg-white rounded-lg shadow-sm">
+    // Use responsive width classes: full width on small screens, 400px on medium and up.
+    <div className="w-full md:w-[400px] bg-white rounded-lg shadow-sm">
       <div className="p-4">
         <h1 className="text-2xl font-semibold mb-4">Meddelanden</h1>
         <h2 className="text-sm text-gray-600 mb-4">Sök bland dina meddelanden</h2>

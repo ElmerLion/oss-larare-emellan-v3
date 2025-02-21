@@ -7,6 +7,7 @@ import { CreateResourceDialog } from "@/components/CreateResourceDialog";
 import { ResourceCard } from "@/components/resources/ResourceCard";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Resource {
   id: string;
@@ -23,7 +24,7 @@ interface Resource {
 }
 
 export default function Resurser() {
-  // Set up filters including school, subjects, etc.
+  // Set up filters
   const [filters, setFilters] = useState<ResourceFilters>({
     orderBy: "created_at",
     type: "all",
@@ -36,6 +37,9 @@ export default function Resurser() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 25;
+
+  // For mobile/tablet, toggle filter sidebar visibility.
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const { data: queryResult, isLoading } = useQuery({
     queryKey: ["resources", filters, searchQuery, page],
@@ -53,9 +57,7 @@ export default function Resurser() {
       // --- School-level Filtering ---
       if (filters.school) {
         if (filters.school === "Gymnasiet") {
-          // For Gymnasiet, we require the grade column to be exactly "Gymnasiet"
           query = query.eq("grade", "Gymnasiet");
-          // Then use subject_level (if selected) or else a prefix search on subject.
           if (filters.courseLevel !== "all") {
             query = query.eq("subject_level", filters.courseLevel);
           } else if (filters.subject !== "all") {
@@ -82,7 +84,6 @@ export default function Resurser() {
           }
         }
       } else {
-        // If no school filter is set, allow filtering by grade or subject if chosen.
         if (filters.grade !== "all") {
           query = query.eq("grade", filters.grade);
         }
@@ -123,16 +124,39 @@ export default function Resurser() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F6F6F7]">
-      {/* Main content area */}
-      <div className="flex flex-1">
-        <AppSidebar />
-        {/* Content container with left margin equal to AppSidebar width */}
-        <div className="flex flex-1 ml-[255px]">
-          {/* Filters Sidebar – sticky with white background extending full height */}
-          <div className="sticky top-0 h-screen">
-            <FilterSidebar onFilterChange={setFilters} onSearchChange={setSearchQuery} />
+      <AppSidebar />
+      {/* Main container: on mobile/tablet ml-0; on large screens, reserve space for the AppSidebar */}
+      <div className="flex flex-1 ml-0 lg:ml-[255px]">
+        {/* Flex container to arrange FilterSidebar and Resource Area */}
+        <div className="flex flex-col lg:flex-row w-full">
+          {/* Left side: FilterSidebar */}
+          <div className="w-full lg:w-64">
+            {/* On large screens, always show FilterSidebar attached to AppSidebar */}
+            <div className="hidden lg:block sticky top-0 h-screen bg-white border-r border-gray-300 p-6">
+              <FilterSidebar onFilterChange={setFilters} onSearchChange={setSearchQuery} />
+            </div>
+            {/* On mobile/tablet, render FilterSidebar above resource cards */}
+            <div className="block lg:hidden mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+                className="w-full flex items-center justify-between mb-2"
+              >
+                Filter
+                {isMobileFiltersOpen ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </Button>
+              {isMobileFiltersOpen && (
+                <div className="mb-4">
+                  <FilterSidebar onFilterChange={setFilters} onSearchChange={setSearchQuery} />
+                </div>
+              )}
+            </div>
           </div>
-          {/* Main resource area: only this section scrolls */}
+          {/* Right side: Main Resource Area */}
           <main className="flex-1 p-6 overflow-y-auto">
             <div className="max-w-7xl mx-auto">
               <CreateResourceDialog
@@ -148,7 +172,8 @@ export default function Resurser() {
                 <div className="text-center py-4">Inga resurser hittades</div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-6">
+                  {/* Responsive grid: one column on very small devices, two columns on sm and up */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {resources.map((resource) => (
                       <ResourceCard key={resource.id} resource={resource} />
                     ))}
@@ -179,6 +204,7 @@ export default function Resurser() {
           </main>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

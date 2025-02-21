@@ -5,7 +5,7 @@ import { ProfileAvatar } from "./ProfileAvatar";
 interface ProfileHeaderProps {
   name: string;
   role: string;
-  contactsCount: number; // renamed from followers
+  contactsCount: number;
   reviews: number;
   imageUrl: string;
   onProfileUpdate?: () => void;
@@ -22,20 +22,30 @@ export function ProfileHeader({
   isCurrentUser = false
 }: ProfileHeaderProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
-      <div className="flex items-start gap-4 sm:gap-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      {/* On small screens: center content; On larger screens: align left */}
+      <div className="flex flex-col sm:flex-row sm:items-start gap-6 items-center sm:items-start">
         <ProfileAvatar
           imageUrl={imageUrl}
           name={name}
           isCurrentUser={isCurrentUser}
           onProfileUpdate={isCurrentUser ? onProfileUpdate : undefined}
         />
-        <div className="flex-1">
-          <h2 className="text-xl sm:text-2xl font-semibold">{name}</h2>
-          <p className="text-gray-500 text-sm sm:text-base">{role}</p>
-          <ProfileStats contactsCount={contactsCount} reviews={reviews} />
+        <div className="flex-1 text-center sm:text-left">
+          <h2 className="text-2xl font-semibold">{name}</h2>
+          <p className="text-gray-500">{role}</p>
+          <div className="flex flex-col items-center sm:items-start">
+            <ProfileStats contactsCount={contactsCount} reviews={reviews} />
+          </div>
+          {/* On phones: show actions below stats */}
+          <div className="block sm:hidden mt-4">
+            <ProfileActions />
+          </div>
         </div>
-        <ProfileActions />
+        {/* On larger screens: place actions on the right */}
+        <div className="hidden sm:block">
+          <ProfileActions />
+        </div>
       </div>
     </div>
   );

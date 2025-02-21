@@ -117,10 +117,12 @@ const DiscussionDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
 
-      <main className="pl-64">
-        <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
+      {/* Use pl-0 on mobile/tablet and lg:pl-64 on large screens */}
+      <main className="pl-0 lg:pl-64">
+        {/* Responsive grid: single column on mobile/tablet, 3 columns on large screens */}
+        <div className="mx-auto px-6 py-8 grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="col-span-2">
+          <div className="col-span-1 xl:col-span-2">
             {/* Discussion Header */}
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
             <p className="text-gray-700 mb-4">{discussion?.description}</p>
@@ -164,7 +166,7 @@ const DiscussionDetail = () => {
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
                 placeholder="Skriv ditt svar här..."
-                className="w-full px-4 py-2 -mb-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--ole-green)]"
                 rows={1}
                 required
               />
@@ -178,39 +180,37 @@ const DiscussionDetail = () => {
 
             {/* Answers Section */}
             {discussion.answers.length > 0 ? (
-              discussion.answers.map((answer) => {
-                return (
-                  <div
-                    key={answer.id}
-                    className="bg-white p-4 mb-4 rounded-md border border-gray-200 flex flex-col gap-4"
-                  >
-                    {/* Mini Profile */}
-                    <div className="flex items-start gap-4">
-                      <MiniProfile
-                        id={answer.user_id}
-                        name={answer.user?.full_name || "Okänd användare"}
-                        avatarUrl={answer.user?.avatar_url}
-                        title={answer.user?.title}
-                        school={answer.user?.school}
-                        created_at={answer.created_at}
-                        size="medium"
-                      />
-                    </div>
-
-                    {/* Answer Content */}
-                    <div className="mt-2">
-                      <p className="text-gray-700">{answer.content}</p>
-                    </div>
+              discussion.answers.map((answer) => (
+                <div
+                  key={answer.id}
+                  className="bg-white p-4 mb-4 rounded-md border border-gray-200 flex flex-col gap-4"
+                >
+                  {/* Mini Profile */}
+                  <div className="flex items-start gap-4">
+                    <MiniProfile
+                      id={answer.user_id}
+                      name={answer.user?.full_name || "Okänd användare"}
+                      avatarUrl={answer.user?.avatar_url}
+                      title={answer.user?.title}
+                      school={answer.user?.school}
+                      created_at={answer.created_at}
+                      size="medium"
+                    />
                   </div>
-                );
-              })
+
+                  {/* Answer Content */}
+                  <div className="mt-2">
+                    <p className="text-gray-700">{answer.content}</p>
+                  </div>
+                </div>
+              ))
             ) : (
               <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar: Only show on large screens */}
+          <div className="hidden xl:block space-y-6">
             <ProfileCard />
             <LatestDiscussions />
           </div>

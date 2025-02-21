@@ -75,7 +75,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
           Ändra
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg">
+      <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
@@ -98,7 +98,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="school">Skola</Label>
             <Input

@@ -128,7 +128,7 @@ const HomeStats = () => {
             title="Resurser delade"
           >
             <div className="flex flex-col items-center mb-3">
-              <FileText className="w-5 h-5 text-[var(--secondary2)]" />
+              <FileText className="w-4 h-4 text-[var(--secondary2)]" />
               <div className="text-3xl font-semibold text-[var(--secondary2)]">
                 {stats?.sharedMaterials || 0}
               </div>
@@ -145,7 +145,7 @@ const HomeStats = () => {
             title="Resurser nedladdade"
           >
             <div className="flex flex-col items-center mb-3">
-              <Download className="w-5 h-5 text-[var(--secondary)]" />
+              <Download className="w-4 h-4 text-[var(--secondary)]" />
               <div className="text-3xl font-semibold text-[var(--secondary)]">
                 {stats?.totalDownloads || 0}
               </div>

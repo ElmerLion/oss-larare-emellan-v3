@@ -125,7 +125,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-4 top-4 transition-opacity"
           onClick={() => setIsSaveDialogOpen(true)}
         >
           <Bookmark className="h-5 w-5" />

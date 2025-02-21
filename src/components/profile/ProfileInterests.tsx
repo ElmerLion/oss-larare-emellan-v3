@@ -30,17 +30,25 @@ export function ProfileInterests({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 relative">
       {isCurrentUser && (
-        <Button
-          onClick={() => setIsEditOpen(true)}
-          className="absolute top-4 right-4 hover:text-gray-700"
-          variant="outline"
-          size="sm"
-        >
-          <Pencil className="w-4 h-4 mr-2" />
-          Ändra
-        </Button>
+        <>
+          {/* Shown on screens sm and up */}
+          <div className="hidden sm:block absolute top-4 right-4 hover:text-gray-700">
+            <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Ändra
+            </Button>
+          </div>
+          {/* Shown on phones */}
+          <div className="block sm:hidden mb-2">
+            <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Ändra
+            </Button>
+          </div>
+        </>
       )}
-      <h2 className="text-xl font-semibold mb-4">Ämnen & Intressen</h2>
+
+      <h2 className="text-xl font-semibold mb-2">Ämnen & Intressen</h2>
       {educationLevel && (
         <p className="text-sm text-gray-500 mb-2">
           Utbildningsnivå: {educationLevel}

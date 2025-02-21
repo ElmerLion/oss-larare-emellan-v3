@@ -34,7 +34,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#features" className="hover:text-[color:var(--ole-green)]">
+                <a href="/funktioner" className="hover:text-[color:var(--ole-green)]">
                   Funktioner
                 </a>
               </li>

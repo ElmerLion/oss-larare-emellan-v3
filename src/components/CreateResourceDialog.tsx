@@ -370,7 +370,7 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
           {previewUrl && file && file.type.startsWith("audio/") && (
             <div className="mt-2">
               <audio controls src={previewUrl}>
-                Din webbläsare stödjer inte audio.
+                Din webbläsare stödjer inte ljudfiler.
               </audio>
             </div>
           )}

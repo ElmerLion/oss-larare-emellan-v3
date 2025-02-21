@@ -111,9 +111,11 @@ const Diskussioner = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <AppSidebar />
-      <main className="pl-64">
-        <div className="max-w-[1500px] mx-auto px-6 py-8 grid grid-cols-3 gap-8">
-          <div className="col-span-2">
+      {/* Use no left padding on mobile/tablet and add it on large screens */}
+      <main className="pl-0 lg:pl-64">
+        {/* Responsive grid: single column on mobile/tablet, 3 columns on large screens */}
+        <div className="mx-auto px-6 py-8 grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="xl:col-span-2">
             <h1 className="text-2xl font-semibold mb-2">Forum</h1>
             <p className="text-gray-600 mb-8">
               Utforska pågående samtal och delta med dina idéer.
@@ -195,12 +197,12 @@ const Diskussioner = () => {
               )}
             </div>
 
-            {/* Use the extracted DiscussionsList component */}
+            {/* Discussions list */}
             <DiscussionsList currentUserId={currentUserId} />
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar: only show on large screens */}
+          <div className="hidden xl:block space-y-6">
             <ProfileCard />
             <LatestDiscussions />
           </div>

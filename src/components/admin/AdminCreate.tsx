@@ -224,7 +224,7 @@ export function AdminCreate(): JSX.Element {
 
         {/* Broadcast Message Card */}
         <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande</h2>
+          <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande (FUNGERAR INTE)</h2>
           <form onSubmit={handleUpdateBroadcast} className="space-y-4">
             <Input
               value={broadcastMessage}
@@ -249,11 +249,6 @@ export function AdminCreate(): JSX.Element {
             </Button>
           </form>
         </div>
-
-        <p className="text-gray-600">
-          Denna sida låter dig både skapa ett nytt "Veckans Hot Topic" samt ställa in ett
-          broadcast-meddelande som visas på alla sidor.
-        </p>
       </main>
     </div>
   );

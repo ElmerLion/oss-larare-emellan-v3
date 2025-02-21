@@ -230,9 +230,9 @@ export function AppSidebar() {
             }
           />
 
-          {/* Admin Section */}
+          {/* Admin Section – hidden on phones */}
           {isAdmin && (
-            <>
+            <div className="hidden sm:block">
               <div className="px-4 py-2 mt-4 text-gray-500 uppercase text-xs">
                 Admin
               </div>
@@ -263,7 +263,7 @@ export function AppSidebar() {
               >
                 <span>Feedback</span>
               </Link>
-            </>
+            </div>
           )}
         </nav>
 

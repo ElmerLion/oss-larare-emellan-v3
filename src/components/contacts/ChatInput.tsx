@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { LinkMaterialDialog } from "@/components/LinkMaterialDialog";
 import type { Material } from "@/types/material";
+import type { Profile } from "@/types/profile";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ChatInputProps {
   newMessage: string;
   currentUserId: string | null;
   selectedUser: Profile;
++  selectedGroup?: any | null;
   onNewMessageChange: (message: string) => void;
   onSendMessage: (linkedMaterialIds?: string[], linkedFileIds?: string[]) => void;
   linkedMaterials?: Material[];
@@ -17,12 +19,14 @@ interface ChatInputProps {
   onClearLinkedMaterial?: (index: number) => void;
   onClearLinkedFile?: (index: number) => void;
   onLinkMaterial?: (material: Material) => void;
+  onLinkFile?: (file: Material) => void;
 }
 
 export function ChatInput({
   newMessage,
   currentUserId,
   selectedUser,
++  selectedGroup,
   onNewMessageChange,
   onSendMessage,
   linkedMaterials = [],

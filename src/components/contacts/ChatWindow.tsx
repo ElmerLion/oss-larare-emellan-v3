@@ -6,6 +6,7 @@ import type { Material } from "@/types/material";
 
 interface ChatWindowProps {
   selectedUser: Profile | null;
+  selectedGroup?: any | null;
   messages: Message[] | undefined;
   newMessage: string;
   currentUserId: string | null;
@@ -21,7 +22,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow(props: ChatWindowProps) {
-  if (!props.selectedUser) {
+  if (!props.selectedUser && !props.selectedGroup) {
     return (
       <div className="flex-1 bg-white rounded-lg shadow-sm flex items-center justify-center text-gray-500">
         Välj en användare för att börja chatta

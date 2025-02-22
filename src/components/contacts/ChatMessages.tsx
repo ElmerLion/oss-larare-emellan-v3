@@ -4,9 +4,11 @@ import { Paperclip, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import type { Profile } from "@/types/profile";
 import type { Message } from "@/types/message";
 import type { Material } from "@/types/material";
+import { Button } from "@/components/ui/button";
 
 async function downloadFile(filePath: string, fileName: string) {
   const cleanedFilePath = filePath.trim();
@@ -44,6 +46,7 @@ async function downloadFile(filePath: string, fileName: string) {
 
 interface ChatMessagesProps {
   selectedUser: Profile;
+  selectedGroup?: any | null;
   messages: Message[] | undefined;
   currentUserId: string | null;
   onViewMaterial?: (materialId: string) => void;
@@ -51,53 +54,112 @@ interface ChatMessagesProps {
 
 export function ChatMessages({
   selectedUser,
+  selectedGroup,
   messages,
   currentUserId,
   onViewMaterial,
 }: ChatMessagesProps) {
-  // When the chat is opened, mark unread messages (sent by selectedUser) as read.
-useEffect(() => {
-  if (!selectedUser || !currentUserId) return;
+  const { toast } = useToast();
 
-  const markMessagesAsRead = async () => {
-    const { data, error } = await supabase
-      .from("messages")
-      .update({ is_read: true })
-      .eq("receiver_id", currentUserId)
-      .eq("sender_id", selectedUser.id)
-      .eq("is_read", false)
-      .select(); // add this line to return updated rows
-
-    if (error) {
-      console.error("Error marking messages as read:", error);
-    } else {
-      console.log("Marked messages as read:", data);
+  // Mark messages as read when the conversation is opened.
+  useEffect(() => {
+    if (!currentUserId) return;
+    if (selectedGroup) {
+      const markGroupMessagesAsRead = async () => {
+        const { data, error } = await supabase
+          .from("messages")
+          .update({ is_read: true })
+          .eq("group_id", selectedGroup.id)
+          .neq("sender_id", currentUserId)
+          .eq("is_read", false)
+          .select();
+        if (error) {
+          console.error("Error marking group messages as read:", error);
+        } else {
+          console.log("Marked group messages as read:", data);
+        }
+      };
+      markGroupMessagesAsRead();
+    } else if (selectedUser) {
+      const markUserMessagesAsRead = async () => {
+        const { data, error } = await supabase
+          .from("messages")
+          .update({ is_read: true })
+          .eq("receiver_id", currentUserId)
+          .eq("sender_id", selectedUser.id)
+          .eq("is_read", false)
+          .select();
+        if (error) {
+          console.error("Error marking messages as read:", error);
+        } else {
+          console.log("Marked messages as read:", data);
+        }
+      };
+      markUserMessagesAsRead();
     }
-  };
-
-  markMessagesAsRead();
-}, [selectedUser, currentUserId]);
-
+  }, [selectedGroup, selectedUser, currentUserId]);
 
   return (
     <>
       <div className="p-4 border-b flex items-center gap-3">
-        <img
-          src={selectedUser.avatar_url || "/placeholder.svg"}
-          alt={selectedUser.full_name}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <div>
-          <Link
-            to={`/profil/${selectedUser.id}`}
-            className="font-medium hover:underline"
-          >
-            {selectedUser.full_name}
-          </Link>
-          <p className="text-sm text-gray-600">
-            {selectedUser.title} {selectedUser.school ? `på ${selectedUser.school}` : ""}
-          </p>
-        </div>
+        {selectedGroup ? (
+          <>
+            <img
+              src={selectedGroup.icon_url || "/group-placeholder.svg"}
+              alt={selectedGroup.name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <span className="font-medium">{selectedGroup.name}</span>
+              {selectedGroup.description && (
+                <p className="text-sm text-gray-600">{selectedGroup.description}</p>
+              )}
+            </div>
+            {currentUserId === selectedGroup.owner_id && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="ml-auto"
+                onClick={async () => {
+                  if (window.confirm("Är du säker på att du vill radera denna grupp?")) {
+                    const { error } = await supabase
+                      .from("groups")
+                      .delete()
+                      .eq("id", selectedGroup.id);
+                    if (error) {
+                      console.error("Error deleting group:", error);
+                      toast({ title: "Fel", description: error.message, variant: "destructive" });
+                    } else {
+                      toast({ title: "Grupp raderad", description: "Gruppen har raderats", variant: "success" });
+                      // Optionally, call parent's state update to remove the deleted group.
+                    }
+                  }
+                }}
+              >
+                Radera
+              </Button>
+            )}
+          </>
+        ) : (
+          <>
+            <img
+              src={selectedUser.avatar_url || "/placeholder.svg"}
+              alt={selectedUser.full_name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <Link
+                to={`/profil/${selectedUser.id}`}
+                className="font-medium hover:underline"
+              >
+                {selectedUser.full_name}
+              </Link>
+              <p className="text-sm text-gray-600">
+                {selectedUser.title} {selectedUser.school ? `på ${selectedUser.school}` : ""}
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto space-y-4">

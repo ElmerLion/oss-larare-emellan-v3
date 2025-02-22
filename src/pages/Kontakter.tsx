@@ -22,8 +22,10 @@ export default function Kontakter() {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
 
-  // New state to detect mobile/tablet view and to control which panel is shown.
+
+  // New state to detect mobile/tablet view and control which panel is shown.
   const [isMobileView, setIsMobileView] = useState(false);
   const [showContacts, setShowContacts] = useState(true);
 
@@ -31,7 +33,6 @@ export default function Kontakter() {
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 1024;
       setIsMobileView(mobile);
-      // On desktop, always show both panels.
       if (!mobile) setShowContacts(true);
     };
     checkScreenSize();
@@ -55,7 +56,6 @@ export default function Kontakter() {
     queryKey: ["recentMessages", currentUserId],
     queryFn: async () => {
       if (!currentUserId) return [];
-
       const { data, error } = await supabase
         .from("messages")
         .select(`
@@ -67,6 +67,7 @@ export default function Kontakter() {
           receiver:profiles!receiver_id ( full_name, avatar_url, title, school )
         `)
         .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+        .is("group_id", null) // Only one-to-one messages
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -87,7 +88,6 @@ export default function Kontakter() {
           };
         }
       });
-
       return Object.values(grouped);
     },
     enabled: !!currentUserId,
@@ -113,6 +113,21 @@ export default function Kontakter() {
         .in("id", contactIds);
       if (profilesError) throw profilesError;
       return profilesData || [];
+    },
+    enabled: !!currentUserId,
+  });
+
+  // Query: Get groups for the current user by fetching group memberships and joining with groups.
+  const { data: groups } = useQuery({
+    queryKey: ["contacts-groups", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      const { data, error } = await supabase
+        .from("group_memberships")
+        .select(`group:groups(*)`)
+        .eq("user_id", currentUserId);
+      if (error) throw error;
+      return data?.map((membership: any) => membership.group) || [];
     },
     enabled: !!currentUserId,
   });
@@ -230,31 +245,52 @@ export default function Kontakter() {
 
   // Query: Fetch messages for the selected conversation.
   const { data: messages, refetch: refetchMessages } = useQuery({
-    queryKey: ["messages", selectedUser?.id],
+    queryKey: ["messages", selectedGroup ? selectedGroup.id : selectedUser?.id],
     queryFn: async () => {
-      if (!selectedUser?.id || !currentUserId) return [];
-      const { data, error } = await supabase
-        .from("messages")
-        .select(`
-          *,
-          materials:message_materials(
-            material_id,
-            resources!message_materials_material_id_fkey(id, title, file_path, description)
-          ),
-          files:message_files(
-            file_id,
-            resources:files(id, title, file_path, created_at)
+      if (selectedGroup && currentUserId) {
+        const { data, error } = await supabase
+          .from("messages")
+          .select(`
+            *,
+            materials:message_materials(
+              material_id,
+              resources!message_materials_material_id_fkey(id, title, file_path, description)
+            ),
+            files:message_files(
+              file_id,
+              resources:files(id, title, file_path, created_at)
+            )
+          `)
+          .eq("group_id", selectedGroup.id)
+          .order("created_at", { ascending: true });
+        if (error) throw error;
+        return data;
+      } else if (selectedUser && currentUserId) {
+        const { data, error } = await supabase
+          .from("messages")
+          .select(`
+            *,
+            materials:message_materials(
+              material_id,
+              resources!message_materials_material_id_fkey(id, title, file_path, description)
+            ),
+            files:message_files(
+              file_id,
+              resources:files(id, title, file_path, created_at)
+            )
+          `)
+          .or(
+            `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
           )
-        `)
-        .or(
-          `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
-        )
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data;
+          .order("created_at", { ascending: true });
+        if (error) throw error;
+        return data;
+      }
+      return [];
     },
-    enabled: !!selectedUser && !!currentUserId,
+    enabled: !!(selectedGroup || (selectedUser && currentUserId)),
   });
+
 
   // Realtime subscription for new messages.
   useEffect(() => {
@@ -278,23 +314,36 @@ export default function Kontakter() {
     };
   }, [selectedUser, refetchMessages]);
 
-  const handleLinkMaterial = (material: Material) => setLinkedMaterials((prev) => [...prev, material]);
+  const handleLinkMaterial = (material: Material) =>
+    setLinkedMaterials((prev) => [...prev, material]);
   const handleClearLinkedMaterial = (index: number) => {
     const updatedMaterials = [...linkedMaterials];
     updatedMaterials.splice(index, 1);
     setLinkedMaterials(updatedMaterials);
   };
 
-  const handleSendMessage = async (linkedMaterialIds: string[] = [], linkedFileIds: string[] = []) => {
-    if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+  const handleSendMessage = async (
+    linkedMaterialIds: string[] = [],
+    linkedFileIds: string[] = []
+  ) => {
+    if (!newMessage.trim() || !currentUserId || !(selectedUser || selectedGroup)) return;
     try {
+      let insertPayload: any = {
+        sender_id: currentUserId,
+        content: newMessage,
+      };
+
+      if (selectedGroup) {
+        // Send as group message
+        insertPayload.group_id = selectedGroup.id;
+      } else if (selectedUser) {
+        // Send as individual message
+        insertPayload.receiver_id = selectedUser.id;
+      }
+
       const { data: messageData, error: messageError } = await supabase
         .from("messages")
-        .insert({
-          sender_id: currentUserId,
-          receiver_id: selectedUser.id,
-          content: newMessage,
-        })
+        .insert(insertPayload)
         .select()
         .single();
       if (messageError) throw messageError;
@@ -356,23 +405,30 @@ export default function Kontakter() {
     <div className="flex h-screen bg-[#F6F6F7]">
       <AppSidebar />
       <div className="flex flex-1 lg:ml-64 p-6 gap-6 relative">
-        {/* On mobile/tablet, show ContactList only if showContacts is true */}
         {(!isMobileView || showContacts) && (
           <ContactList
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             profiles={combinedProfiles}
+            groups={groups}
             selectedUser={selectedUser}
             onSelectUser={(user) => {
               setSelectedUser(user);
+              setSelectedGroup(null); // clear any selected group
+              if (isMobileView) setShowContacts(false);
+            }}
+            onSelectGroup={(group) => {
+              setSelectedGroup(group);
+              setSelectedUser(null); // clear any selected user
+              console.log("Selected group ", group)
               if (isMobileView) setShowContacts(false);
             }}
           />
+
+
         )}
-        {/* On mobile/tablet, show ChatWindow only if showContacts is false */}
         {(!isMobileView || !showContacts) && (
           <div className="flex-1 flex flex-col h-full">
-            {/* Mobile back button */}
             {isMobileView && !showContacts && (
               <button
                 onClick={handleBack}
@@ -383,6 +439,7 @@ export default function Kontakter() {
             )}
             <ChatWindow
               selectedUser={selectedUser}
+              selectedGroup={selectedGroup}
               messages={messages}
               newMessage={newMessage}
               currentUserId={currentUserId}
@@ -412,7 +469,6 @@ export default function Kontakter() {
             />
           </div>
         )}
-
         {selectedMaterial && (
           <ResourceDetailsDialog
             resource={selectedMaterial}

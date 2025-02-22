@@ -19,7 +19,7 @@ import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
 const menuItems = [
-  { icon: Home, label: "Hem", path: "/" },
+  { icon: Home, label: "Hem", path: "/home" },
   { icon: User, label: "Profil", path: "/profil" },
   { icon: MessageSquare, label: "Forum", path: "/forum" },
   { icon: Users, label: "Meddelanden", path: "/meddelanden" },
@@ -152,7 +152,7 @@ export function AppSidebar() {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300",
+          "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300 overflow-y-auto",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0" // Always show sidebar on desktop
         )}
@@ -179,7 +179,11 @@ export function AppSidebar() {
               to={item.path}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
-                location.pathname === item.path && "bg-sage-50 text-sage-500"
+                (item.path === "/profil" && location.pathname.startsWith("/profil")) ||
+                (item.path === "/forum" && location.pathname.startsWith("/forum")) ||
+                location.pathname === item.path
+                  ? "bg-sage-50 text-sage-500"
+                  : ""
               )}
             >
               <item.icon className="w-5 h-5" />
@@ -193,7 +197,8 @@ export function AppSidebar() {
           ))}
         </nav>
 
-        <div className="absolute bottom-8 left-4 right-4 space-y-2">
+         {/* Logout / Authentication Section */}
+        <div className="space-y-2">
           {session ? (
             <button
               onClick={handleLogout}

@@ -20,6 +20,16 @@ import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
 import Funktioner from "./pages/Funktioner";
+<<<<<<< Updated upstream
+=======
+import ContactUs from "@/pages/ContactUs";
+
+// Import Admin Pages
+import { AdminOverview } from "@/components/admin/AdminOverview";
+import { AdminModeration } from "@/components/admin/AdminModeration";
+import { AdminCreate } from "@/components/admin/AdminCreate";
+import { AdminFeedback } from "@/components/admin/AdminFeedback";
+>>>>>>> Stashed changes
 
 const queryClient = new QueryClient();
 
@@ -76,6 +86,10 @@ const AppRoutes = ({ isAuthenticated, currentUserId }: { isAuthenticated: boolea
       />
       <Route path="/omoss" element={<OmOss />} />
       <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
+<<<<<<< Updated upstream
+=======
+      <Route path="/kontakt" element={<ContactUs />} />
+>>>>>>> Stashed changes
       <Route path="/forum" element={<Diskussioner />} />
       <Route path="/forum/:slug" element={<DiscussionDetail />} />
       <Route

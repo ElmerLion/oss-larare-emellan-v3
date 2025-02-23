@@ -26,7 +26,7 @@ export function ChatInput({
   newMessage,
   currentUserId,
   selectedUser,
-+  selectedGroup,
+  selectedGroup,
   onNewMessageChange,
   onSendMessage,
   linkedMaterials = [],

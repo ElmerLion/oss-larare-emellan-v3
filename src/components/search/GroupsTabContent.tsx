@@ -1,0 +1,149 @@
+// GroupsTabContent.tsx
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+
+interface Group {
+  id: string;
+  name: string;
+  description: string;
+  icon_url?: string;
+  is_public: boolean;
+  created_at: string;
+}
+
+interface GroupsTabContentProps {
+  searchQuery: string;
+}
+
+export default function GroupsTabContent({ searchQuery }: GroupsTabContentProps) {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Fetch the current user ID
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setCurrentUserId(user.id);
+    };
+    fetchUser();
+  }, []);
+
+  // Query public groups matching the search query
+  const { data: groups, isLoading, error } = useQuery<Group[]>({
+    queryKey: ["groups", searchQuery],
+    queryFn: async () => {
+      let queryBuilder = supabase
+        .from("groups")
+        .select("*")
+        .eq("is_public", true)
+        .order("created_at", { ascending: false });
+      if (searchQuery) {
+        queryBuilder = queryBuilder.or(
+          `name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
+        );
+      }
+      const { data, error } = await queryBuilder;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Query the groups the user is already in
+  const { data: userGroups } = useQuery<{ group_id: string }[]>({
+    queryKey: ["userGroups", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      const { data, error } = await supabase
+        .from("group_memberships")
+        .select("group_id")
+        .eq("user_id", currentUserId)
+        .eq("status", "approved");
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentUserId,
+  });
+  const userGroupIds = new Set(userGroups?.map((g) => g.group_id));
+
+  // Handler to join a group
+  const handleJoinGroup = async (group: Group) => {
+    if (!currentUserId) return;
+    try {
+      const { error } = await supabase
+        .from("group_memberships")
+        .insert({
+          group_id: group.id,
+          user_id: currentUserId,
+          role: "member",
+          status: "approved",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      toast({
+        title: "Gå med",
+        description: "Du har gått med i gruppen",
+        variant: "success",
+      });
+      queryClient.invalidateQueries(["userGroups", currentUserId]);
+    } catch (err: any) {
+      toast({
+        title: "Fel",
+        description: err.message || "Något gick fel",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) return <p>Laddar grupper...</p>;
+  if (error) return <p>Ett fel inträffade: {error.message}</p>;
+  if (!groups || groups.length === 0) return <p>Inga grupper hittades.</p>;
+
+  return (
+    <div className="p-4 space-y-4">
+      {groups.map((group) => (
+        <div
+          key={group.id}
+          className="p-4 bg-white rounded-lg shadow-sm border flex items-center"
+        >
+          {group.icon_url ? (
+            <img
+              src={group.icon_url}
+              alt={group.name}
+              className="w-12 h-12 rounded object-cover mr-4"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded bg-gray-200 mr-4 flex items-center justify-center">
+              <span className="text-gray-500">Icon</span>
+            </div>
+          )}
+          <div className="flex-1">
+            <Link
+              to={`/group/${group.id}`}
+              className="text-lg font-semibold hover:underline"
+            >
+              {group.name}
+            </Link>
+            {group.description && (
+              <p className="text-sm text-gray-600">{group.description}</p>
+            )}
+          </div>
+          <div>
+            {userGroupIds.has(group.id) ? (
+              <span className="text-green-600 font-semibold">Medlem</span>
+            ) : (
+              <Button variant="outline" onClick={() => handleJoinGroup(group)}>
+                Gå med
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -214,11 +214,32 @@ export function AdminOverview(): JSX.Element {
     }
   };
 
-  // Helper to render a discussion card; (omitted here for brevity – see previous version)
-  // ... (renderDiscussionCard function from your code)
+  // Query for groups
+  const {
+    data: adminGroups,
+    isLoading: groupsLoading,
+    error: groupsError,
+  } = useQuery({
+    queryKey: ["adminGroups"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("groups")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  // In this example, we'll assume the existing code for comments, posts, discussions, and resources remains unchanged.
-  // We'll now add a new section for "Nya Konton" below the existing sections.
+  const deleteGroup = async (id: string) => {
+    const { error } = await supabase.from("groups").delete().eq("id", id);
+    if (error) {
+      toast.error("Kunde inte ta bort gruppen: " + error.message);
+    } else {
+      toast.success("Grupp borttagen");
+      queryClient.invalidateQueries(["adminGroups"]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -454,6 +475,56 @@ export function AdminOverview(): JSX.Element {
                     <p>Inga resurser hittades.</p>
                   )}
                 </>
+              )}
+            </section>
+            {/* Recent Groups Section */}
+            <section className="mb-8">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => {}}
+              >
+                <h2 className="text-xl font-semibold mb-4">Senaste Grupper</h2>
+              </div>
+              {groupsLoading ? (
+                <div>Laddar grupper...</div>
+              ) : adminGroups && adminGroups.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {adminGroups.map((group: any) => (
+                    <div
+                      key={group.id}
+                      className="bg-white rounded-lg shadow p-4 hover:shadow-md transition relative cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={group.icon_url || "/group-placeholder.svg"}
+                          alt={group.name}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div>
+                          <p className="text-gray-800 font-medium">{group.name}</p>
+                          <p className="text-gray-600">{group.description}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (
+                            window.confirm(
+                              `Är du säker på att du vill ta bort gruppen "${group.name}"?`
+                            )
+                          ) {
+                            deleteGroup(group.id);
+                          }
+                        }}
+                        className="absolute top-2 right-2 text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>Inga grupper hittades.</p>
               )}
             </section>
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Paperclip, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -9,12 +9,12 @@ import type { Profile } from "@/types/profile";
 import type { Message } from "@/types/message";
 import type { Material } from "@/types/material";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 async function downloadFile(filePath: string, fileName: string) {
   const cleanedFilePath = filePath.trim();
   console.log("Generating signed URL for filePath:", cleanedFilePath);
 
-  // Generate the signed URL with a 60-second expiration
   const { data, error } = await supabase
     .storage
     .from("message_files")
@@ -61,7 +61,74 @@ export function ChatMessages({
 }: ChatMessagesProps) {
   const { toast } = useToast();
 
-  // Mark messages as read when the conversation is opened.
+  // Editing state for group details
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+  const [editedIconUrl, setEditedIconUrl] = useState("");
+
+  // Update edit state when selectedGroup changes.
+  useEffect(() => {
+    if (selectedGroup) {
+      setEditedName(selectedGroup.name);
+      setEditedDescription(selectedGroup.description || "");
+      setEditedIconUrl(selectedGroup.icon_url || "");
+      setIsEditing(false);
+    }
+  }, [selectedGroup]);
+
+  // Handler for icon update in editing mode.
+  const handleIconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && currentUserId) {
+      const file = e.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const fileName = `group_icons/${currentUserId}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage
+        .from("group_icons")
+        .upload(fileName, file);
+      if (error) {
+        toast({ title: "Fel", description: error.message, variant: "destructive" });
+        return;
+      }
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from("group_icons")
+        .createSignedUrl(fileName, 60 * 60 * 24 * 7);
+      if (urlError) {
+        toast({ title: "Fel", description: urlError.message, variant: "destructive" });
+        return;
+      }
+      setEditedIconUrl(urlData.signedUrl);
+    }
+  };
+
+  // Handler to save edited group details.
+  const handleSaveEdits = async () => {
+    if (!selectedGroup) return;
+    try {
+      const { data, error } = await supabase
+        .from("groups")
+        .update({
+          name: editedName,
+          description: editedDescription,
+          icon_url: editedIconUrl,
+        })
+        .eq("id", selectedGroup.id)
+        .select()
+        .single();
+      if (error) throw error;
+      toast({ title: "Uppdaterad", description: "Gruppuppgifter uppdaterade", variant: "success" });
+      // Optionally update selectedGroup in parent.
+      // For now, we update local selectedGroup
+      selectedGroup.name = data.name;
+      selectedGroup.description = data.description;
+      selectedGroup.icon_url = data.icon_url;
+      setIsEditing(false);
+    } catch (err: any) {
+      toast({ title: "Fel", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // Mark messages as read when conversation opens.
   useEffect(() => {
     if (!currentUserId) return;
     if (selectedGroup) {
@@ -104,18 +171,83 @@ export function ChatMessages({
       <div className="p-4 border-b flex items-center gap-3">
         {selectedGroup ? (
           <>
-            <img
-              src={selectedGroup.icon_url || "/group-placeholder.svg"}
-              alt={selectedGroup.name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-              <span className="font-medium">{selectedGroup.name}</span>
-              {selectedGroup.description && (
-                <p className="text-sm text-gray-600">{selectedGroup.description}</p>
+            <div className="relative">
+              {isEditing ? (
+                <>
+                  <img
+                    src={editedIconUrl || "/group-placeholder.svg"}
+                    alt={editedName}
+                    className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                    onClick={() => {
+                      // Trigger file input click.
+                      const fileInput = document.getElementById("groupIconInput");
+                      fileInput?.click();
+                    }}
+                  />
+                  <input
+                    id="groupIconInput"
+                    type="file"
+                    className="hidden"
+                    onChange={handleIconChange}
+                  />
+                </>
+              ) : (
+                <img
+                  src={selectedGroup.icon_url || "/group-placeholder.svg"}
+                  alt={selectedGroup.name}
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                  onClick={() => setIsEditing(true)}
+                />
               )}
             </div>
-            {currentUserId === selectedGroup.owner_id && (
+            <div className="flex-1">
+              {isEditing ? (
+                <>
+                  <Input
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onDoubleClick={() => {}}
+                    className="mb-1"
+                  />
+                  <Input
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    onDoubleClick={() => {}}
+                  />
+                </>
+              ) : (
+                <div
+                  onDoubleClick={() => setIsEditing(true)}
+                  className="cursor-pointer"
+                >
+                  <span className="font-medium">{selectedGroup.name}</span>
+                  {selectedGroup.description && (
+                    <p className="text-sm text-gray-600">
+                      {selectedGroup.description}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            {selectedGroup && currentUserId === selectedGroup.owner_id && isEditing && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSaveEdits}
+                >
+                  Spara
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Avbryt
+                </Button>
+              </div>
+            )}
+            {selectedGroup && currentUserId === selectedGroup.owner_id && !isEditing && (
               <Button
                 variant="destructive"
                 size="sm"
@@ -131,7 +263,7 @@ export function ChatMessages({
                       toast({ title: "Fel", description: error.message, variant: "destructive" });
                     } else {
                       toast({ title: "Grupp raderad", description: "Gruppen har raderats", variant: "success" });
-                      // Optionally, call parent's state update to remove the deleted group.
+                      // Optionally update parent's state.
                     }
                   }
                 }}

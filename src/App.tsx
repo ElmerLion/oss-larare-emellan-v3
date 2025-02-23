@@ -27,6 +27,7 @@ import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
 import Funktioner from "./pages/Funktioner";
 import Contact from "@/pages/Contact";
+import Search from "@/pages/Search";
 
 // Import Admin Pages
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -94,9 +95,25 @@ const AppRoutes = ({
         element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />}
       />
       <Route
+        path="/sök"
+        element={isAuthenticated ? <Search /> : <Navigate to="/login" replace />}
+      />
+      <Route
         path="/mitt-bibliotek"
         element={
           isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/forum"
+        element={
+          isAuthenticated ? <Diskussioner /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/forum/:slug"
+        element={
+          isAuthenticated ? <DiscussionDetail /> : <Navigate to="/login" replace />
         }
       />
       <Route
@@ -116,8 +133,6 @@ const AppRoutes = ({
       <Route path="/omoss" element={<OmOss />} />
       <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
       <Route path="/kontakt" element={<Contact />} />
-      <Route path="/forum" element={<Diskussioner />} />
-      <Route path="/forum/:slug" element={<DiscussionDetail />} />
       <Route
         path="/installningar"
         element={

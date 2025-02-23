@@ -11,7 +11,7 @@ interface ChatInputProps {
   newMessage: string;
   currentUserId: string | null;
   selectedUser: Profile;
-+  selectedGroup?: any | null;
+  selectedGroup?: any | null;
   onNewMessageChange: (message: string) => void;
   onSendMessage: (linkedMaterialIds?: string[], linkedFileIds?: string[]) => void;
   linkedMaterials?: Material[];

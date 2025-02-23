@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import LatestDiscussions from "@/components/LatestDiscussions";
 import { interestsOptions } from "@/types/interestsOptions";
 import DiscussionsList from "@/components/discussion/DiscussionList";
+import { Header } from "@/components/Header";
 
 const Diskussioner = () => {
   const queryClient = useQueryClient();
@@ -109,11 +110,12 @@ const Diskussioner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 mt-16">
       <AppSidebar />
       {/* Use no left padding on mobile/tablet and add it on large screens */}
       <main className="pl-0 lg:pl-64">
         {/* Responsive grid: single column on mobile/tablet, 3 columns on large screens */}
+        <Header />
         <div className="mx-auto px-6 py-8 grid grid-cols-1 xl:grid-cols-3 gap-8">
           <div className="xl:col-span-2">
             <h1 className="text-2xl font-semibold mb-2">Forum</h1>

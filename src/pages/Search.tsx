@@ -39,7 +39,7 @@ export default function Search() {
         <div className="max-w-[1500px] mx-auto px-4 xl:px-6 py-8 grid grid-cols-1 xl:grid-cols-3 gap-8">
           <div className="xl:col-span-2">
             <h1 className="text-3xl font-bold mb-4">Sökresultat för "{query}"</h1>
-            <div className="mb-4 flex space-x-4 border-b">
+            <div className="mb-4 flex flex-wrap gap-4 border-b pb-2">
               {["Resurser", "Kontakter", "Diskussioner", "Grupper"].map((tab) => (
                 <button
                   key={tab}

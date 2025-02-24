@@ -259,6 +259,13 @@ export default function Kontakter() {
             files:message_files(
               file_id,
               resources:files(id, title, file_path, created_at)
+            ),
+            sender:profiles!sender_id (
+              id,
+              full_name,
+              avatar_url,
+              title,
+              school
             )
           `)
           .eq("group_id", selectedGroup.id)
@@ -277,6 +284,13 @@ export default function Kontakter() {
             files:message_files(
               file_id,
               resources:files(id, title, file_path, created_at)
+            ),
+            sender:profiles!sender_id (
+              id,
+              full_name,
+              avatar_url,
+              title,
+              school
             )
           `)
           .or(

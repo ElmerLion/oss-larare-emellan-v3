@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Paperclip, Upload } from "lucide-react";
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Profile } from "@/types/profile";
 import type { Message } from "@/types/message";
 import type { Material } from "@/types/material";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ChatHeader } from "./ChatHeader";
+import MiniProfile from "@/components/profile/MiniProfile";
 
 async function downloadFile(filePath: string, fileName: string) {
   const cleanedFilePath = filePath.trim();
@@ -61,13 +59,12 @@ export function ChatMessages({
 }: ChatMessagesProps) {
   const { toast } = useToast();
 
-  // Editing state for group details
+  // Editing state for group details (passed down to ChatHeader)
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedIconUrl, setEditedIconUrl] = useState("");
 
-  // Update edit state when selectedGroup changes.
   useEffect(() => {
     if (selectedGroup) {
       setEditedName(selectedGroup.name);
@@ -77,31 +74,6 @@ export function ChatMessages({
     }
   }, [selectedGroup]);
 
-  // Handler for icon update in editing mode.
-  const handleIconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0] && currentUserId) {
-      const file = e.target.files[0];
-      const fileExt = file.name.split(".").pop();
-      const fileName = `group_icons/${currentUserId}/${Date.now()}.${fileExt}`;
-      const { error } = await supabase.storage
-        .from("group_icons")
-        .upload(fileName, file);
-      if (error) {
-        toast({ title: "Fel", description: error.message, variant: "destructive" });
-        return;
-      }
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from("group_icons")
-        .createSignedUrl(fileName, 60 * 60 * 24 * 7);
-      if (urlError) {
-        toast({ title: "Fel", description: urlError.message, variant: "destructive" });
-        return;
-      }
-      setEditedIconUrl(urlData.signedUrl);
-    }
-  };
-
-  // Handler to save edited group details.
   const handleSaveEdits = async () => {
     if (!selectedGroup) return;
     try {
@@ -116,9 +88,12 @@ export function ChatMessages({
         .select()
         .single();
       if (error) throw error;
-      toast({ title: "Uppdaterad", description: "Gruppuppgifter uppdaterade", variant: "success" });
-      // Optionally update selectedGroup in parent.
-      // For now, we update local selectedGroup
+      toast({
+        title: "Uppdaterad",
+        description: "Gruppuppgifter uppdaterade",
+        variant: "success",
+      });
+      // Update local group properties.
       selectedGroup.name = data.name;
       selectedGroup.description = data.description;
       selectedGroup.icon_url = data.icon_url;
@@ -128,7 +103,7 @@ export function ChatMessages({
     }
   };
 
-  // Mark messages as read when conversation opens.
+  // Mark messages as read
   useEffect(() => {
     if (!currentUserId) return;
     if (selectedGroup) {
@@ -168,156 +143,56 @@ export function ChatMessages({
 
   return (
     <>
-      <div className="p-4 border-b flex items-center gap-3">
-        {selectedGroup ? (
-          <>
-            <div className="relative">
-              {isEditing ? (
-                <>
-                  <img
-                    src={editedIconUrl || "/group-placeholder.svg"}
-                    alt={editedName}
-                    className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                    onClick={() => {
-                      // Trigger file input click.
-                      const fileInput = document.getElementById("groupIconInput");
-                      fileInput?.click();
-                    }}
-                  />
-                  <input
-                    id="groupIconInput"
-                    type="file"
-                    className="hidden"
-                    onChange={handleIconChange}
-                  />
-                </>
-              ) : (
-                <img
-                  src={selectedGroup.icon_url || "/group-placeholder.svg"}
-                  alt={selectedGroup.name}
-                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                  onClick={() => setIsEditing(true)}
-                />
-              )}
-            </div>
-            <div className="flex-1">
-              {isEditing ? (
-                <>
-                  <Input
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    onDoubleClick={() => {}}
-                    className="mb-1"
-                  />
-                  <Input
-                    value={editedDescription}
-                    onChange={(e) => setEditedDescription(e.target.value)}
-                    onDoubleClick={() => {}}
-                  />
-                </>
-              ) : (
-                <div
-                  onDoubleClick={() => setIsEditing(true)}
-                  className="cursor-pointer"
-                >
-                  <span className="font-medium">{selectedGroup.name}</span>
-                  {selectedGroup.description && (
-                    <p className="text-sm text-gray-600">
-                      {selectedGroup.description}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-            {selectedGroup && currentUserId === selectedGroup.owner_id && isEditing && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSaveEdits}
-                >
-                  Spara
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Avbryt
-                </Button>
-              </div>
-            )}
-            {selectedGroup && currentUserId === selectedGroup.owner_id && !isEditing && (
-              <Button
-                variant="destructive"
-                size="sm"
-                className="ml-auto"
-                onClick={async () => {
-                  if (window.confirm("Är du säker på att du vill radera denna grupp?")) {
-                    const { error } = await supabase
-                      .from("groups")
-                      .delete()
-                      .eq("id", selectedGroup.id);
-                    if (error) {
-                      console.error("Error deleting group:", error);
-                      toast({ title: "Fel", description: error.message, variant: "destructive" });
-                    } else {
-                      toast({ title: "Grupp raderad", description: "Gruppen har raderats", variant: "success" });
-                      // Optionally update parent's state.
-                    }
-                  }
-                }}
-              >
-                Radera
-              </Button>
-            )}
-          </>
-        ) : (
-          <>
-            <img
-              src={selectedUser.avatar_url || "/placeholder.svg"}
-              alt={selectedUser.full_name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-              <Link
-                to={`/profil/${selectedUser.id}`}
-                className="font-medium hover:underline"
-              >
-                {selectedUser.full_name}
-              </Link>
-              <p className="text-sm text-gray-600">
-                {selectedUser.title} {selectedUser.school ? `på ${selectedUser.school}` : ""}
-              </p>
-            </div>
-          </>
-        )}
-      </div>
+      <ChatHeader
+        selectedUser={selectedUser}
+        selectedGroup={selectedGroup}
+        currentUserId={currentUserId}
+        isEditing={isEditing}
+        editedName={editedName}
+        editedDescription={editedDescription}
+        editedIconUrl={editedIconUrl}
+        setIsEditing={setIsEditing}
+        setEditedName={setEditedName}
+        setEditedDescription={setEditedDescription}
+        onIconChange={() => {}}
+        handleSaveEdits={handleSaveEdits}
+      />
 
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages?.map((message) => {
-          const isSentByMe = message.sender_id === currentUserId;
+          const senderName = message.sender?.full_name || "Unknown Sender";
+          const senderAvatar = message.sender?.avatar_url || "/placeholder.svg";
+          const senderTitle = message.sender?.title;
+          const senderSchool = message.sender?.school;
+          const timeStamp = format(new Date(message.created_at), "MMM d, HH:mm");
+
           return (
-            <div
-              key={message.id}
-              className={cn(
-                "max-w-[80%]",
-                isSentByMe ? "ml-auto" : "mr-auto",
-                isSentByMe ? "bg-[var(--secondary2)] text-white" : "bg-gray-100",
-                "p-3 rounded-lg"
-              )}
-            >
+            <div key={message.id} className="w-full bg-gray-100 p-3 rounded-lg hover:bg-gray-200">
+              {/* Row with the mini-profile + timestamp on the right */}
+              <div className="flex items-center justify-between mb-1">
+                <MiniProfile
+                  id={message.sender?.id || message.sender_id}
+                  name={senderName}
+                  avatarUrl={senderAvatar}
+                  title={senderTitle}
+                  school={senderSchool}
+                  size="small"
+                  showLink={false}
+                />
+                <span className="text-xs text-gray-500 ml-2 mb-4">{timeStamp}</span>
+              </div>
+
               <p>{message.content}</p>
 
               {/* Display attached materials */}
               {message.materials?.map((material) => (
                 <button
                   key={material.material_id}
-                  className="mt-2 p-2 bg-gray-50 rounded-md flex items-center gap-2 w-full hover:bg-gray-100 transition-colors"
+                  className="mt-2 p-2 bg-[var(--secondary2)] rounded-md flex items-center gap-2 w-full hover:bg-[var(--hover-secondary2)] transition-colors"
                   onClick={() => onViewMaterial?.(material.resources.id)}
                 >
-                  <Paperclip className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600 flex-1 text-left">
+                  <Paperclip className="h-4 w-4 text-white" />
+                  <span className="text-sm text-white flex-1 text-left">
                     {material.resources?.title}
                   </span>
                 </button>
@@ -332,18 +207,14 @@ export function ChatMessages({
                     e.preventDefault();
                     await downloadFile(file.resources.file_path, file.resources.title);
                   }}
-                  className="mt-2 p-2 bg-gray-50 rounded-md flex items-center gap-2 w-full hover:bg-gray-100 transition-colors"
+                  className="mt-2 p-2 bg-[var(--secondary2)] rounded-md flex items-center gap-2 w-full hover:bg-[var(--hover-secondary2)] transition-colors"
                 >
-                  <Upload className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600 flex-1 text-left">
+                  <Upload className="h-4 w-4 text-white" />
+                  <span className="text-sm text-white flex-1 text-left">
                     {file.resources?.title}
                   </span>
                 </a>
               ))}
-
-              <p className="text-xs mt-1 opacity-70">
-                {format(new Date(message.created_at), "MMM d, HH:mm")}
-              </p>
             </div>
           );
         })}

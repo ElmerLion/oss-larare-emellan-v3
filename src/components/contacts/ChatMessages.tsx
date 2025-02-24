@@ -152,7 +152,7 @@ export function ChatMessages({
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages?.map((message) => {
           const isSentByMe = message.sender_id === currentUserId;
-          const messageBg = isSentByMe ? "bg-blue-100" : "bg-gray-100 text-gray-900";
+          const messageBg = isSentByMe ? "bg-blue-100 hover:bg-blue-200" : "bg-gray-100 text-gray-900 hover:bg-gray-200";
           return (
             <div
               key={message.id}

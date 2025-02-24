@@ -131,7 +131,7 @@ const AppRoutes = ({
         }
       />
       <Route path="/omoss" element={<OmOss />} />
-      <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
+      <Route path="/integritetspolicy" element={<IntegritetsPolicy />} />
       <Route path="/kontakt" element={<Contact />} />
       <Route
         path="/installningar"

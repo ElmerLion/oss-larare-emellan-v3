@@ -181,7 +181,7 @@ export function AppSidebar() {
       {/* Sidebar */}
 <div
   className={cn(
-    "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300 overflow-y-auto",
+    "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-10 transform transition-transform duration-300 overflow-y-auto",
     isSidebarOpen ? "translate-x-0" : "-translate-x-full",
     "lg:translate-x-0" // Always show sidebar on large screens
   )}

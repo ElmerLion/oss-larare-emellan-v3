@@ -28,6 +28,7 @@ import Installningar from "./pages/Installningar";
 import Funktioner from "./pages/Funktioner";
 import Contact from "@/pages/Contact";
 import Search from "@/pages/Search";
+import InstructionManual from "@/pages/InstructionManual";
 
 // Import Admin Pages
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -137,6 +138,12 @@ const AppRoutes = ({
         path="/installningar"
         element={
           isAuthenticated ? <Installningar /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/instruktionsmanual"
+        element={
+          isAuthenticated ? <InstructionManual /> : <Navigate to="/login" replace />
         }
       />
       <Route path="/funktioner" element={<Funktioner />} />

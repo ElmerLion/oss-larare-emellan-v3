@@ -8,6 +8,8 @@ import type { Message } from "@/types/message";
 import type { Material } from "@/types/material";
 import { ChatHeader } from "./ChatHeader";
 import MiniProfile from "@/components/profile/MiniProfile";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 async function downloadFile(filePath: string, fileName: string) {
   const cleanedFilePath = filePath.trim();
@@ -88,12 +90,7 @@ export function ChatMessages({
         .select()
         .single();
       if (error) throw error;
-      toast({
-        title: "Uppdaterad",
-        description: "Gruppuppgifter uppdaterade",
-        variant: "success",
-      });
-      // Update local group properties.
+      toast({ title: "Uppdaterad", description: "Gruppuppgifter uppdaterade", variant: "success" });
       selectedGroup.name = data.name;
       selectedGroup.description = data.description;
       selectedGroup.icon_url = data.icon_url;
@@ -103,7 +100,7 @@ export function ChatMessages({
     }
   };
 
-  // Mark messages as read
+  // Mark messages as read.
   useEffect(() => {
     if (!currentUserId) return;
     if (selectedGroup) {
@@ -115,11 +112,8 @@ export function ChatMessages({
           .neq("sender_id", currentUserId)
           .eq("is_read", false)
           .select();
-        if (error) {
-          console.error("Error marking group messages as read:", error);
-        } else {
-          console.log("Marked group messages as read:", data);
-        }
+        if (error) console.error("Error marking group messages as read:", error);
+        else console.log("Marked group messages as read:", data);
       };
       markGroupMessagesAsRead();
     } else if (selectedUser) {
@@ -131,11 +125,8 @@ export function ChatMessages({
           .eq("sender_id", selectedUser.id)
           .eq("is_read", false)
           .select();
-        if (error) {
-          console.error("Error marking messages as read:", error);
-        } else {
-          console.log("Marked messages as read:", data);
-        }
+        if (error) console.error("Error marking messages as read:", error);
+        else console.log("Marked messages as read:", data);
       };
       markUserMessagesAsRead();
     }
@@ -160,29 +151,25 @@ export function ChatMessages({
 
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages?.map((message) => {
-          const senderName = message.sender?.full_name || "Unknown Sender";
-          const senderAvatar = message.sender?.avatar_url || "/placeholder.svg";
-          const senderTitle = message.sender?.title;
-          const senderSchool = message.sender?.school;
-          const timeStamp = format(new Date(message.created_at), "MMM d, HH:mm");
-
+          const isSentByMe = message.sender_id === currentUserId;
+          const messageBg = isSentByMe ? "bg-blue-100" : "bg-gray-100 text-gray-900";
           return (
-            <div key={message.id} className="w-full bg-gray-100 p-3 rounded-lg hover:bg-gray-200">
-              {/* Row with the mini-profile + timestamp on the right */}
-              <div className="flex items-center justify-between mb-1">
+            <div
+              key={message.id}
+              className={cn("max-w-[80%] p-3 rounded-lg", isSentByMe ? "ml-auto" : "mr-auto", messageBg)}
+            >
+              <div className="flex items-center mb-1">
                 <MiniProfile
                   id={message.sender?.id || message.sender_id}
-                  name={senderName}
-                  avatarUrl={senderAvatar}
+                  name={message.sender?.full_name || "Unknown Sender"}
+                  avatarUrl={message.sender?.avatar_url || "/placeholder.svg"}
                   size="small"
                   showLink={false}
                 />
-                <span className="text-xs text-gray-500 ml-2 mb-4">{timeStamp}</span>
+                <span className="text-xs ml-4">Skickad {format(new Date(message.created_at), "MMM d, HH:mm")}</span>
               </div>
-
               <p>{message.content}</p>
 
-              {/* Display attached materials */}
               {message.materials?.map((material) => (
                 <button
                   key={material.material_id}
@@ -196,7 +183,6 @@ export function ChatMessages({
                 </button>
               ))}
 
-              {/* Display attached files */}
               {message.files?.map((file) => (
                 <a
                   key={file.file_id}

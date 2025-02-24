@@ -174,8 +174,6 @@ export function ChatMessages({
                   id={message.sender?.id || message.sender_id}
                   name={senderName}
                   avatarUrl={senderAvatar}
-                  title={senderTitle}
-                  school={senderSchool}
                   size="small"
                   showLink={false}
                 />

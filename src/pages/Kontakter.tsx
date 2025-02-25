@@ -434,7 +434,6 @@ export default function Kontakter() {
             onSelectGroup={(group) => {
               setSelectedGroup(group);
               setSelectedUser(null); // clear any selected user
-              console.log("Selected group ", group)
               if (isMobileView) setShowContacts(false);
             }}
           />

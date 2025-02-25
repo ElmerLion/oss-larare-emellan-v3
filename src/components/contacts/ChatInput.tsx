@@ -39,10 +39,6 @@ export function ChatInput({
   // Local state for files uploaded during this session
   const [uploadedFiles, setUploadedFiles] = useState<Material[]>([]);
 
-  useEffect(() => {
-    console.log("Uploaded files state updated:", uploadedFiles);
-  }, [uploadedFiles]);
-
   // Upload file to Supabase Storage and insert its record into the files table
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

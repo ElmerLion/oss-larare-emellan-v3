@@ -95,6 +95,7 @@ export default function Profil() {
   useEffect(() => {
     // Only count visits for non‑current users and if the profile has been loaded.
     if (profileData.id && !isCurrentUser) {
+        console.log("Attempting to increment visits for", profileData.id);
       const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2025-02"
       const localKey = `profile_visit_${profileData.id}`;
       const lastVisitMonth = localStorage.getItem(localKey);

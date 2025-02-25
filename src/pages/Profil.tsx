@@ -91,6 +91,29 @@ export default function Profil() {
     fetchContactsCount();
   }, [profileId]);
 
+  // Increment visits if a unique (non‑current) user visits the profile page.
+  useEffect(() => {
+    // Only count visits for non‑current users and if the profile has been loaded.
+    if (profileData.id && !isCurrentUser) {
+      const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2025-02"
+      const localKey = `profile_visit_${profileData.id}`;
+      const lastVisitMonth = localStorage.getItem(localKey);
+
+      // If the visit for this month hasn’t been recorded locally, record it and update Supabase.
+      if (lastVisitMonth !== currentMonth) {
+        localStorage.setItem(localKey, currentMonth);
+        // Use an RPC function to atomically update the visits column.
+        supabase
+          .rpc("increment_profile_visits", { profile_id: profileData.id })
+          .then(({ error }) => {
+            if (error) {
+              console.error("Error incrementing visits:", error);
+            }
+          });
+      }
+    }
+  }, [profileData.id, isCurrentUser]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex bg-[#F6F6F7]">
@@ -115,7 +138,9 @@ export default function Profil() {
                 <div className="lg:col-span-2">
                   <ProfileHeader
                     name={profileData.full_name}
-                    role={`${profileData.title}${profileData.school ? ` på ${profileData.school}` : ''}`}
+                    role={`${profileData.title}${
+                      profileData.school ? ` på ${profileData.school}` : ""
+                    }`}
                     contactsCount={contactsCount}
                     reviews={54}
                     imageUrl={profileData.avatar_url}
@@ -131,7 +156,7 @@ export default function Profil() {
                     onComplete={fetchProfile}
                   />
                   <ExperienceSection userId={profileId} />
-                  <UploadedMaterials userId={profileId || ''} isCurrentUser={isCurrentUser} />
+                  <UploadedMaterials userId={profileId || ""} isCurrentUser={isCurrentUser} />
                 </div>
                 <div className="hidden lg:block">
                   <RecommendedContacts />

@@ -4,64 +4,49 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export function ProfileCard() {
+  // Query to fetch the current user's profile (including visits)
   const { data: profile } = useQuery({
     queryKey: ['profileCard'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-
       const { data } = await supabase
         .from('profiles')
         .select('id, full_name, title, school, purpose, motivation, contribution, avatar_url, visits')
         .eq('id', user.id)
         .single();
-
       return data;
     },
   });
 
-const { data: stats } = useQuery({
-  queryKey: ['profile-stats'],
-  queryFn: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    // Fetch resources uploaded by the user using the "author_id" column.
-    const { data: resources, error } = await supabase
-      .from('resources')
-      .select('downloads')
-      .eq('author_id', user.id); // Changed from 'id' to 'author_id'
-
-    if (error) throw error;
-
-    // Calculate total downloads
-    const totalDownloads =
-      resources?.reduce(
-        (sum, resource) => sum + (resource.downloads || 0),
-        0
-      ) || 0;
-
-    // Fetch the profile to get visits
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('visits')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError) throw profileError;
-
-    return {
-      downloads: totalDownloads,
-      profileViews: profile?.visits || 0,
-    };
-  },
-  enabled: !!profile,
-});
-
+  // Query to fetch additional stats like total downloads.
+  // We use the profile's id in the query key and get visits from the already loaded profile.
+  const { data: stats } = useQuery({
+    queryKey: ['profile-stats', profile?.id],
+    queryFn: async () => {
+      if (!profile) return { downloads: 0, profileViews: 0 };
+      // Fetch resources uploaded by the user (downloads stat)
+      const { data: resources, error } = await supabase
+        .from('resources')
+        .select('downloads')
+        .eq('author_id', profile.id);
+      if (error) throw error;
+      const totalDownloads =
+        resources?.reduce(
+          (sum, resource) => sum + (resource.downloads || 0),
+          0
+        ) || 0;
+      return {
+        downloads: totalDownloads,
+        profileViews: profile.visits || 0,
+      };
+    },
+    enabled: !!profile,
+  });
 
   if (!profile) return null;
 
-  // Combine title and school:
+  // Combine title and school for display.
   const titleSchool =
     profile.title && profile.school
       ? `${profile.title} på ${profile.school}`
@@ -71,7 +56,7 @@ const { data: stats } = useQuery({
     <Card className="p-6 border border-gray-200 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Min Profil</h2>
 
-      {/* Green Background with Avatar */}
+      {/* Green background with Avatar */}
       <div className="relative w-full h-[120px] bg-[var(--ole-green)] rounded-md">
         <div className="absolute inset-x-0 bottom-10 transform translate-y-1/2 flex justify-center">
           <Avatar className="h-[120px] w-[120px] rounded-full border-2 border-white">
@@ -117,7 +102,9 @@ const { data: stats } = useQuery({
             </svg>
           </div>
           <div>
-            <div className="text-sm font-bold px-2 text-black">{stats?.downloads || 0}</div>
+            <div className="text-sm font-bold px-2 text-black">
+              {stats?.downloads || 0}
+            </div>
             <div className="text-xs text-gray-600 px-2">Nedladdningar</div>
           </div>
         </div>
@@ -139,7 +126,9 @@ const { data: stats } = useQuery({
             </div>
           </div>
           <div>
-            <div className="text-sm font-bold px-2 text-black">{stats?.profileViews || 0}</div>
+            <div className="text-sm font-bold px-2 text-black">
+              {stats?.profileViews || 0}
+            </div>
             <div className="text-xs text-gray-600 px-2">Profilbesök</div>
           </div>
         </div>

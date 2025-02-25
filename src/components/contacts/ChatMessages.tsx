@@ -125,8 +125,6 @@ export function ChatMessages({
           .eq("sender_id", selectedUser.id)
           .eq("is_read", false)
           .select();
-        if (error) console.error("Error marking messages as read:", error);
-        else console.log("Marked messages as read:", data);
       };
       markUserMessagesAsRead();
     }

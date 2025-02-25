@@ -263,15 +263,20 @@ export default function DiscussionTabContent({ searchQuery }: DiscussionTabConte
     }
   };
 
-  if (isLoading) return <p>Laddar diskussioner...</p>;
-  if (error) return <p>Ett fel inträffade: {error.message}</p>;
-  if (!discussions || discussions.length === 0)
-    return <p>Inga diskussioner hittades.</p>;
-
   return (
-    <div className="space-y-6">
-      {hotDiscussion && renderDiscussionCard(hotDiscussion, "border-2 border-yellow-400")}
-      {remainingDiscussions.map((discussion: any) => renderDiscussionCard(discussion))}
+    <div className="bg-[#F6F6F7] p-6">
+      {isLoading ? (
+        <div className="text-center py-4">Laddar diskussioner...</div>
+      ) : error ? (
+        <div className="text-center py-4">Ett fel inträffade: {error.message}</div>
+      ) : !discussions || discussions.length === 0 ? (
+        <div className="text-center py-4">Inga diskussioner hittades.</div>
+      ) : (
+        <div className="space-y-6">
+          {hotDiscussion && renderDiscussionCard(hotDiscussion, "border-2 border-yellow-400")}
+          {remainingDiscussions.map((discussion: any) => renderDiscussionCard(discussion))}
+        </div>
+      )}
     </div>
   );
 }

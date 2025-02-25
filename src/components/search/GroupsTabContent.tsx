@@ -100,50 +100,56 @@ export default function GroupsTabContent({ searchQuery }: GroupsTabContentProps)
     }
   };
 
-  if (isLoading) return <p>Laddar grupper...</p>;
-  if (error) return <p>Ett fel inträffade: {error.message}</p>;
-  if (!groups || groups.length === 0) return <p>Inga grupper hittades.</p>;
-
   return (
-    <div className="p-4 space-y-4">
-      {groups.map((group) => (
-        <div
-          key={group.id}
-          className="p-4 bg-white rounded-lg shadow-sm border flex items-center"
-        >
-          {group.icon_url ? (
-            <img
-              src={group.icon_url}
-              alt={group.name}
-              className="w-12 h-12 rounded object-cover mr-4"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded bg-gray-200 mr-4 flex items-center justify-center">
-              <span className="text-gray-500">Icon</span>
-            </div>
-          )}
-          <div className="flex-1">
-            <Link
-              to={`/group/${group.id}`}
-              className="text-lg font-semibold hover:underline"
+    <div className="bg-[#F6F6F7] p-6">
+      {isLoading ? (
+        <div className="text-center py-4">Laddar grupper...</div>
+      ) : error ? (
+        <div className="text-center py-4">Ett fel inträffade: {error.message}</div>
+      ) : !groups || groups.length === 0 ? (
+        <div className="text-center py-4">Inga grupper hittades.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {groups.map((group) => (
+            <div
+              key={group.id}
+              className="p-4 bg-white rounded-lg shadow-sm border flex items-center"
             >
-              {group.name}
-            </Link>
-            {group.description && (
-              <p className="text-sm text-gray-600">{group.description}</p>
-            )}
-          </div>
-          <div>
-            {userGroupIds.has(group.id) ? (
-              <span className="text-green-600 font-semibold">Medlem</span>
-            ) : (
-              <Button variant="outline" onClick={() => handleJoinGroup(group)}>
-                Gå med
-              </Button>
-            )}
-          </div>
+              {group.icon_url ? (
+                <img
+                  src={group.icon_url}
+                  alt={group.name}
+                  className="w-12 h-12 rounded object-cover mr-4"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded bg-gray-200 mr-4 flex items-center justify-center">
+                  <span className="text-gray-500">Icon</span>
+                </div>
+              )}
+              <div className="flex-1">
+                <Link
+                  to={`/group/${group.id}`}
+                  className="text-lg font-semibold hover:underline"
+                >
+                  {group.name}
+                </Link>
+                {group.description && (
+                  <p className="text-sm text-gray-600">{group.description}</p>
+                )}
+              </div>
+              <div>
+                {userGroupIds.has(group.id) ? (
+                  <span className="text-green-600 font-semibold">Medlem</span>
+                ) : (
+                  <Button variant="outline" onClick={() => handleJoinGroup(group)}>
+                    Gå med
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

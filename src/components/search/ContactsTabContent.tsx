@@ -51,19 +51,19 @@ export default function ContactsTabContent({ searchQuery }: ContactsTabContentPr
     }) || [];
 
   return (
-    <div className="p-4">
+    <div className="bg-[#F6F6F7] p-6">
       {isLoading ? (
-        <p>Laddar kontakter...</p>
+        <div className="text-center py-4">Laddar kontakter...</div>
       ) : error ? (
-        <p>Ett fel inträffade: {error.message}</p>
+        <div className="text-center py-4">Ett fel inträffade: {error.message}</div>
       ) : filteredProfiles.length === 0 ? (
-        <p>Inga kontakter hittades.</p>
+        <div className="text-center py-4">Inga kontakter hittades.</div>
       ) : (
         <div className="space-y-4">
           {filteredProfiles.map((profile) => (
             <div
               key={profile.id}
-              className="p-4 hover:bg-gray-100 flex items-center bg-white rounded-lg shadow-sm border"
+              className="p-4 flex items-center bg-white rounded-lg shadow-sm border hover:bg-gray-100"
             >
               <img
                 src={profile.avatar_url || "/placeholder.svg"}
@@ -71,10 +71,7 @@ export default function ContactsTabContent({ searchQuery }: ContactsTabContentPr
                 className="w-12 h-12 rounded-full object-cover mr-4"
               />
               <div className="flex-1">
-                <Link
-                  to={`/profil/${profile.id}`}
-                  className="font-medium hover:underline"
-                >
+                <Link to={`/profil/${profile.id}`} className="font-medium hover:underline">
                   {profile.full_name || "Unnamed User"}
                 </Link>
                 <p className="text-sm text-gray-500">

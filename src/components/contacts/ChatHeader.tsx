@@ -66,7 +66,11 @@ export function ChatHeader({
                 src={selectedGroup.icon_url || "/group-placeholder.svg"}
                 alt={selectedGroup.name}
                 className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                    if (currentUserId === selectedGroup.owner_id) {
+                      setIsEditing(true);
+                    }
+                  }}
               />
             )}
           </div>
@@ -84,7 +88,11 @@ export function ChatHeader({
                 />
               </>
             ) : (
-              <div onDoubleClick={() => setIsEditing(true)} className="cursor-pointer">
+              <div onDoubleClick={() => {
+                       if (currentUserId === selectedGroup.owner_id) {
+                         setIsEditing(true);
+                       }
+                     }} className="cursor-pointer">
                 <span className="font-medium">{selectedGroup.name}</span>
                 {selectedGroup.description && (
                   <p className="text-sm text-gray-600">{selectedGroup.description}</p>

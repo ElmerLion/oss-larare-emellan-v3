@@ -36,6 +36,8 @@ export function ChatHeader({
 }: ChatHeaderProps) {
   const toast = useToast().toast;
 
+
+
   return (
     <div className="p-4 border-b flex items-center gap-3">
       {selectedGroup ? (

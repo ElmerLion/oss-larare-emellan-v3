@@ -130,6 +130,30 @@ export function ChatMessages({
     }
   }, [selectedGroup, selectedUser, currentUserId]);
 
+  const handleIconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && currentUserId) {
+      const file = e.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const fileName = `group_icons/${currentUserId}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage
+        .from("group_icons")
+        .upload(fileName, file);
+      if (error) {
+        toast({ title: "Fel", description: error.message, variant: "destructive" });
+        return;
+      }
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from("group_icons")
+        .createSignedUrl(fileName, 60 * 60 * 24 * 7); // URL valid for 7 days
+      if (urlError) {
+        toast({ title: "Fel", description: urlError.message, variant: "destructive" });
+        return;
+      }
+      setEditedIconUrl(urlData.signedUrl);
+    }
+  };
+
+
   return (
     <>
       <ChatHeader
@@ -143,7 +167,7 @@ export function ChatMessages({
         setIsEditing={setIsEditing}
         setEditedName={setEditedName}
         setEditedDescription={setEditedDescription}
-        onIconChange={() => {}}
+        onIconChange={handleIconChange}
         handleSaveEdits={handleSaveEdits}
       />
 

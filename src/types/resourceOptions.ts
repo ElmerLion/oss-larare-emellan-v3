@@ -136,6 +136,7 @@ export const courseLevelsMapping = {
     { value: "1a", label: "1a" },
     { value: "1b1", label: "1b1" },
     { value: "1b2", label: "1b2" },
+    { value: "1", label: "1" },
     { value: "2", label: "2" }
   ],
   Naturkunskap: [

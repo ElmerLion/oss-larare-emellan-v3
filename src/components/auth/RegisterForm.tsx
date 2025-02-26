@@ -1,4 +1,3 @@
-// RegisterForm.tsx
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,8 +31,35 @@ export default function RegisterForm({ toggleMode, nextStep, data, updateData }:
       toast.error("Lösenorden matchar inte");
       return;
     }
+
+    // Normalize email by trimming and converting to lowercase.
+    const normalizedEmail = data.email.trim().toLowerCase();
+
+    console.log(normalizedEmail);
+    console.log(data.email);
+    // Check if the email is allowed
+    const { data: allowedUser, error: allowedError } = await supabase
+      .from("allowed_users")
+      .select("email")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    console.log(allowedUser);
+    console.log(allowedError);
+    if (allowedError) {
+      console.error("Error checking allowed users:", allowedError);
+      toast.error("Ett fel uppstod, försök igen senare.");
+      return;
+    }
+
+    if (!allowedUser) {
+      toast.error("Du har inte tillåtelse att skapa ett konto. Om du tror att något är fel, vänligen maila oss.");
+      return;
+    }
+
     try {
-      const { error } = await supabase.auth.signUp({ email: data.email, password: data.password });
+      // Use the normalized email in the sign-up call
+      const { error } = await supabase.auth.signUp({ email: normalizedEmail, password: data.password });
       if (error) {
         if (
           error.code === "23505" ||

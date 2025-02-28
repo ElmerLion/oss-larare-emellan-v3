@@ -97,7 +97,7 @@ export function EditExperienceDialog({ onExperienceUpdate }: EditExperienceDialo
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role">Roll</Label>
+              <Label htmlFor="role">Jobbtitel</Label>
               <Input
                 id="role"
                 value={formData.role}

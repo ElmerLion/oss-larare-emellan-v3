@@ -217,6 +217,7 @@ export function ResourceDetailsDialog({
   const isImage = resource.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
   const isPDF = resource.file_name?.match(/\.pdf$/i);
   const isPowerPoint = resource.file_name?.match(/\.(ppt|pptx)$/i);
+  const isVideo = resource.file_name?.match(/\.(mp4|mov|webm)$/i); // added for video files
   const isAudio = resource.file_name?.match(/\.(mp3|wav|ogg)$/i);
 
   return (
@@ -347,6 +348,12 @@ export function ResourceDetailsDialog({
                         <p className="text-gray-600">PowerPoint-presentation</p>
                         <p className="text-sm text-gray-500">Ladda ner för att visa</p>
                       </div>
+                    ) : isVideo ? (
+                      <video
+                        controls
+                        src={fileUrl}
+                        className="w-full max-h-[400px] object-contain"
+                      />
                     ) : isAudio ? (
                       <audio controls src={fileUrl} className="w-full" />
                     ) : (

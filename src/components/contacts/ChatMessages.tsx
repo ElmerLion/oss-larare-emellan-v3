@@ -50,6 +50,8 @@ interface ChatMessagesProps {
   messages: Message[] | undefined;
   currentUserId: string | null;
   onViewMaterial?: (materialId: string) => void;
+  // Callback to be called when the user is no longer a member of the current group.
+  onGroupLeft?: () => void;
 }
 
 export function ChatMessages({
@@ -58,6 +60,7 @@ export function ChatMessages({
   messages,
   currentUserId,
   onViewMaterial,
+  onGroupLeft,
 }: ChatMessagesProps) {
   const { toast } = useToast();
 
@@ -153,6 +156,49 @@ export function ChatMessages({
     }
   };
 
+  // Realtime subscription: if the current user loses membership from the selected group, call onGroupLeft.
+  useEffect(() => {
+    if (!selectedGroup || !currentUserId || !onGroupLeft) return;
+    // Use a unique channel name to avoid conflicts.
+    const channelName = `chat-membership-deletion-${selectedGroup.id}-${currentUserId}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "group_memberships" },
+        (payload) => {
+          console.log("Received DELETE event in ChatMessages:", payload);
+          if (
+            payload.old.user_id === currentUserId &&
+            payload.old.group_id === selectedGroup.id
+          ) {
+            toast({ title: "Grupp lämnat", description: "Du har lämnat gruppen.", variant: "destructive" });
+            onGroupLeft();
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "group_memberships" },
+        (payload) => {
+          console.log("Received UPDATE event in ChatMessages:", payload);
+          // In case the membership status changes from approved to something else.
+          if (
+            payload.new.user_id === currentUserId &&
+            payload.new.group_id === selectedGroup.id &&
+            payload.new.status !== "approved"
+          ) {
+            toast({ title: "Grupp lämnat", description: "Du har lämnat gruppen.", variant: "destructive" });
+            onGroupLeft();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedGroup, currentUserId, onGroupLeft, toast]);
 
   return (
     <>
@@ -169,6 +215,7 @@ export function ChatMessages({
         setEditedDescription={setEditedDescription}
         onIconChange={handleIconChange}
         handleSaveEdits={handleSaveEdits}
+        onGroupLeft={onGroupLeft}
       />
 
       <div className="flex-1 p-4 overflow-y-auto space-y-4">

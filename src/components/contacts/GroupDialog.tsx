@@ -56,7 +56,7 @@ export function GroupDialog({
   });
 
   // Query for pending invitations.
-  const { data: invitations } = useQuery({
+  const { data: invitations, refetch: refetchInvitations } = useQuery({
     queryKey: ["groupInvitations", currentUserId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -91,10 +91,10 @@ export function GroupDialog({
     return latestGroups.filter((group: any) => !userGroupIds.has(group.id));
   }, [latestGroups, userGroups]);
 
-  // Helper: join an existing group.
+  // Helper: join an existing group (via confirmation dialog).
   const handleJoinGroup = async (group: any) => {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("group_memberships")
         .insert({
           group_id: group.id,
@@ -112,6 +112,33 @@ export function GroupDialog({
       });
       setIsConfirmOpen(false);
       onOpenChange(false);
+    } catch (err: any) {
+      toast({
+        title: "Fel",
+        description: err.message || "Något gick fel",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Helper: Accept an invitation by updating status to "approved"
+  const handleAcceptInvitation = async (group: any) => {
+    try {
+      const { error } = await supabase
+        .from("group_memberships")
+        .update({ status: "approved" })
+        .eq("group_id", group.id)
+        .eq("user_id", currentUserId)
+        .select()
+        .single();
+      if (error) throw error;
+      toast({
+        title: "Gå med",
+        description: "Du har gått med i gruppen",
+        variant: "success",
+      });
+      // Refetch invitations so that the accepted invitation is removed from the list.
+      refetchInvitations();
     } catch (err: any) {
       toast({
         title: "Fel",
@@ -176,7 +203,7 @@ export function GroupDialog({
         .single();
       if (groupError) throw groupError;
 
-      const { data: membershipData, error: membershipError } = await supabase
+      const { error: membershipError } = await supabase
         .from("group_memberships")
         .insert({
           group_id: groupData.id,
@@ -234,7 +261,7 @@ export function GroupDialog({
                         key={group.id}
                         className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
-                          // Open a confirmation dialog instead of window.confirm.
+                          // Open confirmation dialog before joining
                           setGroupToJoin(group);
                           setIsConfirmOpen(true);
                         }}
@@ -262,9 +289,7 @@ export function GroupDialog({
                       <div
                         key={group.id}
                         className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
-                        onClick={() => {
-                          console.log("Invitation clicked:", group);
-                        }}
+                        onClick={() => handleAcceptInvitation(group)}
                       >
                         <div className="font-medium">{group.name}</div>
                         {group.description && (

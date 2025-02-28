@@ -34,6 +34,7 @@ export function ContactList({
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
   const [localGroups, setLocalGroups] = useState<any[]>(groups || []);
 
+  // Update local groups if groups prop changes.
   useEffect(() => {
     setLocalGroups(groups || []);
   }, [groups]);
@@ -54,7 +55,22 @@ export function ContactList({
     fetchUser();
   }, []);
 
-  // Fetch unread message counts for the current user.
+  // Function to re-fetch groups for the current user based on approved memberships.
+  const fetchLocalGroups = async () => {
+    if (!currentUserId) return;
+    const { data, error } = await supabase
+      .from("group_memberships")
+      .select(`group:groups(*)`)
+      .eq("user_id", currentUserId)
+      .eq("status", "approved");
+    if (error) {
+      console.error("Error fetching groups:", error);
+    } else if (data) {
+      setLocalGroups(data.map((membership: any) => membership.group));
+    }
+  };
+
+  // Realtime subscription for unread messages.
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -128,6 +144,96 @@ export function ContactList({
     };
   }, [currentUserId]);
 
+  // Realtime subscription for groups changes (for groups you own).
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const groupsChannel = supabase
+      .channel("groups-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "groups",
+          filter: `owner_id=eq.${currentUserId}`,
+        },
+        (payload) => {
+          setLocalGroups((prev) => [...prev, payload.new]);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "groups",
+          filter: `owner_id=eq.${currentUserId}`,
+        },
+        (payload) => {
+          setLocalGroups((prev) =>
+            prev.filter((group) => group.id !== payload.old.id)
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(groupsChannel);
+    };
+  }, [currentUserId]);
+
+  // Realtime subscription for group_memberships changes.
+  // We listen for INSERT, UPDATE, and DELETE events and re-fetch the groups.
+    useEffect(() => {
+      if (!currentUserId) return;
+
+      // Initial fetch of groups.
+      fetchLocalGroups();
+
+      const membershipChannel = supabase
+        .channel("memberships-changes")
+        // Listen for INSERT events.
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "group_memberships" },
+          (payload) => {
+            if (payload.new.user_id === currentUserId && payload.new.status === "approved") {
+              console.log("Membership INSERT:", payload);
+              fetchLocalGroups();
+            }
+          }
+        )
+        // Listen for DELETE events without a filter.
+        .on(
+          "postgres_changes",
+          { event: "DELETE", schema: "public", table: "group_memberships" },
+          (payload) => {
+            // For DELETE events, the affected row is in payload.old.
+              console.log("Membership DELETE:", payload);
+              fetchLocalGroups();
+
+          }
+        )
+        // Listen for UPDATE events.
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "group_memberships" },
+          (payload) => {
+            if (payload.new.user_id === currentUserId) {
+              console.log("Membership UPDATE:", payload);
+              fetchLocalGroups();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(membershipChannel);
+      };
+    }, [currentUserId]);
+
+
   const filteredGroups = useMemo(() => {
     return localGroups.filter((group) =>
       group.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -151,7 +257,8 @@ export function ContactList({
   const sortedProfilesWithMessages = useMemo(() => {
     return [...filteredProfiles.filter((profile) => !!profile.lastMessageTime)].sort(
       (a, b) =>
-        new Date(b.lastMessageTime!).getTime() - new Date(a.lastMessageTime!).getTime()
+        new Date(b.lastMessageTime!).getTime() -
+        new Date(a.lastMessageTime!).getTime()
     );
   }, [filteredProfiles]);
 
@@ -177,9 +284,9 @@ export function ContactList({
             />
           </div>
 
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                    Senaste meddelanden
-                  </h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">
+            Senaste meddelanden
+          </h3>
           {filteredProfiles.length === 0 ? (
             <p className="flex text-sm text-gray-500 h-full">
               Inga meddelanden hittades.
@@ -293,6 +400,7 @@ export function ContactList({
               )}
             </div>
           )}
+
           {/* Always show groups section */}
           <div className="mt-4">
             <div className="flex items-center justify-between mb-2">

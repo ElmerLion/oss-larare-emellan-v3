@@ -125,7 +125,8 @@ export default function Kontakter() {
       const { data, error } = await supabase
         .from("group_memberships")
         .select(`group:groups(*)`)
-        .eq("user_id", currentUserId);
+        .eq("user_id", currentUserId)
+        .eq("status", "approved");
       if (error) throw error;
       return data?.map((membership: any) => membership.group) || [];
     },
@@ -479,6 +480,7 @@ export default function Kontakter() {
                 }
               }}
               onViewMaterial={handleViewMaterial}
+              onGroupLeft={() => setSelectedGroup(null)}
             />
           </div>
         )}

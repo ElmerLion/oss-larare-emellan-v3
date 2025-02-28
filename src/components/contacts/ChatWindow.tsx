@@ -19,6 +19,7 @@ interface ChatWindowProps {
   onLinkMaterial?: (material: Material) => void;
   onLinkFile?: (file: Material) => void;
   onViewMaterial?: (materialId: string) => void;
+  onGroupLeft?: () => void;
 }
 
 export function ChatWindow(props: ChatWindowProps) {
@@ -32,7 +33,7 @@ export function ChatWindow(props: ChatWindowProps) {
 
   return (
     <div className="flex-1 bg-white rounded-lg shadow-sm flex flex-col">
-      <ChatMessages {...props} />
+      <ChatMessages {...props} onGroupLeft={props.onGroupLeft} />
       <ChatInput {...props} />
     </div>
   );

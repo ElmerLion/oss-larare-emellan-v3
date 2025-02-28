@@ -1,8 +1,29 @@
 import { Mail, Instagram, Linkedin } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export function Footer() {
+  const location = useLocation();
+
+  const sidebarRoutes = [
+    "/home",
+    "/profil",
+    "/forum",
+    "/meddelanden",
+    "/resurser",
+    "/mitt-bibliotek",
+    "/installningar",
+    "/admin",
+  ];
+  const hasSidebar = sidebarRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
+    <footer
+      className={`bg-gray-50 border-t border-gray-200 mt-auto ${
+        hasSidebar ? "lg:ml-64" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Use a responsive grid that stacks on small screens */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -34,7 +55,10 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/funktioner" className="hover:text-[color:var(--ole-green)]">
+                <a
+                  href="/funktioner"
+                  className="hover:text-[color:var(--ole-green)]"
+                >
                   Funktioner
                 </a>
               </li>

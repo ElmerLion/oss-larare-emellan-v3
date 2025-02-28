@@ -167,7 +167,6 @@ export function ChatMessages({
         "postgres_changes",
         { event: "DELETE", schema: "public", table: "group_memberships" },
         (payload) => {
-          console.log("Received DELETE event in ChatMessages:", payload);
           if (
             payload.old.user_id === currentUserId &&
             payload.old.group_id === selectedGroup.id
@@ -181,7 +180,6 @@ export function ChatMessages({
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "group_memberships" },
         (payload) => {
-          console.log("Received UPDATE event in ChatMessages:", payload);
           // In case the membership status changes from approved to something else.
           if (
             payload.new.user_id === currentUserId &&

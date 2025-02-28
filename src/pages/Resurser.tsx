@@ -204,7 +204,6 @@ export default function Resurser() {
           </main>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -199,7 +199,6 @@ export function ContactList({
           { event: "INSERT", schema: "public", table: "group_memberships" },
           (payload) => {
             if (payload.new.user_id === currentUserId && payload.new.status === "approved") {
-              console.log("Membership INSERT:", payload);
               fetchLocalGroups();
             }
           }
@@ -209,8 +208,6 @@ export function ContactList({
           "postgres_changes",
           { event: "DELETE", schema: "public", table: "group_memberships" },
           (payload) => {
-            // For DELETE events, the affected row is in payload.old.
-              console.log("Membership DELETE:", payload);
               fetchLocalGroups();
 
           }
@@ -221,7 +218,6 @@ export function ContactList({
           { event: "UPDATE", schema: "public", table: "group_memberships" },
           (payload) => {
             if (payload.new.user_id === currentUserId) {
-              console.log("Membership UPDATE:", payload);
               fetchLocalGroups();
             }
           }

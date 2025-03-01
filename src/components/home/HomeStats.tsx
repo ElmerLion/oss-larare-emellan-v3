@@ -151,7 +151,7 @@ const HomeStats = () => {
               </div>
             </div>
             <div className="text-sm text-gray-500 text-center hidden sm:block">
-              Resurser nedladdade
+              Nedladdningar
             </div>
           </div>
         </Link>

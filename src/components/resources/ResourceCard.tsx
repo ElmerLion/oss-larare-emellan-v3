@@ -132,7 +132,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         </Button>
 
         <h3 className="text-lg font-semibold mb-2">{localResource.title}</h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+        <p className="text-gray-600 text-sm mb-4 line-clamp-1">
           {localResource.description}
         </p>
 

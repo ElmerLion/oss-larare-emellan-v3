@@ -1,5 +1,4 @@
 import { AppSidebar } from "@/components/AppSidebar";
-import { Header } from "@/components/Header";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AboutSection } from "@/components/profile/AboutSection";
 import ProfileInterests from "@/components/profile/ProfileInterests"; // Import the new component
@@ -10,6 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import type { Profile } from "@/types/profile";
+import { Header } from "@/components/Header";
 
 export default function Profil() {
   const { id: profileId } = useParams();
@@ -133,7 +133,8 @@ export default function Profil() {
       <AppSidebar />
       <div className="flex-1 ml-0 lg:ml-64">
         <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
-          <div className="p-6">
+        <Header />
+          <div className="p-6 mt-8">
             <div className="max-w-[2800px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">

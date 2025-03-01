@@ -127,12 +127,11 @@ export default function GroupsTabContent({ searchQuery }: GroupsTabContentProps)
                 </div>
               )}
               <div className="flex-1">
-                <Link
-                  to={`/group/${group.id}`}
-                  className="text-lg font-semibold hover:underline"
+                <p
+                  className="text-lg font-semibold"
                 >
                   {group.name}
-                </Link>
+                </p>
                 {group.description && (
                   <p className="text-sm text-gray-600">{group.description}</p>
                 )}

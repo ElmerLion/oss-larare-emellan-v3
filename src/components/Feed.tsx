@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { CreatePostDialog } from "./CreatePostDialog";
-import { Post } from "./Post";
-import { useQueryClient } from "@tanstack/react-query";
+import { CreatePostDialog } from "@/components/CreatePostDialog";
+import { Post } from "@/components/Post";
 
 export function Feed() {
   const queryClient = useQueryClient();
@@ -10,10 +10,11 @@ export function Feed() {
   const { data: posts, isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
-      // Get the current user (if needed for reactions)
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      // Query posts with the full author profile, materials and tags.
+      // Query posts
       const { data: postsData, error: postsError } = await supabase
         .from("posts")
         .select(`
@@ -25,9 +26,21 @@ export function Feed() {
             title,
             school
           ),
-          post_materials (
-            title,
-            type
+          resources:post_materials (
+            resource:resources (
+              id,
+              title,
+              description,
+              subject,
+              grade,
+              type,
+              difficulty,
+              file_path,
+              file_name,
+              author_id,
+              subject_level,
+              downloads
+            )
           ),
           post_tags (
             tag
@@ -37,19 +50,20 @@ export function Feed() {
 
       if (postsError) throw postsError;
 
-      // Get reaction and comment counts as needed…
+      // Flatten resources + gather reaction/comment counts
       const postsWithReactions = await Promise.all(
-        postsData.map(async (post) => {
-          const [{ count: reactionCount }, { count: commentCount }] = await Promise.all([
-            supabase
-              .from("post_reactions")
-              .select("*", { count: "exact", head: true })
-              .eq("post_id", post.id),
-            supabase
-              .from("post_comments")
-              .select("*", { count: "exact", head: true })
-              .eq("post_id", post.id),
-          ]);
+        postsData.map(async (post: any) => {
+          const [{ count: reactionCount }, { count: commentCount }] =
+            await Promise.all([
+              supabase
+                .from("post_reactions")
+                .select("*", { count: "exact", head: true })
+                .eq("post_id", post.id),
+              supabase
+                .from("post_comments")
+                .select("*", { count: "exact", head: true })
+                .eq("post_id", post.id),
+            ]);
 
           let userReaction = null;
           if (user) {
@@ -62,11 +76,17 @@ export function Feed() {
             userReaction = reactionData?.reaction;
           }
 
+          const materials =
+            (post.resources || [])
+              .map((item: any) => item.resource)
+              .filter((resource: any) => resource != null) || [];
+
           return {
             ...post,
             reaction_count: reactionCount || 0,
             comment_count: commentCount || 0,
             user_reaction: userReaction,
+            materials,
           };
         })
       );
@@ -76,11 +96,11 @@ export function Feed() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <CreatePostDialog />
       {isLoading ? (
         <div className="text-center py-4">Laddar inlägg...</div>
-      ) : posts.length === 0 ? (
+      ) : !posts || posts.length === 0 ? (
         <div className="text-center py-4">Inga inlägg hittades</div>
       ) : (
         posts.map((dbPost) => (
@@ -93,13 +113,13 @@ export function Feed() {
               avatar: dbPost.profiles?.avatar_url || "/placeholder.svg",
               title: dbPost.profiles?.title || "",
               school: dbPost.profiles?.school || "",
-              created_at: dbPost.created_at, // Pass the raw created_at timestamp
+              created_at: dbPost.created_at,
             }}
             content={dbPost.content}
             reactions={dbPost.reaction_count}
             comments={dbPost.comment_count}
-            materials={dbPost.post_materials}
-            tags={dbPost.post_tags?.map((t) => t.tag)}
+            tags={dbPost.post_tags?.map((t: any) => t.tag)}
+            materials={dbPost.materials}
             userReaction={dbPost.user_reaction}
           />
         ))
@@ -107,3 +127,5 @@ export function Feed() {
     </div>
   );
 }
+
+export default Feed;

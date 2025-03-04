@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,6 @@ import { ResourceDetailsDialog } from "@/components/resources/ResourceDetailsDia
 import type { ExtendedProfile } from "@/types/profile";
 import type { Message } from "@/types/message";
 import type { Material } from "@/types/material";
-import { useRef } from "react";
 
 export default function Kontakter() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,6 +22,23 @@ export default function Kontakter() {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
+
+
+  // New state to detect mobile/tablet view and control which panel is shown.
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [showContacts, setShowContacts] = useState(true);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobileView(mobile);
+      if (!mobile) setShowContacts(true);
+    };
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Fetch current user
   useEffect(() => {
@@ -36,52 +52,46 @@ export default function Kontakter() {
   }, []);
 
   // Query: Get recent messages (received by current user)
-const { data: recentMessages } = useQuery({
-  queryKey: ["recentMessages", currentUserId],
-  queryFn: async () => {
-    if (!currentUserId) return [];
+  const { data: recentMessages } = useQuery({
+    queryKey: ["recentMessages", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      const { data, error } = await supabase
+        .from("messages")
+        .select(`
+          sender_id,
+          receiver_id,
+          content,
+          created_at,
+          sender:profiles!sender_id ( full_name, avatar_url, title, school ),
+          receiver:profiles!receiver_id ( full_name, avatar_url, title, school )
+        `)
+        .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+        .is("group_id", null) // Only one-to-one messages
+        .order("created_at", { ascending: false });
 
-    // This query selects messages along with the sender and receiver profiles.
-    const { data, error } = await supabase
-      .from("messages")
-      .select(`
-        sender_id,
-        receiver_id,
-        content,
-        created_at,
-        sender:profiles!sender_id ( full_name, avatar_url, title, school ),
-        receiver:profiles!receiver_id ( full_name, avatar_url, title, school )
-      `)
-      .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-      .order("created_at", { ascending: false });
+      if (error) throw error;
 
-    if (error) throw error;
-
-    // Group messages by the conversation partner's ID (the "other" party) and include profile details.
-    const grouped = {};
-    data.forEach((msg) => {
-      const otherId = msg.sender_id === currentUserId ? msg.receiver_id : msg.sender_id;
-      // Pick the correct profile data from the join (if current user is the sender, then other user's profile is under "receiver", and vice versa)
-      const profileData = msg.sender_id === currentUserId ? msg.receiver : msg.sender;
-      if (!grouped[otherId]) {
-        grouped[otherId] = {
-          id: otherId,
-          full_name: profileData?.full_name || "",
-          avatar_url: profileData?.avatar_url || "/placeholder.svg",
-          title: profileData?.title || "",
-          school: profileData?.school || "",
-          lastMessage: msg.content,
-          lastMessageTime: msg.created_at,
-        };
-      }
-    });
-
-    return Object.values(grouped);
-  },
-  enabled: !!currentUserId,
-});
-
-
+      const grouped: Record<string, any> = {};
+      data.forEach((msg) => {
+        const otherId = msg.sender_id === currentUserId ? msg.receiver_id : msg.sender_id;
+        const profileData = msg.sender_id === currentUserId ? msg.receiver : msg.sender;
+        if (!grouped[otherId]) {
+          grouped[otherId] = {
+            id: otherId,
+            full_name: profileData?.full_name || "",
+            avatar_url: profileData?.avatar_url || "/placeholder.svg",
+            title: profileData?.title || "",
+            school: profileData?.school || "",
+            lastMessage: msg.content,
+            lastMessageTime: msg.created_at,
+          };
+        }
+      });
+      return Object.values(grouped);
+    },
+    enabled: !!currentUserId,
+  });
 
   // Query: Get contacts for the current user
   const { data: contactProfiles } = useQuery({
@@ -107,165 +117,197 @@ const { data: recentMessages } = useQuery({
     enabled: !!currentUserId,
   });
 
-  // Combine recentMessages and contactProfiles into one array of ExtendedProfile objects.
+  // Query: Get groups for the current user by fetching group memberships and joining with groups.
+  const { data: groups } = useQuery({
+    queryKey: ["contacts-groups", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      const { data, error } = await supabase
+        .from("group_memberships")
+        .select(`group:groups(*)`)
+        .eq("user_id", currentUserId)
+        .eq("status", "approved");
+      if (error) throw error;
+      return data?.map((membership: any) => membership.group) || [];
+    },
+    enabled: !!currentUserId,
+  });
+
+  // Combine recentMessages and contactProfiles into one array.
   const [combinedProfiles, setCombinedProfiles] = useState<ExtendedProfile[]>([]);
-useEffect(() => {
-  const combinedMap = new Map<string, ExtendedProfile>();
+  useEffect(() => {
+    const combinedMap = new Map<string, ExtendedProfile>();
 
-  // Add entries from recentMessages with basic info.
-  if (recentMessages) {
-    recentMessages.forEach((msg: any) => {
-      combinedMap.set(msg.id, {
-        id: msg.id,
-        full_name: "", // empty because we don't have the data yet
-        avatar_url: "",
-        title: "",
-        school: "",
-        lastMessage: msg.lastMessage,
-        lastMessageTime: msg.lastMessageTime,
-        isContact: false,
-      });
-    });
-  }
-
-  // Merge in contactProfiles (which contain full profile info)
-  if (contactProfiles) {
-    contactProfiles.forEach((profile: ExtendedProfile) => {
-      if (combinedMap.has(profile.id)) {
-        const existing = combinedMap.get(profile.id)!;
-        existing.full_name = profile.full_name;
-        existing.avatar_url = profile.avatar_url;
-        existing.title = profile.title || "";
-        existing.school = profile.school || "";
-        existing.isContact = true;
-        combinedMap.set(profile.id, existing);
-      } else {
-        combinedMap.set(profile.id, {
-          ...profile,
-          lastMessage: profile.lastMessage || null,
-          lastMessageTime: profile.lastMessageTime || null,
-          isContact: true,
+    if (recentMessages) {
+      recentMessages.forEach((msg: any) => {
+        combinedMap.set(msg.id, {
+          id: msg.id,
+          full_name: "",
+          avatar_url: "",
+          title: "",
+          school: "",
+          lastMessage: msg.lastMessage,
+          lastMessageTime: msg.lastMessageTime,
+          isContact: false,
         });
-      }
-    });
-  }
+      });
+    }
 
-  // Now update entries missing profile data.
-  const updateMissingProfiles = async () => {
-    const promises = Array.from(combinedMap.entries()).map(async ([id, profile]) => {
-      if (!profile.full_name) {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("full_name, avatar_url, title, school")
-          .eq("id", id)
-          .single();
-        if (!error && data) {
-          combinedMap.set(id, {
+    if (contactProfiles) {
+      contactProfiles.forEach((profile: ExtendedProfile) => {
+        if (combinedMap.has(profile.id)) {
+          const existing = combinedMap.get(profile.id)!;
+          existing.full_name = profile.full_name;
+          existing.avatar_url = profile.avatar_url;
+          existing.title = profile.title || "";
+          existing.school = profile.school || "";
+          existing.isContact = true;
+          combinedMap.set(profile.id, existing);
+        } else {
+          combinedMap.set(profile.id, {
             ...profile,
-            full_name: data.full_name,
-            avatar_url: data.avatar_url || "/placeholder.svg",
-            title: data.title || "",
-            school: data.school || "",
+            lastMessage: profile.lastMessage || null,
+            lastMessageTime: profile.lastMessageTime || null,
+            isContact: true,
           });
         }
-      }
-    });
+      });
+    }
 
-    await Promise.all(promises);
-
-    // Sort entries: those with messages (i.e. forced chats) come first.
-    const profilesWithMessages = Array.from(combinedMap.values()).filter(
-      (p) => p.lastMessageTime
-    );
-    profilesWithMessages.sort(
-      (a, b) =>
-        new Date(b.lastMessageTime!).getTime() -
-        new Date(a.lastMessageTime!).getTime()
-    );
-    const profilesWithoutMessages = Array.from(combinedMap.values()).filter(
-      (p) => !p.lastMessageTime
-    );
-    setCombinedProfiles([...profilesWithMessages, ...profilesWithoutMessages]);
-  };
-
-  updateMissingProfiles();
-}, [recentMessages, contactProfiles]);
-
-
-    const processedChatParam = useRef(false);
-
-    useEffect(() => {
-      const chatUserId = searchParams.get("chat");
-      if (!chatUserId || processedChatParam.current) return;
-
-      // Mark that we've processed the query param so we don't add duplicates.
-      processedChatParam.current = true;
-
-      // Check if the user already exists in combinedProfiles.
-      const userToSelect = combinedProfiles.find((p) => p.id === chatUserId);
-      if (userToSelect) {
-        setSelectedUser(userToSelect);
-      } else {
-        // If not found, fetch the profile from Supabase.
-        (async () => {
+    const updateMissingProfiles = async () => {
+      const promises = Array.from(combinedMap.entries()).map(async ([id, profile]) => {
+        if (!profile.full_name) {
           const { data, error } = await supabase
             .from("profiles")
-            .select("*")
-            .eq("id", chatUserId)
+            .select("full_name, avatar_url, title, school")
+            .eq("id", id)
             .single();
           if (!error && data) {
-            // Assign a default lastMessageTime so that it appears in "Senaste meddelanden"
-            const newProfile = {
-              ...data,
-              lastMessage: data.lastMessage || "",
-              lastMessageTime: data.lastMessageTime || new Date().toISOString(),
-              isContact: false,
-            };
-
-            // Only add if it's not already in the list.
-            setCombinedProfiles((prev) => {
-              if (prev.find((p) => p.id === newProfile.id)) {
-                return prev;
-              }
-              return [...prev, newProfile];
+            combinedMap.set(id, {
+              ...profile,
+              full_name: data.full_name,
+              avatar_url: data.avatar_url || "/placeholder.svg",
+              title: data.title || "",
+              school: data.school || "",
             });
-            setSelectedUser(newProfile);
           }
-        })();
-      }
-    }, [searchParams, combinedProfiles]);
+        }
+      });
+      await Promise.all(promises);
+      const profilesWithMessages = Array.from(combinedMap.values()).filter(
+        (p) => p.lastMessageTime
+      );
+      profilesWithMessages.sort(
+        (a, b) =>
+          new Date(b.lastMessageTime!).getTime() - new Date(a.lastMessageTime!).getTime()
+      );
+      const profilesWithoutMessages = Array.from(combinedMap.values()).filter(
+        (p) => !p.lastMessageTime
+      );
+      setCombinedProfiles([...profilesWithMessages, ...profilesWithoutMessages]);
+    };
 
+    updateMissingProfiles();
+  }, [recentMessages, contactProfiles]);
 
+  const processedChatParam = useRef(false);
+  useEffect(() => {
+    const chatUserId = searchParams.get("chat");
+    if (!chatUserId || processedChatParam.current) return;
+    processedChatParam.current = true;
+    const userToSelect = combinedProfiles.find((p) => p.id === chatUserId);
+    if (userToSelect) {
+      setSelectedUser(userToSelect);
+      if (isMobileView) setShowContacts(false);
+    } else {
+      (async () => {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", chatUserId)
+          .single();
+        if (!error && data) {
+          const newProfile = {
+            ...data,
+            lastMessage: data.lastMessage || "",
+            lastMessageTime: data.lastMessageTime || new Date().toISOString(),
+            isContact: false,
+          };
+          setCombinedProfiles((prev) => {
+            if (prev.find((p) => p.id === newProfile.id)) return prev;
+            return [...prev, newProfile];
+          });
+          setSelectedUser(newProfile);
+          if (isMobileView) setShowContacts(false);
+        }
+      })();
+    }
+  }, [searchParams, combinedProfiles, isMobileView]);
 
   // Query: Fetch messages for the selected conversation.
   const { data: messages, refetch: refetchMessages } = useQuery({
-    queryKey: ["messages", selectedUser?.id],
+    queryKey: ["messages", selectedGroup ? selectedGroup.id : selectedUser?.id],
     queryFn: async () => {
-      if (!selectedUser?.id || !currentUserId) return [];
-      const { data, error } = await supabase
-        .from("messages")
-        .select(`
-          *,
-          materials:message_materials(
-            material_id,
-            resources!message_materials_material_id_fkey(id, title, file_path, description)
-          ),
-          files:message_files(
-            file_id,
-            resources:files(id, title, file_path, created_at)
+      if (selectedGroup && currentUserId) {
+        const { data, error } = await supabase
+          .from("messages")
+          .select(`
+            *,
+            materials:message_materials(
+              material_id,
+              resources!message_materials_material_id_fkey(id, title, file_path, description)
+            ),
+            files:message_files(
+              file_id,
+              resources:files(id, title, file_path, created_at)
+            ),
+            sender:profiles!sender_id (
+              id,
+              full_name,
+              avatar_url,
+              title,
+              school
+            )
+          `)
+          .eq("group_id", selectedGroup.id)
+          .order("created_at", { ascending: true });
+        if (error) throw error;
+        return data;
+      } else if (selectedUser && currentUserId) {
+        const { data, error } = await supabase
+          .from("messages")
+          .select(`
+            *,
+            materials:message_materials(
+              material_id,
+              resources!message_materials_material_id_fkey(id, title, file_path, description)
+            ),
+            files:message_files(
+              file_id,
+              resources:files(id, title, file_path, created_at)
+            ),
+            sender:profiles!sender_id (
+              id,
+              full_name,
+              avatar_url,
+              title,
+              school
+            )
+          `)
+          .or(
+            `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
           )
-        `)
-        .or(
-          `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
-        )
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data;
+          .order("created_at", { ascending: true });
+        if (error) throw error;
+        return data;
+      }
+      return [];
     },
-    enabled: !!selectedUser && !!currentUserId,
+    enabled: !!(selectedGroup || (selectedUser && currentUserId)),
   });
 
-  // Real-time subscription for new messages.
+
+  // Realtime subscription for new messages.
   useEffect(() => {
     if (!selectedUser) return;
     const channel = supabase
@@ -287,31 +329,48 @@ useEffect(() => {
     };
   }, [selectedUser, refetchMessages]);
 
-  const handleLinkMaterial = (material: Material) => setLinkedMaterials(material);
-  const handleClearLinkedMaterial = () => setLinkedMaterials([]);
+  const handleLinkMaterial = (material: Material) =>
+    setLinkedMaterials((prev) => [...prev, material]);
+  const handleClearLinkedMaterial = (index: number) => {
+    const updatedMaterials = [...linkedMaterials];
+    updatedMaterials.splice(index, 1);
+    setLinkedMaterials(updatedMaterials);
+  };
 
-  const handleSendMessage = async (linkedMaterialIds: string[] = [], linkedFileIds: string[] = []) => {
-    if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+  const handleSendMessage = async (
+    linkedMaterialIds: string[] = [],
+    linkedFileIds: string[] = []
+  ) => {
+    if (!newMessage.trim() || !currentUserId || !(selectedUser || selectedGroup)) return;
     try {
+      let insertPayload: any = {
+        sender_id: currentUserId,
+        content: newMessage,
+      };
+
+      if (selectedGroup) {
+        // Send as group message
+        insertPayload.group_id = selectedGroup.id;
+      } else if (selectedUser) {
+        // Send as individual message
+        insertPayload.receiver_id = selectedUser.id;
+      }
+
       const { data: messageData, error: messageError } = await supabase
         .from("messages")
-        .insert({
-          sender_id: currentUserId,
-          receiver_id: selectedUser.id,
-          content: newMessage,
-        })
+        .insert(insertPayload)
         .select()
         .single();
       if (messageError) throw messageError;
       if (linkedMaterialIds.length > 0) {
-        const materialEntries = linkedMaterialIds.map(materialId => ({
+        const materialEntries = linkedMaterialIds.map((materialId) => ({
           message_id: messageData.id,
           material_id: materialId,
         }));
         await supabase.from("message_materials").insert(materialEntries);
       }
       if (linkedFileIds.length > 0) {
-        const fileEntries = linkedFileIds.map(fileId => ({
+        const fileEntries = linkedFileIds.map((fileId) => ({
           message_id: messageData.id,
           file_id: fileId,
         }));
@@ -321,7 +380,7 @@ useEffect(() => {
       setLinkedMaterials([]);
       setLinkedFiles([]);
       refetchMessages();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error inserting/updating materials and files:", error);
       toast({
         title: "Error",
@@ -349,48 +408,82 @@ useEffect(() => {
     }
   };
 
+  // Back button handler for mobile/tablet.
+  const handleBack = () => {
+    if (isMobileView) {
+      setSelectedUser(null);
+      setShowContacts(true);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-[#F6F6F7]">
       <AppSidebar />
-      <div className="flex flex-1 ml-64 p-6 gap-6">
-        <ContactList
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          profiles={combinedProfiles}
-          selectedUser={selectedUser}
-          onSelectUser={setSelectedUser}
-        />
-        <ChatWindow
-          selectedUser={selectedUser}
-          messages={messages}
-          newMessage={newMessage}
-          currentUserId={currentUserId}
-          onNewMessageChange={setNewMessage}
-          onSendMessage={(linkedMaterialIds, linkedFileIds) => handleSendMessage(linkedMaterialIds, linkedFileIds)}
-          linkedMaterials={linkedMaterials}
-          linkedFiles={linkedFiles}
-          onClearLinkedMaterial={(index) => {
-            const updatedMaterials = [...linkedMaterials];
-            updatedMaterials.splice(index, 1);
-            setLinkedMaterials(updatedMaterials);
-          }}
-          onClearLinkedFile={(index) => {
-            const updatedFiles = [...linkedFiles];
-            updatedFiles.splice(index, 1);
-            setLinkedFiles(updatedFiles);
-          }}
-          onLinkMaterial={(material) => {
-            if (!linkedMaterials.some(m => m.id === material.id)) {
-              setLinkedMaterials([...linkedMaterials, material]);
-            }
-          }}
-          onLinkFile={(file) => {
-            if (!linkedFiles.some(f => f.id === file.id)) {
-              setLinkedFiles([...linkedFiles, file]);
-            }
-          }}
-          onViewMaterial={handleViewMaterial}
-        />
+      <div className="flex flex-1 lg:ml-64 p-6 gap-6 relative">
+        {(!isMobileView || showContacts) && (
+          <ContactList
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            profiles={combinedProfiles}
+            groups={groups}
+            selectedUser={selectedUser}
+            onSelectUser={(user) => {
+              setSelectedUser(user);
+              setSelectedGroup(null); // clear any selected group
+              if (isMobileView) setShowContacts(false);
+            }}
+            onSelectGroup={(group) => {
+              setSelectedGroup(group);
+              setSelectedUser(null); // clear any selected user
+              if (isMobileView) setShowContacts(false);
+            }}
+          />
+
+
+        )}
+        {(!isMobileView || !showContacts) && (
+          <div className="flex-1 flex flex-col h-full">
+            {isMobileView && !showContacts && (
+              <button
+                onClick={handleBack}
+                className="mb-4 p-2 text-sm font-medium bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Tillbaka till kontakter
+              </button>
+            )}
+            <ChatWindow
+              selectedUser={selectedUser}
+              selectedGroup={selectedGroup}
+              messages={messages}
+              newMessage={newMessage}
+              currentUserId={currentUserId}
+              onNewMessageChange={setNewMessage}
+              onSendMessage={(linkedMaterialIds, linkedFileIds) =>
+                handleSendMessage(linkedMaterialIds, linkedFileIds)
+              }
+              linkedMaterials={linkedMaterials}
+              linkedFiles={linkedFiles}
+              onClearLinkedMaterial={(index) => handleClearLinkedMaterial(index)}
+              onClearLinkedFile={(index) => {
+                const updatedFiles = [...linkedFiles];
+                updatedFiles.splice(index, 1);
+                setLinkedFiles(updatedFiles);
+              }}
+              onLinkMaterial={(material) => {
+                if (!linkedMaterials.some((m) => m.id === material.id)) {
+                  setLinkedMaterials([...linkedMaterials, material]);
+                }
+              }}
+              onLinkFile={(file) => {
+                if (!linkedFiles.some((f) => f.id === file.id)) {
+                  setLinkedFiles([...linkedFiles, file]);
+                }
+              }}
+              onViewMaterial={handleViewMaterial}
+              onGroupLeft={() => setSelectedGroup(null)}
+            />
+          </div>
+        )}
         {selectedMaterial && (
           <ResourceDetailsDialog
             resource={selectedMaterial}

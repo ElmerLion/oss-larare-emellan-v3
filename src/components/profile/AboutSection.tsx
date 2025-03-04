@@ -53,15 +53,28 @@ export function AboutSection({ userId, onProfileUpdate }: AboutSectionProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Om Mig</h2>
-        {isCurrentUser && (
-          <EditProfileDialog
-            profileData={profileData}
-            onProfileUpdate={handleProfileUpdate}
-          />
-        )}
+      <div className="flex flex-col mb-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Om Mig</h2>
+          <div className="hidden sm:block">
+            {isCurrentUser && (
+              <EditProfileDialog
+                profileData={profileData}
+                onProfileUpdate={handleProfileUpdate}
+              />
+            )}
+          </div>
+        </div>
+        <div className="block sm:hidden mt-2">
+          {isCurrentUser && (
+            <EditProfileDialog
+              profileData={profileData}
+              onProfileUpdate={handleProfileUpdate}
+            />
+          )}
+        </div>
       </div>
+
       <div className="space-y-6">
         <div>
           <h3 className="text-sm font-medium text-gray-600 mb-2">Jag är här för att</h3>

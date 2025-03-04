@@ -3,7 +3,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
@@ -20,20 +26,41 @@ import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
 import Funktioner from "./pages/Funktioner";
-<<<<<<< Updated upstream
-=======
-import ContactUs from "@/pages/ContactUs";
+import Contact from "@/pages/Contact";
+import Search from "@/pages/Search";
+import InstructionManual from "@/pages/InstructionManual";
 
 // Import Admin Pages
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminModeration } from "@/components/admin/AdminModeration";
 import { AdminCreate } from "@/components/admin/AdminCreate";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
->>>>>>> Stashed changes
 
 const queryClient = new QueryClient();
 
-const AppRoutes = ({ isAuthenticated, currentUserId }: { isAuthenticated: boolean; currentUserId: string | null }) => {
+// A simple component to protect admin routes
+const AdminProtected = ({
+  isAdmin,
+  children,
+}: {
+  isAdmin: boolean;
+  children: JSX.Element;
+}) => {
+  if (!isAdmin) {
+    return <Navigate to="/home" replace />;
+  }
+  return children;
+};
+
+const AppRoutes = ({
+  isAuthenticated,
+  currentUserId,
+  isAdmin,
+}: {
+  isAuthenticated: boolean;
+  currentUserId: string | null;
+  isAdmin: boolean;
+}) => {
   const location = useLocation();
   // Check if the URL has the register query parameter
   const isRegisteringRoute = location.search.includes("register=true");
@@ -60,15 +87,35 @@ const AppRoutes = ({ isAuthenticated, currentUserId }: { isAuthenticated: boolea
       />
       <Route
         path="/meddelanden"
-        element={isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />}
+        element={
+          isAuthenticated ? <Kontakter /> : <Navigate to="/login" replace />
+        }
       />
       <Route
         path="/resurser"
         element={isAuthenticated ? <Resurser /> : <Navigate to="/login" replace />}
       />
       <Route
+        path="/sök"
+        element={isAuthenticated ? <Search /> : <Navigate to="/login" replace />}
+      />
+      <Route
         path="/mitt-bibliotek"
-        element={isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />}
+        element={
+          isAuthenticated ? <MittBibliotek /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/forum"
+        element={
+          isAuthenticated ? <Diskussioner /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/forum/:slug"
+        element={
+          isAuthenticated ? <DiscussionDetail /> : <Navigate to="/login" replace />
+        }
       />
       <Route
         path="/profil/:id"
@@ -85,18 +132,72 @@ const AppRoutes = ({ isAuthenticated, currentUserId }: { isAuthenticated: boolea
         }
       />
       <Route path="/omoss" element={<OmOss />} />
-      <Route path="/integritets-policy" element={<IntegritetsPolicy />} />
-<<<<<<< Updated upstream
-=======
-      <Route path="/kontakt" element={<ContactUs />} />
->>>>>>> Stashed changes
-      <Route path="/forum" element={<Diskussioner />} />
-      <Route path="/forum/:slug" element={<DiscussionDetail />} />
+      <Route path="/integritetspolicy" element={<IntegritetsPolicy />} />
+      <Route path="/kontakt" element={<Contact />} />
       <Route
         path="/installningar"
-        element={isAuthenticated ? <Installningar /> : <Navigate to="/login" replace />}
+        element={
+          isAuthenticated ? <Installningar /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/instruktionsmanual"
+        element={
+          isAuthenticated ? <InstructionManual /> : <Navigate to="/login" replace />
+        }
       />
       <Route path="/funktioner" element={<Funktioner />} />
+
+      {/* Admin Routes */}
+      <Route
+        path="/admin/oversikt"
+        element={
+          isAuthenticated ? (
+            <AdminProtected isAdmin={isAdmin}>
+              <AdminOverview />
+            </AdminProtected>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/moderation"
+        element={
+          isAuthenticated ? (
+            <AdminProtected isAdmin={isAdmin}>
+              <AdminModeration />
+            </AdminProtected>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/skapa"
+        element={
+          isAuthenticated ? (
+            <AdminProtected isAdmin={isAdmin}>
+              <AdminCreate />
+            </AdminProtected>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/feedback"
+        element={
+          isAuthenticated ? (
+            <AdminProtected isAdmin={isAdmin}>
+              <AdminFeedback />
+            </AdminProtected>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/"} replace />}
@@ -108,10 +209,13 @@ const AppRoutes = ({ isAuthenticated, currentUserId }: { isAuthenticated: boolea
 const App = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
         setCurrentUserId(session.user.id);
@@ -123,18 +227,46 @@ const App = () => {
 
     checkSession();
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setIsAuthenticated(true);
-        setCurrentUserId(session.user.id);
-      } else {
-        setIsAuthenticated(false);
-        setCurrentUserId(null);
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session) {
+          setIsAuthenticated(true);
+          setCurrentUserId(session.user.id);
+        } else {
+          setIsAuthenticated(false);
+          setCurrentUserId(null);
+        }
       }
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch user's role to check if they are Admin
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!currentUserId) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select('"Role"')
+        .eq("id", currentUserId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user role", error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(data.Role === "Admin");
+    };
+
+    fetchUserRole();
+  }, [currentUserId]);
 
   if (isAuthenticated === null) {
     return null; // or a loading spinner
@@ -148,7 +280,11 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <div className="flex-grow">
-              <AppRoutes isAuthenticated={isAuthenticated} currentUserId={currentUserId} />
+              <AppRoutes
+                isAuthenticated={isAuthenticated}
+                currentUserId={currentUserId}
+                isAdmin={isAdmin}
+              />
             </div>
             <Footer />
           </BrowserRouter>

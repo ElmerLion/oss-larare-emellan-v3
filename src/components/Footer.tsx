@@ -1,8 +1,29 @@
 import { Mail, Instagram, Linkedin } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export function Footer() {
+  const location = useLocation();
+
+  const sidebarRoutes = [
+    "/home",
+    "/profil",
+    "/forum",
+    "/meddelanden",
+    "/resurser",
+    "/mitt-bibliotek",
+    "/installningar",
+    "/admin",
+  ];
+  const hasSidebar = sidebarRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-auto md:ml-64">
+    <footer
+      className={`bg-gray-50 border-t border-gray-200 mt-auto ${
+        hasSidebar ? "lg:ml-64" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Use a responsive grid that stacks on small screens */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -29,24 +50,22 @@ export function Footer() {
             <h3 className="text-gray-800 font-medium mb-4">Snabblänkar</h3>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>
-                <a href="/omoss" className="hover:text-green-600">
+                <a href="/omoss" className="hover:text-[color:var(--ole-green)]">
                   Om Oss
                 </a>
               </li>
               <li>
-                <a href="#features" className="hover:text-green-600">
+                <a
+                  href="/funktioner"
+                  className="hover:text-[color:var(--ole-green)]"
+                >
                   Funktioner
                 </a>
               </li>
               <li>
-                <a href="#testimonials" className="hover:text-green-600">
-                  Omdömen
-                </a>
-              </li>
-              <li>
                 <a
-                  href="/Integritets-policy"
-                  className="hover:text-green-600"
+                  href="/integritetspolicy"
+                  className="hover:text-[color:var(--ole-green)]"
                 >
                   Integritetspolicy
                 </a>
@@ -59,7 +78,7 @@ export function Footer() {
             <h3 className="text-gray-800 font-medium mb-4">Kontakt</h3>
             <a
               href="mailto:osslarareemellan@gmail.com"
-              className="flex items-center gap-2 text-gray-600 hover:text-green-600 text-sm"
+              className="flex items-center gap-2 text-gray-600 hover:text-[color:var(--ole-green)] text-sm"
             >
               <Mail className="h-5 w-5" />
               <span>osslarareemellan@gmail.com</span>
@@ -74,7 +93,7 @@ export function Footer() {
                 href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-green-600"
+                className="text-gray-600 hover:text-[color:var(--ole-green)]"
               >
                 <Linkedin className="h-5 w-5" />
               </a>

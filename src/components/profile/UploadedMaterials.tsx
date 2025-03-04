@@ -63,20 +63,36 @@ export function UploadedMaterials({ userId, isCurrentUser }: UploadedMaterialsPr
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Uppladdade Material</h2>
-        {isCurrentUser && (
-          // Use CreateResourceDialog and supply your own trigger element so it looks like the old button.
-          <CreateResourceDialog
-            triggerElement={
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Ladda upp material
-              </Button>
-            }
-          />
-        )}
+      <div className="flex flex-col mb-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Uppladdade Material</h2>
+          <div className="hidden sm:block">
+            {isCurrentUser && (
+              <CreateResourceDialog
+                triggerElement={
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Ladda upp material
+                  </Button>
+                }
+              />
+            )}
+          </div>
+        </div>
+        <div className="block sm:hidden mt-2">
+          {isCurrentUser && (
+            <CreateResourceDialog
+              triggerElement={
+                <Button variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ladda upp material
+                </Button>
+              }
+            />
+          )}
+        </div>
       </div>
+
 
       <ScrollArea className="h-[400px]">
         {isLoading ? (

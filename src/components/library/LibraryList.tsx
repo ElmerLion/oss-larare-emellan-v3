@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { ResourceDetailsDialog } from "@/components/resources/ResourceDetailsDialog";
+import { PostDetailsDialog } from "@/components/post/PostDetailsDialog"; // new import
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ interface LibraryListProps {
 
 export function LibraryList({ list, onDelete }: LibraryListProps) {
   const [selectedResource, setSelectedResource] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [isPostsOpen, setIsPostsOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
 
@@ -31,28 +33,89 @@ export function LibraryList({ list, onDelete }: LibraryListProps) {
     queryKey: ["resource", selectedResource],
     queryFn: async () => {
       if (!selectedResource) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("resources")
         .select("*")
         .eq("id", selectedResource)
         .single();
+      if (error) throw error;
       return data;
     },
     enabled: !!selectedResource,
   });
 
+  const { data: postDetails } = useQuery({
+    queryKey: ["post", selectedPost],
+    queryFn: async () => {
+      if (!selectedPost) return null;
+      const { data, error } = await supabase
+        .from("posts")
+        .select(`
+          *,
+          profiles:author_id (
+            id,
+            full_name,
+            avatar_url,
+            title,
+            school,
+            created_at
+          ),
+          resources:post_materials (
+            resource:resources (
+              id,
+              title,
+              description,
+              subject,
+              grade,
+              type,
+              difficulty,
+              file_path,
+              file_name,
+              author_id,
+              subject_level,
+              downloads
+            )
+          )
+        `)
+        .eq("id", selectedPost)
+        .single();
+      if (error) throw error;
+
+      // Flatten the joined resources into a materials array.
+      const materials =
+        (data.resources || [])
+          .map((item: any) => item.resource)
+          .filter((resource: any) => resource != null) || [];
+
+      // Map the joined profile data to a profile object.
+      const profile = data.profiles
+        ? {
+            id: data.profiles.id,
+            name: data.profiles.full_name,
+            avatar: data.profiles.avatar_url,
+            title: data.profiles.title,
+            school: data.profiles.school,
+            created_at: data.profiles.created_at,
+          }
+        : null;
+
+      return { ...data, materials, profile };
+    },
+    enabled: !!selectedPost,
+  });
+
   const handleItemClick = (item: SavedItem) => {
     if (item.type === "resource") {
       setSelectedResource(item.id);
+    } else if (item.type === "post") {
+      setSelectedPost(item.id);
     }
   };
 
   const handleDeleteList = async () => {
     try {
       const { error } = await supabase.from("user_lists").delete().eq("id", list.id);
-
       if (error) throw error;
-
       toast.success("Listan har tagits bort");
       onDelete?.();
     } catch (error) {
@@ -176,6 +239,15 @@ export function LibraryList({ list, onDelete }: LibraryListProps) {
           resource={resourceDetails}
           open={!!selectedResource}
           onOpenChange={(open) => !open && setSelectedResource(null)}
+          onResourceUpdate={(updatedResource) => {}}
+        />
+      )}
+
+      {postDetails && (
+        <PostDetailsDialog
+          post={postDetails}
+          open={!!selectedPost}
+          onOpenChange={(open) => !open && setSelectedPost(null)}
         />
       )}
     </div>

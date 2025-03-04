@@ -19,4 +19,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+      outDir: "dist",
+      emptyOutDir: true,
+rollupOptions: {
+      output: {
+        entryFileNames: "[name].js",  // Forces non-hashed output names
+        chunkFileNames: "[name]-chunk.js",
+        assetFileNames: "[name].[ext]"
+      },
+    },
+    }
 }));

@@ -72,12 +72,23 @@ export function ExperienceSection({ userId }: ExperienceSectionProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Arbetslivserfarenhet</h2>
-        {isCurrentUser && (
-          <EditExperienceDialog onExperienceUpdate={fetchExperiences} />
-        )}
+      <div className="flex flex-col mb-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Arbetslivserfarenhet</h2>
+          <div className="hidden sm:block">
+            {isCurrentUser && (
+              <EditExperienceDialog onExperienceUpdate={fetchExperiences} />
+            )}
+          </div>
+        </div>
+        {/* For phones, show the edit button below the header */}
+        <div className="block sm:hidden mt-2">
+          {isCurrentUser && (
+            <EditExperienceDialog onExperienceUpdate={fetchExperiences} />
+          )}
+        </div>
       </div>
+
       <div className="space-y-4">
         {experiences.map((experience) => (
           <div key={experience.id} className="flex items-start gap-4">

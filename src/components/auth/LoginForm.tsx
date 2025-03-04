@@ -10,6 +10,7 @@ export function LoginForm({ toggleMode }: { toggleMode: () => void }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,11 +21,11 @@ export function LoginForm({ toggleMode }: { toggleMode: () => void }) {
       navigate("/home");
     } catch (error: any) {
       console.error("Login error:", error);
-      toast({
-        title: error.message === "Invalid login credentials"
+      toast.error(
+        error.message === "Invalid login credentials"
           ? "Felaktiga inloggningsuppgifter"
-          : "Ett fel uppstod, försök igen senare",
-      });
+          : "Ett fel uppstod, försök igen senare"
+      );
     }
   };
 
@@ -42,15 +43,22 @@ export function LoginForm({ toggleMode }: { toggleMode: () => void }) {
             required
           />
         </div>
-        <div className="space-y-2">
+        <div className="relative space-y-2">
           <Label htmlFor="password">Lösenord</Label>
           <Input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute top-11 right-3 transform -translate-y-1/2 text-sm text-gray-600 focus:outline-none"
+          >
+            {showPassword ? "Dölj" : "Visa"}
+          </button>
         </div>
         <Button
           type="submit"

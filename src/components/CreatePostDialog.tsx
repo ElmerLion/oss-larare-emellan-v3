@@ -59,6 +59,7 @@ export function CreatePostDialog() {
               post_id: post.id,
               title: material.title,
               type: material.type,
+              resource_id: material.id,
             }))
           );
 
@@ -99,12 +100,13 @@ export function CreatePostDialog() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button 
-            className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mb-6"
+            className="w-full bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white py-6 text-lg font-medium mt-2"
           >
             Dela en tanke
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[525px] bg-white rounded-lg shadow-lg">
+        {/* On small devices, the dialog content will span full width with horizontal margins */}
+        <DialogContent className="w-full sm:max-w-[525px] mx-2 bg-white rounded-lg shadow-lg">
           <DialogHeader>
             <DialogTitle>Dela en tanke</DialogTitle>
           </DialogHeader>
@@ -119,12 +121,12 @@ export function CreatePostDialog() {
                 className="min-h-[150px]"
               />
             </div>
-            
-            <LinkedMaterialsList 
+
+            <LinkedMaterialsList
               materials={linkedMaterials}
               onRemove={removeMaterial}
             />
-            
+
             <PostActionButtons
               onUploadClick={() => {}}
               onLinkClick={() => setShowLinkMaterial(true)}

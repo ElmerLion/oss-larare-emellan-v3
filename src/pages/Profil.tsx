@@ -1,6 +1,4 @@
-// src/pages/Profil.tsx
 import { AppSidebar } from "@/components/AppSidebar";
-import { Header } from "@/components/Header";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AboutSection } from "@/components/profile/AboutSection";
 import ProfileInterests from "@/components/profile/ProfileInterests"; // Import the new component
@@ -11,6 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import type { Profile } from "@/types/profile";
+import { Header } from "@/components/Header";
 
 export default function Profil() {
   const { id: profileId } = useParams();
@@ -20,7 +19,7 @@ export default function Profil() {
     title: "",
     school: "",
     avatar_url: "/placeholder.svg",
-    subjects: [],         // Add these fields if not present already
+    subjects: [],
     interests: [],
     education_level: "",
   });
@@ -92,11 +91,35 @@ export default function Profil() {
     fetchContactsCount();
   }, [profileId]);
 
+  // Increment visits if a unique (non‑current) user visits the profile page.
+  useEffect(() => {
+    // Only count visits for non‑current users and if the profile has been loaded.
+    if (profileData.id && !isCurrentUser) {
+        console.log("Attempting to increment visits for", profileData.id);
+      const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2025-02"
+      const localKey = `profile_visit_${profileData.id}`;
+      const lastVisitMonth = localStorage.getItem(localKey);
+
+      // If the visit for this month hasn’t been recorded locally, record it and update Supabase.
+      if (lastVisitMonth !== currentMonth) {
+        localStorage.setItem(localKey, currentMonth);
+        // Use an RPC function to atomically update the visits column.
+        supabase
+          .rpc("increment_profile_visits", { profile_id: profileData.id })
+          .then(({ error }) => {
+            if (error) {
+              console.error("Error incrementing visits:", error);
+            }
+          });
+      }
+    }
+  }, [profileData.id, isCurrentUser]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex bg-[#F6F6F7]">
         <AppSidebar />
-        <div className="flex-1 ml-64">
+        <div className="flex-1 ml-0 lg:ml-64">
           <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
             <div className="p-6">Laddar...</div>
           </main>
@@ -108,15 +131,18 @@ export default function Profil() {
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
       <AppSidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-0 lg:ml-64">
         <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
-          <div className="p-6">
+        <Header />
+          <div className="p-6 mt-8">
             <div className="max-w-[2800px] mx-auto">
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
                   <ProfileHeader
                     name={profileData.full_name}
-                    role={`${profileData.title}${profileData.school ? ` på ${profileData.school}` : ''}`}
+                    role={`${profileData.title}${
+                      profileData.school ? ` på ${profileData.school}` : ""
+                    }`}
                     contactsCount={contactsCount}
                     reviews={54}
                     imageUrl={profileData.avatar_url}
@@ -124,8 +150,6 @@ export default function Profil() {
                     isCurrentUser={isCurrentUser}
                   />
                   <AboutSection userId={profileId} onProfileUpdate={fetchProfile} />
-
-                  {/* New component showing subjects and interests */}
                   <ProfileInterests
                     subjects={profileData.subjects}
                     interests={profileData.interests}
@@ -133,11 +157,10 @@ export default function Profil() {
                     isCurrentUser={isCurrentUser}
                     onComplete={fetchProfile}
                   />
-
                   <ExperienceSection userId={profileId} />
-                  <UploadedMaterials userId={profileId || ''} isCurrentUser={isCurrentUser} />
+                  <UploadedMaterials userId={profileId || ""} isCurrentUser={isCurrentUser} />
                 </div>
-                <div className="col-span-1">
+                <div className="hidden lg:block">
                   <RecommendedContacts />
                 </div>
               </div>

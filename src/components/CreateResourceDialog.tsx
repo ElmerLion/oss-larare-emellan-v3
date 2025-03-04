@@ -40,7 +40,11 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       if (selectedFile.size > MAX_FILE_SIZE) {
-        toast.error("Filen får inte vara större än 50 MB.");
+        toast({
+          title: "Fel",
+          description: "Filen får inte vara större än 50 MB.",
+          variant: "destructive",
+        });
         // Clear any previously selected file and preview.
         setFile(null);
         setPreviewUrl(null);
@@ -97,7 +101,11 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
     }
 
     if (errorMessage.trim()) {
-      toast.error(errorMessage.trim());
+      toast({
+          title: "Fel",
+          description: errorMessage.trim(),
+          variant: "destructive",
+        });
       return;
     }
 
@@ -139,7 +147,7 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
         resourceData["grade"] = "Gymnasiet";
         resourceData["subject_level"] =
           courseLevelsMapping[subject] && courseLevelsMapping[subject].length > 0 && courseLevel !== "all"
-            ? `${subject} ${courseLevel}` // e.g. "Matematik 3c"
+            ? `${courseLevel}` // e.g. "Matematik 3c"
             : null;
       } else if (school === "Grundskola") {
         resourceData["subject"] = subject;
@@ -362,7 +370,7 @@ export function CreateResourceDialog({ triggerElement }: { triggerElement?: Reac
           {previewUrl && file && file.type.startsWith("audio/") && (
             <div className="mt-2">
               <audio controls src={previewUrl}>
-                Din webbläsare stödjer inte audio.
+                Din webbläsare stödjer inte ljudfiler.
               </audio>
             </div>
           )}

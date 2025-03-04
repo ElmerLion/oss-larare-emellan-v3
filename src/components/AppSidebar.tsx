@@ -10,6 +10,7 @@ import {
   Library,
   MessageSquare,
   Menu, // For the hamburger button
+  CircleHelp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, Link, useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { FeedbackDialog } from "@/components/settings/FeedbackDialog";
 
 const menuItems = [
   { icon: Home, label: "Hem", path: "/home" },
@@ -33,7 +35,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   // Listen for authentication changes.
   useEffect(() => {
@@ -109,6 +112,32 @@ export function AppSidebar() {
     };
   }, [session]);
 
+  // Fetch the user's role from the "profiles" table.
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!session?.user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select('"Role"')
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user role", error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(data.Role === "Admin");
+    };
+
+    fetchUserRole();
+  }, [session]);
+
   const handleLogout = async () => {
     try {
       localStorage.removeItem("supabase.auth.token");
@@ -129,9 +158,9 @@ export function AppSidebar() {
 
   return (
     <>
-      {/* Hamburger button for mobile (hidden on desktop and when sidebar is open) */}
+      {/* Hamburger button for mobile/tablet (hidden on desktop and when sidebar is open) */}
       {!isSidebarOpen && (
-        <div className="md:hidden fixed top-4 left-4 z-50">
+        <div className="lg:hidden fixed top-4 left-4 z-50">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 bg-white rounded shadow"
@@ -141,92 +170,142 @@ export function AppSidebar() {
         </div>
       )}
 
-      {/* Overlay on mobile when sidebar is open */}
+      {/* Overlay on mobile/tablet when sidebar is open */}
       {isSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black opacity-50 z-30"
+          className="lg:hidden fixed inset-0 bg-black opacity-50 z-30"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
 
       {/* Sidebar */}
-      <div
-        className={cn(
-          "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300 overflow-y-auto",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0" // Always show sidebar on desktop
-        )}
-      >
-        <div className="flex items-center gap-2 group mb-8">
-          <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg">
-            <button onClick={() => navigate("/home")} className="flex items-center gap-2">
-              <img
-                src="/Images/OLELogga.png"
-                alt="OLE Logo"
-                className="w-full h-full object-contain"
-              />
-            </button>
-          </div>
-          <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
-            Oss Lärare Emellan
-          </span>
-        </div>
-
-        <nav className="space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
-                (item.path === "/profil" && location.pathname.startsWith("/profil")) ||
-                (item.path === "/forum" && location.pathname.startsWith("/forum")) ||
-                location.pathname === item.path
-                  ? "bg-sage-50 text-sage-500"
-                  : ""
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
-              {item.label === "Meddelanden" && unreadCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-         {/* Logout / Authentication Section */}
-        <div className="space-y-2">
-          {session ? (
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 transition-colors w-full"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Logga ut</span>
-            </button>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
-              >
-                <LogIn className="w-5 h-5" />
-                <span>Logga in</span>
-              </Link>
-              <Link
-                to="/login"
-                className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
-              >
-                <UserPlus className="w-5 h-5" />
-                <span>Registrera</span>
-              </Link>
-            </>
-          )}
-        </div>
+<div
+  className={cn(
+    "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-10 transform transition-transform duration-300 overflow-y-auto",
+    isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+    "lg:translate-x-0" // Always show sidebar on large screens
+  )}
+>
+  <div className="flex flex-col">
+    {/* Sidebar Header */}
+    <div className="flex items-center gap-2 group mb-8">
+      <div className="w-10 h-10 bg-sage-300 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg">
+        <button onClick={() => navigate("/home")} className="flex items-center gap-2">
+          <img
+            src="/Images/OLELogga.png"
+            alt="OLE Logo"
+            className="w-full h-full object-contain"
+          />
+        </button>
       </div>
+      <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors duration-300">
+        Oss Lärare Emellan
+      </span>
+    </div>
+
+    {/* Navigation */}
+    <nav className="space-y-1">
+      {menuItems.map((item) => (
+        <Link
+          key={item.label}
+          to={item.path}
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+            (item.path === "/profil" && location.pathname.startsWith("/profil")) ||
+            (item.path === "/forum" && location.pathname.startsWith("/forum")) ||
+            location.pathname === item.path
+              ? "bg-sage-50 text-sage-500"
+              : ""
+          )}
+        >
+          <item.icon className="w-5 h-5" />
+          <span>{item.label}</span>
+          {item.label === "Meddelanden" && unreadCount > 0 && (
+            <span className="ml-auto bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+              {unreadCount}
+            </span>
+          )}
+        </Link>
+      ))}
+
+      <FeedbackDialog
+        triggerElement={
+          <button className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full">
+            <CircleHelp className="w-5 h-5" />
+            <span>Skicka Feedback</span>
+          </button>
+        }
+      />
+
+      {/* Admin Section – hidden on phones */}
+      {isAdmin && (
+        <div className="hidden sm:block">
+          <div className="px-4 py-2 mt-4 text-gray-500 uppercase text-xs">
+            Admin
+          </div>
+          <Link
+            to="/admin/oversikt"
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+              location.pathname === "/admin/oversikt" && "bg-sage-50 text-sage-500"
+            )}
+          >
+            <span>Översikt</span>
+          </Link>
+          <Link
+            to="/admin/skapa"
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+              location.pathname === "/admin/skapa" && "bg-sage-50 text-sage-500"
+            )}
+          >
+            <span>Skapa</span>
+          </Link>
+          <Link
+            to="/admin/feedback"
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors",
+              location.pathname === "/admin/feedback" && "bg-sage-50 text-sage-500"
+            )}
+          >
+            <span>Feedback</span>
+          </Link>
+        </div>
+      )}
+    </nav>
+
+    {/* Logout / Authentication Section (Now part of the scrollable content) */}
+    <div className="space-y-2 mt-8">
+      {session ? (
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 transition-colors w-full"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logga ut</span>
+        </button>
+      ) : (
+        <>
+          <Link
+            to="/login"
+            className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+          >
+            <LogIn className="w-5 h-5" />
+            <span>Logga in</span>
+          </Link>
+          <Link
+            to="/login"
+            className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-sage-50 transition-colors w-full"
+          >
+            <UserPlus className="w-5 h-5" />
+            <span>Registrera</span>
+          </Link>
+        </>
+      )}
+    </div>
+  </div>
+</div>
+
     </>
   );
 }

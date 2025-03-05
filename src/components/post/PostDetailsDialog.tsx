@@ -1,8 +1,8 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ResourceCard } from "@/components/resources/ResourceCard";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import MiniProfile from "@/components/profile/MiniProfile";
+import { PostComments } from "@/components/post/PostComments";
+import { PostReactions } from "@/components/post/PostReactions";
 
 export interface Material {
   id: string;
@@ -31,7 +31,10 @@ export interface Post {
     school: string;
     created_at: string;
   };
-  // add other fields as needed
+  // Ensure these fields are available or provide defaults as needed.
+  reactions?: number;
+  comments?: number;
+  userReaction?: any; // Replace 'any' with your ReactionType if available
 }
 
 export interface PostDetailsDialogProps {
@@ -70,6 +73,19 @@ export function PostDetailsDialog({ post, open, onOpenChange }: PostDetailsDialo
             </div>
           </div>
         )}
+        {/* Comments and Reactions Section */}
+        <div className="pt-4 border-t border-gray-100 mt-4">
+          <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
+            <PostComments postId={post.id} totalComments={post.comments || 0} />
+            <PostReactions
+              postId={post.id}
+              reactions={post.reactions || 0}
+              userReaction={post.userReaction || null}
+              compact={true}
+            />
+          </div>
+          <PostComments postId={post.id} totalComments={post.comments || 0} showCommentForm={true} />
+        </div>
       </DialogContent>
     </Dialog>
   );

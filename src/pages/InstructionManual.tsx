@@ -198,10 +198,10 @@ export default function InstructionManual() {
             <p className="text-gray-700">
               Skicka dina frågor direkt till oss via feedbackfunktionen eller kontakta oss på{" "}
               <a
-                href="mailto:osslarareemellan@gmail.com"
+                              href="mailto:info@osslarareemellan.se"
                 className="text-[var(--ole-green)] hover:underline"
               >
-                osslarareemellan@gmail.com
+                info@osslarareemellan.se
               </a>.
             </p>
           </div>

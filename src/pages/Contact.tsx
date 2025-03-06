@@ -68,7 +68,7 @@ export default function Contact() {
             <div className="flex flex-col sm:flex-row gap-16 justify-center items-center">
               {/* Email Block */}
               <a
-                href="mailto:osslarareemellan@gmail.com"
+                href="mailto:info@osslarareemellan.se"
                 className="
                   flex flex-col sm:flex-row
                   items-center sm:items-start
@@ -83,7 +83,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-800 mb-1">E-post</h2>
-                  <p className="text-gray-700">osslarareemellan@gmail.com</p>
+                  <p className="text-gray-700">info@osslarareemellan.se</p>
                 </div>
               </a>
 

@@ -83,10 +83,10 @@ export default function Integritetspolicy() {
               <br />
               <span className="font-semibold">E-post:</span>{" "}
               <a
-                href="mailto:osslarareemellan@gmail.com"
+                              href="mailto:info@osslarareemellan.se"
                 className="text-green-600 hover:underline"
               >
-                osslarareemellan@gmail.com
+                              info@osslarareemellan.se
               </a>
             </p>
 

@@ -262,7 +262,7 @@ const App = () => {
         return;
       }
 
-      setIsAdmin(data.Role === "Admin");
+      setIsAdmin(data.role === "Admin");
     };
 
     fetchUserRole();

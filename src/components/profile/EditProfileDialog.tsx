@@ -52,16 +52,16 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
       if (error) throw error;
 
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        title: "Profil uppdaterad",
+        description: "Din profil har uppdaterats!.",
       });
       
       onProfileUpdate();
       setOpen(false);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
+        title: "Ett Problem Uppstod",
+        description: "Misslyckades med att uppdatera profilen. Var vänlig försök igen.",
         variant: "destructive",
       });
     }
@@ -77,7 +77,7 @@ export function EditProfileDialog({ profileData, onProfileUpdate }: EditProfileD
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-white rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>Ändra Profil</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

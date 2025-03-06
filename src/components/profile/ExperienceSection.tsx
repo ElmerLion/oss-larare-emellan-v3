@@ -53,15 +53,15 @@ export function ExperienceSection({ userId }: ExperienceSectionProps) {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to delete experience. Please try again.",
+        description: "Misslyckades med att radera erfarenhet. Vänligen försök igen.",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Experience deleted",
-      description: "Your experience has been deleted successfully.",
+      title: "Erfarenhet raderad",
+      description: "Din erfarenhet har raderats.",
     });
     fetchExperiences();
   };

@@ -113,7 +113,8 @@ export default function GroupsTabContent({ searchQuery }: GroupsTabContentProps)
           {groups.map((group) => (
             <div
               key={group.id}
-              className="p-4 bg-white rounded-lg shadow-sm border flex items-center"
+              className="p-4 bg-white rounded-lg shadow-sm border flex items-center cursor-pointer"
+              onClick={() => (window.location.href = "/meddelanden")}
             >
               {group.icon_url ? (
                 <img
@@ -127,25 +128,30 @@ export default function GroupsTabContent({ searchQuery }: GroupsTabContentProps)
                 </div>
               )}
               <div className="flex-1">
-                <p
-                  className="text-lg font-semibold"
-                >
+                <div className="text-lg font-semibold hover:underline">
                   {group.name}
-                </p>
+                </div>
                 {group.description && (
                   <p className="text-sm text-gray-600">{group.description}</p>
                 )}
               </div>
-              <div>
+              <div onClick={(e) => e.stopPropagation()}>
                 {userGroupIds.has(group.id) ? (
                   <span className="text-green-600 font-semibold">Medlem</span>
                 ) : (
-                  <Button variant="outline" onClick={() => handleJoinGroup(group)}>
+                  <Button
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleJoinGroup(group);
+                    }}
+                  >
                     Gå med
                   </Button>
                 )}
               </div>
             </div>
+
           ))}
         </div>
       )}

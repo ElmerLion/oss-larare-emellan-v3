@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti"; // Import confetti library
+import { Link } from "react-router-dom";
 
 type ReactionType = Database["public"]["Enums"]["reaction_type"];
 
@@ -43,6 +44,24 @@ export function PostReactions({
   const [reactionCount, setReactionCount] = useState(initialReactions);
   const { toast } = useToast();
   const reactionButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Query to fetch list of users who reacted along with their reaction
+  const [reactionList, setReactionList] = useState<any[]>([]);
+  const updateReactionList = async () => {
+    const { data, error } = await supabase
+      .from("post_reactions")
+      .select("reaction, user:profiles ( id, avatar_url, full_name )")
+      .eq("post_id", postId);
+    if (error) {
+      console.error("Error fetching reaction list:", error);
+    } else {
+      setReactionList(data || []);
+    }
+  };
+
+  useEffect(() => {
+    updateReactionList();
+  }, [postId, reactionCount]);
 
   // Fetch the current reaction count on mount
   useEffect(() => {
@@ -83,7 +102,7 @@ export function PostReactions({
     fetchUserReaction();
   }, [postId]);
 
-  // Listen for realtime changes to update reaction count
+  // Listen for realtime changes to update reaction count and list
   useEffect(() => {
     const channel = supabase
       .channel("schema-db-changes")
@@ -101,6 +120,7 @@ export function PostReactions({
             .select("*", { count: "exact", head: true })
             .eq("post_id", postId);
           setReactionCount(count || 0);
+          updateReactionList();
         }
       )
       .subscribe();
@@ -110,77 +130,77 @@ export function PostReactions({
     };
   }, [postId]);
 
-const handleReaction = async (reactionType: ReactionType) => {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+  const handleReaction = async (reactionType: ReactionType) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Du måste vara inloggad för att reagera på inlägg!",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (userReaction === reactionType) {
+        // Remove reaction if the same reaction is clicked
+        const { error } = await supabase
+          .from("post_reactions")
+          .delete()
+          .eq("post_id", postId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        setUserReaction(null);
+        setReactionCount((prev) => Math.max(prev - 1, 0));
+      } else {
+        // Upsert the reaction to update it if it exists or insert if it doesn't.
+        const { error } = await supabase
+          .from("post_reactions")
+          .upsert(
+            {
+              post_id: postId,
+              user_id: user.id,
+              reaction: reactionType,
+            },
+            { onConflict: ["post_id", "user_id"] }
+          );
+
+        if (error) throw error;
+
+        if (!userReaction) {
+          setReactionCount((prev) => prev + 1);
+        }
+        setUserReaction(reactionType);
+
+        // Trigger confetti effect
+        if (reactionButtonRef.current) {
+          const rect = reactionButtonRef.current.getBoundingClientRect();
+          confetti({
+            particleCount: 20,
+            spread: 80,
+            startVelocity: 15,
+            origin: {
+              x: (rect.left + rect.width / 2) / window.innerWidth,
+              y: (rect.top + rect.height / 2) / window.innerHeight,
+            },
+          });
+        }
+      }
+      // Immediately update the reaction list after any change.
+      updateReactionList();
+    } catch (error) {
+      console.error("Problem med att hantera reaktion:", error);
       toast({
         title: "Error",
-        description: "Du måste vara inloggad för att reagera på inlägg!",
+        description: "Failed to update reaction",
         variant: "destructive",
       });
-      return;
     }
-
-    if (userReaction === reactionType) {
-      // Remove reaction if the same reaction is clicked
-      const { error } = await supabase
-        .from("post_reactions")
-        .delete()
-        .eq("post_id", postId)
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      setUserReaction(null);
-      setReactionCount((prev) => Math.max(0, prev - 1));
-    } else {
-      // Upsert the reaction to update it if it exists or insert if it doesn't.
-      const { error } = await supabase
-        .from("post_reactions")
-        .upsert(
-          {
-            post_id: postId,
-            user_id: user.id,
-            reaction: reactionType,
-          },
-          { onConflict: ["post_id", "user_id"] }
-        );
-
-      if (error) throw error;
-
-      // If there was no previous reaction, increment the count.
-      if (!userReaction) {
-        setReactionCount((prev) => prev + 1);
-      }
-      // Otherwise, if changing reaction, count remains unchanged.
-      setUserReaction(reactionType);
-
-      // Trigger confetti effect
-      if (reactionButtonRef.current) {
-        const rect = reactionButtonRef.current.getBoundingClientRect();
-        confetti({
-          particleCount: 20,
-          spread: 80,
-          startVelocity: 15,
-          origin: {
-            x: (rect.left + rect.width / 2) / window.innerWidth,
-            y: (rect.top + rect.height / 2) / window.innerHeight,
-          },
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Problem med att hantera reaktion:", error);
-    toast({
-      title: "Error",
-      description: "Failed to update reaction",
-      variant: "destructive",
-    });
-  }
-};
+  };
 
   return (
     <DropdownMenu>
@@ -207,6 +227,36 @@ const handleReaction = async (reactionType: ReactionType) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        {/* Users who have reacted */}
+        {reactionList.length > 0 && (
+          <>
+            <div className="px-2 py-2 border-b border-gray-200">
+              <div className="flex flex-wrap gap-2">
+                {reactionList.map((reactionObj: any) => {
+                  const { reaction, user } = reactionObj;
+                  return (
+                    <Link key={user.id} to={`/profil/${user.id}`}>
+                      <div className="relative inline-block">
+                        <img
+                          src={user.avatar_url || "/placeholder.svg"}
+                          alt={user.full_name || "User"}
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <div className="absolute -bottom-1 -right-1 bg-white rounded-full flex items-center justify-center w-5 h-5">
+                          <span className="text-xs">
+                            {reactionEmojis[reaction].emoji}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="border-b border-gray-200 my-1"></div>
+          </>
+        )}
+        {/* Reaction options */}
         {(
           Object.entries(reactionEmojis) as [
             ReactionType,

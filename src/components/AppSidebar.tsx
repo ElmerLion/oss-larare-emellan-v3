@@ -122,7 +122,7 @@ export function AppSidebar() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select('"Role"')
+        .select('"role"')
         .eq("id", session.user.id)
         .single();
 
@@ -132,7 +132,7 @@ export function AppSidebar() {
         return;
       }
 
-      setIsAdmin(data.Role === "Admin");
+      setIsAdmin(data.role === "Admin");
     };
 
     fetchUserRole();
@@ -158,7 +158,7 @@ export function AppSidebar() {
 
   return (
     <>
-      {/* Hamburger button for mobile/tablet (hidden on desktop and when sidebar is open) */}
+
       {!isSidebarOpen && (
         <div className="lg:hidden fixed top-4 left-4 z-50">
           <button
@@ -171,12 +171,6 @@ export function AppSidebar() {
       )}
 
       {/* Overlay on mobile/tablet when sidebar is open */}
-      {isSidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black opacity-50 z-30"
-          onClick={() => setIsSidebarOpen(false)}
-        ></div>
-      )}
 
       {/* Sidebar */}
 <div
@@ -259,7 +253,7 @@ export function AppSidebar() {
               location.pathname === "/admin/skapa" && "bg-sage-50 text-sage-500"
             )}
           >
-            <span>Skapa</span>
+            <span>Skapa/Ändra</span>
           </Link>
           <Link
             to="/admin/feedback"

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { interestsOptions } from "@/types/interestsOptions";
+import AllowedUsers from "./AllowedUsers";
 
 export function AdminCreate(): JSX.Element {
   const queryClient = useQueryClient();
@@ -249,6 +250,7 @@ export function AdminCreate(): JSX.Element {
             </Button>
           </form>
         </div>
+        <AllowedUsers />
       </main>
     </div>
   );

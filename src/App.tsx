@@ -252,7 +252,7 @@ const App = () => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select('"Role"')
+        .select('"role"')
         .eq("id", currentUserId)
         .single();
 

@@ -141,7 +141,7 @@ export function AdminCreate(): JSX.Element {
       <AppSidebar />
       {/* Content offset from sidebar */}
       <main className="pl-72 p-4">
-        <h1 className="text-2xl font-bold mb-4">Admin Skapa</h1>
+        <h1 className="text-2xl font-bold mb-4">Skapa och Ändra</h1>
 
         {/* Hot Topic Creation Card */}
         <div className="mb-8">

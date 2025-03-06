@@ -47,9 +47,12 @@ const HomeStats = () => {
   const [userListTitle, setUserListTitle] = useState("");
   const [userList, setUserList] = useState<any[]>([]); // Replace 'any' with your ExtendedProfile type if available
 
-  // Fetch all active teachers
+  // Fetch all active teachers sorted by newest created_at
   const fetchActiveTeachers = async () => {
-    const { data, error } = await supabase.from("profiles").select("*");
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) {
       console.error("Error fetching active teachers:", error);
       return [];
@@ -57,13 +60,14 @@ const HomeStats = () => {
     return data;
   };
 
-  // Fetch new teachers: those who signed up within the last week
+  // Fetch new teachers: those who signed up within the last week, sorted by newest created_at
   const fetchNewTeachers = async () => {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .gte("created_at", oneWeekAgo);
+      .gte("created_at", oneWeekAgo)
+      .order("created_at", { ascending: false });
     if (error) {
       console.error("Error fetching new teachers:", error);
       return [];
@@ -155,7 +159,6 @@ const HomeStats = () => {
             </div>
           </div>
         </Link>
-
       </div>
       <UserListPopup
         open={isUserListOpen}

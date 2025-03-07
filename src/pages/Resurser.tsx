@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AppSidebar } from "@/components/AppSidebar";
 import { FilterSidebar, ResourceFilters } from "@/components/FilterSidebar";
 import { CreateResourceDialog } from "@/components/CreateResourceDialog";
 import { ResourceCard } from "@/components/resources/ResourceCard";
 import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/Footer";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Resource {
@@ -124,9 +122,8 @@ export default function Resurser() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F6F6F7]">
-      <AppSidebar />
       {/* Main container: on mobile/tablet ml-0; on large screens, reserve space for the AppSidebar */}
-      <div className="flex flex-1 ml-0 lg:ml-[255px]">
+      <div className="flex flex-1 ml-0 lg:ml-[235px]">
         {/* Flex container to arrange FilterSidebar and Resource Area */}
         <div className="flex flex-col lg:flex-row w-full">
           {/* Left side: FilterSidebar */}

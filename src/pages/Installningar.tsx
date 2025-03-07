@@ -10,10 +10,9 @@ export default function Installningar() {
 
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
-      <AppSidebar />
       {/* Use ml-0 on mobile and ml-64 on large screens */}
       <div className="flex-1 ml-0 lg:ml-64">
-        <main className="mt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
+        <main className="min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
           <div className="p-6">
             {/* Constrain the inner container and add horizontal padding */}
             <div className="max-w-4xl mx-auto px-4">

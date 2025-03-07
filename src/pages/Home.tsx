@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { AppSidebar } from "@/components/AppSidebar";
 import { Feed } from "@/components/Feed";
 import { ProfileCard } from "@/components/ProfileCard";
 import LatestDiscussions from "@/components/LatestDiscussions";
@@ -7,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import HomeStats from "@/components/home/HomeStats";
 import RecommendedResources from "@/components/resources/RecommendedResources";
-import { Header } from "@/components/Header";
 
 const Home = () => {
     const [firstName, setFirstName] = useState("");
@@ -77,13 +75,10 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <AppSidebar />
-
             {/* On extra-large screens, add left padding for the sidebar */}
-            <main className="pl-0 lg:pl-64 pt-8 mt-8">
+            <main className="pl-0 lg:pl-64">
                 <div className="max-w-[1500px] mx-auto px-4 xl:px-6 py-8 grid grid-cols-1 xl:grid-cols-3 gap-8">
                     {/* Main Column: full-width on screens below xl, 2/3 on xl and up */}
-                    <Header />
                     <div className="xl:col-span-2 space-y-8">
                         <h1 className="text-2xl font-semibold mb-2">
                             Välkommen tillbaka {firstName || "-"}!

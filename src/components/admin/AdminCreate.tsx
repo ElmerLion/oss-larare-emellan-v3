@@ -8,252 +8,339 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { interestsOptions } from "@/types/interestsOptions";
 import AllowedUsers from "./AllowedUsers";
+import { useBroadcast } from "@/hooks/useBroadcast";
 
 export function AdminCreate(): JSX.Element {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  // Hot Topic states
-  const [isCreatingHotTopic, setIsCreatingHotTopic] = useState<boolean>(false);
-  const [hotTopicQuestion, setHotTopicQuestion] = useState<string>("");
-  const [hotTopicDescription, setHotTopicDescription] = useState<string>("");
+    // Hot Topic states
+    const [isCreatingHotTopic, setIsCreatingHotTopic] = useState<boolean>(false);
+    const [hotTopicQuestion, setHotTopicQuestion] = useState<string>("");
+    const [hotTopicDescription, setHotTopicDescription] = useState<string>("");
 
-  // Tag states for hot topic creation
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState<string>("");
-  const filteredInterests = tagInput
-    ? interestsOptions.filter(
-        (interest) =>
-          interest.label.toLowerCase().includes(tagInput.toLowerCase()) &&
-          !tags.includes(interest.value)
-      )
-    : [];
-  const addTag = (tag: string): void => {
-    if (tags.length >= 5) return;
-    if (!tags.includes(tag)) {
-      setTags([...tags, tag]);
-      setTagInput("");
-    }
-  };
-  const removeTag = (tag: string): void => {
-    setTags(tags.filter((t) => t !== tag));
-  };
+    // Tag states for hot topic creation
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagInput, setTagInput] = useState<string>("");
+    const filteredInterests = tagInput
+        ? interestsOptions.filter(
+            (interest) =>
+                interest.label.toLowerCase().includes(tagInput.toLowerCase()) &&
+                !tags.includes(interest.value)
+        )
+        : [];
+    const addTag = (tag: string): void => {
+        if (tags.length >= 5) return;
+        if (!tags.includes(tag)) {
+            setTags([...tags, tag]);
+            setTagInput("");
+        }
+    };
+    const removeTag = (tag: string): void => {
+        setTags(tags.filter((t) => t !== tag));
+    };
 
-  // Helper to generate unique slug
-  const generateUniqueSlug = async (baseSlug: string): Promise<string> => {
-    let uniqueSlug = baseSlug;
-    let suffix = 0;
-    while (true) {
-      const { data, error } = await supabase
-        .from("discussions")
-        .select("slug")
-        .eq("slug", uniqueSlug)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) break;
-      suffix++;
-      uniqueSlug = `${baseSlug}-${suffix}`;
-    }
-    return uniqueSlug;
-  };
+    // Helper to generate unique slug
+    const generateUniqueSlug = async (baseSlug: string): Promise<string> => {
+        let uniqueSlug = baseSlug;
+        let suffix = 0;
+        while (true) {
+            const { data, error } = await supabase
+                .from("discussions")
+                .select("slug")
+                .eq("slug", uniqueSlug)
+                .maybeSingle();
+            if (error) throw error;
+            if (!data) break;
+            suffix++;
+            uniqueSlug = `${baseSlug}-${suffix}`;
+        }
+        return uniqueSlug;
+    };
 
-  // Mutation to create a hot topic discussion
-  const createHotTopicMutation = useMutation({
-    mutationFn: async () => {
-      const baseSlug = hotTopicQuestion
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "")
-        .replace(/\s+/g, "-");
-      const slug = await generateUniqueSlug(baseSlug);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-      const creatorId = user.id;
-      // Ensure "Veckans Hot Topic" is the first tag.
-      const finalTags = ["Veckans Hot Topic", ...tags.filter(tag => tag !== "Veckans Hot Topic")];
-      const { error } = await supabase.from("discussions").insert({
-        question: hotTopicQuestion,
-        description: hotTopicDescription,
-        slug,
-        creator_id: creatorId,
-        tags: finalTags,
-        created_at: new Date().toISOString(),
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["discussions"]);
-      toast.success("Hot topic skapad!");
-      setHotTopicQuestion("");
-      setHotTopicDescription("");
-      setTags([]);
-      setTagInput("");
-      setIsCreatingHotTopic(false);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Fel vid skapande",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+    // Mutation to create a hot topic discussion
+    const createHotTopicMutation = useMutation({
+        mutationFn: async () => {
+            const baseSlug = hotTopicQuestion
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, "")
+                .replace(/\s+/g, "-");
+            const slug = await generateUniqueSlug(baseSlug);
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+            if (!user) throw new Error("User not authenticated");
+            const creatorId = user.id;
+            // Ensure "Veckans Hot Topic" is the first tag.
+            const finalTags = [
+                "Veckans Hot Topic",
+                ...tags.filter((tag) => tag !== "Veckans Hot Topic"),
+            ];
+            const { error } = await supabase.from("discussions").insert({
+                question: hotTopicQuestion,
+                description: hotTopicDescription,
+                slug,
+                creator_id: creatorId,
+                tags: finalTags,
+                created_at: new Date().toISOString(),
+            });
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["discussions"]);
+            toast.success("Hot topic skapad!");
+            setHotTopicQuestion("");
+            setHotTopicDescription("");
+            setTags([]);
+            setTagInput("");
+            setIsCreatingHotTopic(false);
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Fel vid skapande",
+                description: error.message,
+                variant: "destructive",
+            });
+        },
+    });
 
-  const handleCreateHotTopic = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!hotTopicQuestion.trim() || !hotTopicDescription.trim()) return;
-    createHotTopicMutation.mutate();
-  };
+    const handleCreateHotTopic = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!hotTopicQuestion.trim() || !hotTopicDescription.trim()) return;
+        createHotTopicMutation.mutate();
+    };
 
-  // --- Broadcast Section ---
-  const [broadcastMessage, setBroadcastMessage] = useState<string>("");
-  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean>(false);
-  const updateBroadcastMutation = useMutation({
-    mutationFn: async () => {
-      // Upsert into broadcast table with id = 1.
-      const { error } = await supabase.from("broadcast").upsert({
-        id: 1,
-        message: broadcastMessage,
-        enabled: broadcastEnabled,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Broadcast uppdaterad!");
-      queryClient.invalidateQueries(["broadcast"]);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Fel vid uppdatering",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+    // --- Broadcast Section ---
+    const [broadcastMessage, setBroadcastMessage] = useState<string>("");
+    const [broadcastEnabled, setBroadcastEnabled] = useState<boolean>(false);
+    const [broadcastColor, setBroadcastColor] = useState<string>("yellow");
 
-  const handleUpdateBroadcast = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateBroadcastMutation.mutate();
-  };
+    const updateBroadcastMutation = useMutation({
+        mutationFn: async () => {
+            // Upsert into broadcast table with id = 1, updating updated_at and color
+            const { error } = await supabase.from("broadcast").upsert({
+                id: 1,
+                message: broadcastMessage,
+                enabled: broadcastEnabled,
+                color: broadcastColor, // update the color column
+                updated_at: new Date().toISOString(), // update the timestamp
+            });
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            toast.success("Broadcast uppdaterad!");
+            queryClient.invalidateQueries(["broadcast"]);
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Fel vid uppdatering",
+                description:
+                    typeof error.message === "string"
+                        ? error.message
+                        : JSON.stringify(error.message),
+                variant: "destructive",
+            });
+        },
+    });
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <AppSidebar />
-      {/* Content offset from sidebar */}
-      <main className="pl-72 p-4">
-        <h1 className="text-2xl font-bold mb-4">Skapa och Ändra</h1>
+    const handleUpdateBroadcast = (e: React.FormEvent) => {
+        e.preventDefault();
+        updateBroadcastMutation.mutate();
+    };
 
-        {/* Hot Topic Creation Card */}
-        <div className="mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Skapa Veckans Hot Topic</h2>
-              <Button
-                onClick={() => setIsCreatingHotTopic(!isCreatingHotTopic)}
-                className="bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
-              >
-                {isCreatingHotTopic ? "Avbryt" : "Starta"}
-              </Button>
-            </div>
-            {isCreatingHotTopic && (
-              <form onSubmit={handleCreateHotTopic} className="space-y-4">
-                <Input
-                  value={hotTopicQuestion}
-                  onChange={(e) => setHotTopicQuestion(e.target.value)}
-                  placeholder="Skriv din hot topic fråga här"
-                  className="w-full"
-                  required
-                />
-                <Textarea
-                  value={hotTopicDescription}
-                  onChange={(e) => setHotTopicDescription(e.target.value)}
-                  placeholder="Lägg till en beskrivning"
-                  className="w-full"
-                  rows={4}
-                  required
-                />
-                <div>
-                  <Input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    placeholder="Lägg till en tagg (valfritt)"
-                    className="w-full"
-                  />
-                  {tagInput && filteredInterests.length > 0 && (
-                    <div className="border rounded mt-1 bg-white shadow-md">
-                      {filteredInterests.map((interest, index) => (
-                        <div
-                          key={index}
-                          onClick={() => addTag(interest.value)}
-                          className="cursor-pointer hover:bg-gray-100 px-2 py-1"
-                        >
-                          {interest.label}
+    // New mutation to disable the broadcast
+    const disableBroadcastMutation = useMutation({
+        mutationFn: async () => {
+            const { error } = await supabase.from("broadcast").upsert({
+                id: 1,
+                enabled: false,
+                updated_at: new Date().toISOString(),
+            });
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            toast.success("Broadcast inaktiverad!");
+            queryClient.invalidateQueries(["broadcast"]);
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Fel vid inaktivering",
+                description:
+                    typeof error.message === "string"
+                        ? error.message
+                        : JSON.stringify(error.message),
+                variant: "destructive",
+            });
+        },
+    });
+
+    const handleDisableBroadcast = () => {
+        disableBroadcastMutation.mutate();
+    };
+
+    // Use the broadcast hook to show current broadcast info
+    const { data: broadcastInfo, isLoading: broadcastLoading } = useBroadcast();
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <AppSidebar />
+            {/* Content offset from sidebar */}
+            <main className="pl-72 p-4">
+                <h1 className="text-2xl font-bold mb-4">Skapa och Ändra</h1>
+
+                {/* Hot Topic Creation Card */}
+                <div className="mb-8">
+                    <div className="bg-white rounded-lg shadow p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold">Skapa Veckans Hot Topic</h2>
+                            <Button
+                                onClick={() => setIsCreatingHotTopic(!isCreatingHotTopic)}
+                                className="bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+                            >
+                                {isCreatingHotTopic ? "Avbryt" : "Starta"}
+                            </Button>
                         </div>
-                      ))}
+                        {isCreatingHotTopic && (
+                            <form onSubmit={handleCreateHotTopic} className="space-y-4">
+                                <Input
+                                    value={hotTopicQuestion}
+                                    onChange={(e) => setHotTopicQuestion(e.target.value)}
+                                    placeholder="Skriv din hot topic fråga här"
+                                    className="w-full"
+                                    required
+                                />
+                                <Textarea
+                                    value={hotTopicDescription}
+                                    onChange={(e) => setHotTopicDescription(e.target.value)}
+                                    placeholder="Lägg till en beskrivning"
+                                    className="w-full"
+                                    rows={4}
+                                    required
+                                />
+                                <div>
+                                    <Input
+                                        value={tagInput}
+                                        onChange={(e) => setTagInput(e.target.value)}
+                                        placeholder="Lägg till en tagg (valfritt)"
+                                        className="w-full"
+                                    />
+                                    {tagInput && filteredInterests.length > 0 && (
+                                        <div className="border rounded mt-1 bg-white shadow-md">
+                                            {filteredInterests.map((interest, index) => (
+                                                <div
+                                                    key={index}
+                                                    onClick={() => addTag(interest.value)}
+                                                    className="cursor-pointer hover:bg-gray-100 px-2 py-1"
+                                                >
+                                                    {interest.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {tags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="flex items-center px-3 py-1 bg-[var(--secondary2)] text-white rounded-full text-xs"
+                                                >
+                                                    {tag}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeTag(tag)}
+                                                        className="ml-1 text-xs text-white"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+                                >
+                                    Skapa Hot Topic
+                                </Button>
+                            </form>
+                        )}
                     </div>
-                  )}
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="flex items-center px-3 py-1 bg-[var(--secondary2)] text-white rounded-full text-xs"
-                        >
-                          {tag}
-                          <button
-                            type="button"
-                            onClick={() => removeTag(tag)}
-                            className="ml-1 text-xs text-white"
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
-                >
-                  Skapa Hot Topic
-                </Button>
-              </form>
-            )}
-          </div>
-        </div>
 
-        {/* Broadcast Message Card */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande (FUNGERAR INTE)</h2>
-          <form onSubmit={handleUpdateBroadcast} className="space-y-4">
-            <Input
-              value={broadcastMessage}
-              onChange={(e) => setBroadcastMessage(e.target.value)}
-              placeholder="Ange meddelande som ska sändas"
-              className="w-full"
-            />
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Visa meddelande:</label>
-              <input
-                type="checkbox"
-                checked={broadcastEnabled}
-                onChange={(e) => setBroadcastEnabled(e.target.checked)}
-                className="h-4 w-4"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
-            >
-              Uppdatera Broadcast
-            </Button>
-          </form>
+                {/* Broadcast Information Card */}
+                {!broadcastLoading && broadcastInfo && (
+                    <div className="mb-8 bg-blue-50 rounded-lg shadow p-6">
+                        <h2 className="text-xl font-semibold mb-2">Aktuell Broadcast</h2>
+                        <p className="mb-1">
+                            <strong>Meddelande:</strong> {broadcastInfo.message}
+                        </p>
+                        <p className="mb-1">
+                            <strong>Status:</strong> {broadcastInfo.enabled ? "Visas" : "Dold"}
+                        </p>
+                        <p className="mb-1">
+                            <strong>Färg:</strong> {broadcastInfo.color}
+                        </p>
+                        <p className="mb-4">
+                            <strong>Uppdaterad:</strong> {broadcastInfo.updated_at}
+                        </p>
+                        {/* Button to disable the broadcast */}
+                        {broadcastInfo.enabled && (
+                            <Button
+                                onClick={handleDisableBroadcast}
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                            >
+                                Inaktivera Broadcast
+                            </Button>
+                        )}
+                    </div>
+                )}
+
+                {/* Broadcast Message Card */}
+                <div className="mb-8 bg-white rounded-lg shadow p-6">
+                    <h2 className="text-xl font-semibold mb-4">Broadcast Meddelande</h2>
+                    <form onSubmit={handleUpdateBroadcast} className="space-y-4">
+                        <Input
+                            value={broadcastMessage}
+                            onChange={(e) => setBroadcastMessage(e.target.value)}
+                            placeholder="Ange meddelande som ska sändas"
+                            className="w-full"
+                        />
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">Visa meddelande:</label>
+                            <input
+                                type="checkbox"
+                                checked={broadcastEnabled}
+                                onChange={(e) => setBroadcastEnabled(e.target.checked)}
+                                className="h-4 w-4"
+                            />
+                        </div>
+                        {/* New select for choosing broadcast color */}
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">Välj färg:</label>
+                            <select
+                                value={broadcastColor}
+                                onChange={(e) => setBroadcastColor(e.target.value)}
+                                className="border border-gray-300 rounded p-1"
+                            >
+                                <option value="yellow">Gul</option>
+                                <option value="orange">Orange</option>
+                                <option value="red">Röd</option>
+                                <option value="blue">Blå</option>
+                            </select>
+                        </div>
+                        <Button
+                            type="submit"
+                            className="w-full bg-[color:var(--ole-green)] hover:bg-[color:var(--hover-green)] text-white"
+                        >
+                            Uppdatera Broadcast
+                        </Button>
+                    </form>
+                </div>
+
+                <AllowedUsers />
+            </main>
         </div>
-        <AllowedUsers />
-      </main>
-    </div>
-  );
+    );
 }
 
 export default AdminCreate;

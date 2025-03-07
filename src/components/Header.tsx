@@ -22,7 +22,11 @@ interface Message {
   read_at: string | null;
 }
 
-export function Header() {
+interface HeaderProps {
+    offset?: number;
+}
+
+export function Header({ offset = 0 }: HeaderProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasUnread, setHasUnread] = useState(false);
   const navigate = useNavigate();
@@ -100,7 +104,10 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 fixed top-0 right-0 lg:left-64 left-0 z-10">
+      <header
+          className="h-16 bg-white border-b border-gray-200 fixed right-0 lg:left-64 left-0 z-10"
+          style={{ top: offset }}
+      >
       <div className="flex items-center justify-between h-full px-6">
         <div className="w-96">
           <div className="relative">

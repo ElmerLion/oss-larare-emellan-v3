@@ -118,7 +118,6 @@ export default function Profil() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex bg-[#F6F6F7]">
-        <AppSidebar />
         <div className="flex-1 ml-0 lg:ml-64">
           <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
             <div className="p-6">Laddar...</div>
@@ -130,11 +129,9 @@ export default function Profil() {
 
   return (
     <div className="min-h-screen flex bg-[#F6F6F7]">
-      <AppSidebar />
       <div className="flex-1 ml-0 lg:ml-64">
-        <main className="pt-8 min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
-        <Header />
-          <div className="p-6 mt-8">
+        <main className="min-h-[calc(100vh-4rem)] bg-[#F6F6F7]">
+          <div className="p-6">
             <div className="max-w-[2800px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">

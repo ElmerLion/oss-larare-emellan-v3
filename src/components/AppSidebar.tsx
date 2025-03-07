@@ -30,7 +30,12 @@ const menuItems = [
   { icon: Settings, label: "Inställningar", path: "/installningar" },
 ];
 
-export function AppSidebar() {
+
+interface AppSidebarProps {
+    offset?: number;
+}
+
+export function AppSidebar({ offset = 0 }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
@@ -183,8 +188,10 @@ export function AppSidebar() {
         className={cn(
           "fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-4 z-40 transform transition-transform duration-300 overflow-y-auto",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "lg:translate-x-0" // Always show sidebar on large screens
-        )}
+            "lg:translate-x-0" // Always show sidebar on large screens
+
+              )}
+              style={{ top: offset }}
       >
         <div className="flex flex-col">
           {/* Sidebar Header */}

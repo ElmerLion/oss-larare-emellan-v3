@@ -63,6 +63,14 @@ export function BroadcastBanner({
             bgColor = "bg-yellow-100";
             textColor = "text-yellow-800";
             break;
+        case "blue":
+            bgColor = "bg-blue-100";
+            textColor = "text-blue-800";
+            break;
+        case "green":
+            bgColor = "bg-green-100";
+            textColor = "text-green-800";
+            break;
     }
 
     return (

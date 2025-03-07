@@ -149,5 +149,43 @@
     .btn-outline {
         @apply border-[color:var(--hover-green)] hover:bg-sage-50;
     }
+    @keyframes float {
+        0% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+
+        100% {
+            transform: translateY(0);
+        }
+    }
+
+    .floating {
+        animation: float 8s ease-in-out infinite;
+        will-change: transform;
+    }
+
+    /* Adding different delays to prevent all blobs from moving in sync */
+    .delay-0 {
+        animation-delay: 0s;
+    }
+
+    .delay-1 {
+        animation-delay: 1s;
+    }
+
+    .delay-2 {
+        animation-delay: 2s;
+    }
+
+    .delay-3 {
+        animation-delay: 3s;
+    }
+
+
+
   }
 }

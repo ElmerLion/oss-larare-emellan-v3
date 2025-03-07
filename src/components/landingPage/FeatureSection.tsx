@@ -24,7 +24,7 @@ const features = [
   {
     title: "Anpassa Innehåll",
     description:
-      "Filtrera och anpassa innehåll baserat på dina ämnen och intressen. Få en skräddarsydd upplevelse med relevanta resurser och diskussioner.",
+      "Filtrera och anpassa innehåll baserat på dina ämnen och intressen. Få en skräddarsydd upplevelse med relevanta resurser och samtal.",
     image: "/Images/HomePageMockup.png",
   },
 ];
@@ -35,10 +35,8 @@ export function FeatureSection() {
 
   return (
     <Element name="features" id="features">
-      <section
-        ref={ref}
-        className="py-20 bg-gradient-to-r from-green-50 via-sage-50 to-green-100"
-      >
+          <section ref={ref} className="py-20 bg-gradient-to-r from-green-50 via-sage-50 to-green-100 bg-[length:300%_300%] animate-bgMove">
+
         <div className="container mx-auto px-6">
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
@@ -75,13 +73,15 @@ function FeatureCard({ index, title, description, image, reversed }) {
   const isCardInView = useInView(cardRef, { once: true, amount: 0.2 });
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, x: reversed ? 50 : -50 }}
-      animate={isCardInView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="flex flex-col md:flex-row items-center justify-between gap-2 lg:gap-8"
-    >
+      <motion.div
+          ref={cardRef}
+          initial={{ opacity: 0, x: reversed ? 50 : -50 }}
+          animate={isCardInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          className="flex flex-col md:flex-row items-center justify-between gap-2 lg:gap-8 p-6 rounded-xl transition-all duration-100"
+          whileHover={{ scale: 1.05 }}
+      >
+
       {/* Image */}
       <div
         className={`md:w-1/2 flex-shrink-0 ${
@@ -106,9 +106,14 @@ function FeatureCard({ index, title, description, image, reversed }) {
         }`}
       >
         <a href="/funktioner">
-          <h3 className="text-3xl md:text-5xl font-semibold text-[var(--ole-green)] mb-4">
-            {title}
-          </h3>
+                  <h3 className="text-3xl md:text-5xl font-semibold text-[var(--ole-green)] mb-4 flex items-center gap-2 ">
+                      {index === 0 && "📂"}
+                      {index === 1 && "🤝"}
+                      {index === 2 && "💬"}
+                      {index === 3 && "⚙️"}
+                      {title}
+                  </h3>
+
           <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
             {description}
           </p>

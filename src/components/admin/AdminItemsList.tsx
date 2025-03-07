@@ -362,7 +362,7 @@ export function AdminItemsList({
                         id={account.id}
                         name={account.full_name}
                         avatarUrl={account.avatar_url}
-                        created_at={account.created_at}
+                        created_at={account.last_seen}
                         size="small"
                       />
                       <button

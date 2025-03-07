@@ -23,8 +23,8 @@ import { FeedbackDialog } from "@/components/settings/FeedbackDialog";
 const menuItems = [
   { icon: Home, label: "Hem", path: "/home" },
   { icon: User, label: "Profil", path: "/profil" },
-  { icon: MessageSquare, label: "Forum", path: "/forum" },
-  { icon: Users, label: "Meddelanden", path: "/meddelanden" },
+    { icon: Users, label: "Forum", path: "/forum" },
+    { icon: MessageSquare, label: "Meddelanden", path: "/meddelanden" },
   { icon: Book, label: "Resurser", path: "/resurser" },
   { icon: Library, label: "Mitt Bibliotek", path: "/mitt-bibliotek" },
   { icon: Settings, label: "Inställningar", path: "/installningar" },

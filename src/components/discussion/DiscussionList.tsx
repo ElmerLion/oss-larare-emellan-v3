@@ -176,7 +176,7 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
           {discussion.question}{" "}
           {extraClass && <span role="img" aria-label="hot">🔥</span>}
         </a>
-        <p className="text-gray-700 mt-2">{discussion.description}</p>
+            <p className="text-gray-700 mt-2 whitespace-pre-wrap">{discussion.description}</p>
         {discussion.tags?.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {discussion.tags.map((tag: string, index: number) => (
@@ -209,7 +209,7 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
                 size="small"
               />
               <div className="mt-4">
-                <p className="text-gray-700 line-clamp-2">
+                            <p className="whitespace-pre-wrap text-gray-700 line-clamp-2">
                   {latestAnswer.content}
                 </p>
               </div>

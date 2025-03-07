@@ -67,7 +67,7 @@ export function Post({
         />
       </div>
 
-      <p className="text-gray-700 mb-4">{content}</p>
+          <p className="whitespace-pre-wrap text-gray-700 mb-4">{content}</p>
 
       {tags && tags.length > 0 && <PostTags tags={tags} />}
 

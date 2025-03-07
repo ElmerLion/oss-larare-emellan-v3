@@ -33,7 +33,7 @@ export default function RegisterForm({ toggleMode, nextStep, data, updateData }:
     }
 
     // Normalize email by trimming and converting to lowercase.
-    const normalizedEmail = data.email.trim().toLowerCase();
+    const normalizedEmail = data.email.toLowerCase();
 
     console.log(normalizedEmail);
     console.log(data.email);

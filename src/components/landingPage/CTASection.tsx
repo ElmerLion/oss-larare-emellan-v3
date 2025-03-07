@@ -1,6 +1,7 @@
 import { Element } from "react-scroll";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 export function CTASection() {
 
@@ -19,12 +20,13 @@ export function CTASection() {
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
                 Gå med i <strong><span className="text-[var(--ole-green)]">Oss Lärare Emellan</span></strong> och upplev kraften av <strong><span className="text-[var(--ole-green)]">samarbete</span></strong>.
               </p>
-              <button
-                className="bg-[color:var(--ole-green)] text-white text-lg font-medium px-8 py-4 rounded-lg hover:bg-[color:var(--hover-green)] hover:scale-105 shadow-md hover:shadow-lg transition-transform duration-300 ease-in-out"
+                <Button
+                variant="primary"
+                className="text-lg  p-7 px-10 btn-animated"
                 onClick={() => window.location.href = "/login?register=true"}
               >
                 Registrera dig nu
-              </button>
+              </Button>
             </div>
           </section>
         </Element>

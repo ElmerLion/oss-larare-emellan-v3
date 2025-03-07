@@ -9,25 +9,25 @@ const features = [
     title: "Dela Resurser",
     description:
       "Dela och upptäck lektionsplaner och resurser för att förbättra din undervisning. Genom att dela dina bästa lektionsplaner och material kan du hjälpa andra lärare och samtidigt få tillgång till en mängd resurser som kan förbättra din egen undervisning.",
-    image: "../Images/share-resources.png",
+    image: "../Images/ResurserMockup.png",
   },
   {
     title: "Bygg Nätverk",
     description:
       "Anslut med andra lärare, utbyt idéer och samarbeta över hela Sverige. Att skapa kontakt med andra pedagoger gör att du kan få nya perspektiv, utveckla innovativa lösningar och hitta samarbetspartners för gemensamma projekt.",
-    image: "../Images/networking.png",
+    image: "../Images/MeddelandenMockup.png",
   },
   {
-    title: "Delta i Diskussioner",
+    title: "Delta i Samtal",
     description:
-      "Håll dig uppdaterad med pedagogiska metoder genom diskussioner och forum. Genom att aktivt delta i samtal om undervisningsmetoder och utmaningar får du insikter i hur andra hanterar liknande situationer.",
-    image: "../Images/discussions.png",
+      "Håll dig uppdaterad med pedagogiska metoder genom samtal och forum. Genom att aktivt delta i samtal om undervisningsmetoder och utmaningar får du insikter i hur andra hanterar liknande situationer.",
+    image: "../Images/ForumMockup.png",
   },
   {
     title: "Anpassa Innehåll",
     description:
       "Filtrera och anpassa innehåll baserat på dina ämnen och intressen. Med skräddarsydda funktioner kan du lätt hitta resurser och diskussioner som är relevanta för dig. Genom att anpassa ditt flöde säkerställer du att du får den mest värdefulla informationen direkt, utan att behöva leta igenom irrelevant material.",
-    image: "../Images/customize-content.png",
+    image: "../Images/HomePageMockup.png",
   },
 ];
 
@@ -109,7 +109,7 @@ function FeatureItem({
       }`}
     >
       <motion.div whileHover={{ scale: 1.05 }} className="md:w-1/2">
-        <img src={image} alt={title} className="w-full rounded-lg shadow-lg" />
+        <img src={image} alt={title} className="w-full rounded-lg" />
       </motion.div>
       <motion.div whileHover={{ scale: 1.05 }} className="md:w-1/2">
         <h3 className="text-2xl font-semibold text-[var(--ole-green)] mb-4">

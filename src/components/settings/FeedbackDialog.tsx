@@ -51,7 +51,7 @@ export function FeedbackDialog({ triggerElement }: { triggerElement: React.React
           <p className="text-sm">Har du hittat ett problem eller något du vill förbättra? Skriv till oss!
           <br /> Vi vill veta hur vi kan förbättra plattformen och tittar på allt som skickas in.
           <br /> <br />Är det ett akut problem? Vi svarar snabbare om du
-          <a href="mailto:osslarareemellan@gmail.com" className="text-gray-600 hover:text-[var(--primary)]text-sm"> mailar</a> till oss eller skriver till oss på
+                      <a href="mailto:info@osslarareemellan.se" className="text-gray-600 hover:text-[var(--primary)]text-sm"> mailar</a> till oss eller skriver till oss på
           <a href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[var(--primary)]"> LinkedIn</a>.
           </p>
         </DialogHeader>

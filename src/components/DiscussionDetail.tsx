@@ -125,7 +125,7 @@ const DiscussionDetail = () => {
           <div className="col-span-1 xl:col-span-2">
             {/* Discussion Header */}
             <h1 className="text-2xl font-semibold mb-2">{discussion?.question}</h1>
-            <p className="text-gray-700 mb-4">{discussion?.description}</p>
+                      <p className="text-gray-700 mb-4 whitespace-pre-wrap">{discussion?.description}</p>
 
             {/* Display tags if available */}
             {discussion?.tags?.length > 0 && (
@@ -200,7 +200,7 @@ const DiscussionDetail = () => {
 
                   {/* Answer Content */}
                   <div className="mt-2">
-                    <p className="text-gray-700">{answer.content}</p>
+                          <p className="whitespace-pre-wrap text-gray-700">{answer.content}</p>
                   </div>
                 </div>
               ))

@@ -45,9 +45,10 @@ export function PersonaSection() {
           </div>
           {/* Call-to-Action Button */}
           <div className="flex justify-center mt-12">
-            <Button
+                      <Button
+            variant="primary"
               size="lg"
-              className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8 btn-animated"
+              className="text-lg px-8 btn-animated"
               onClick={() => window.location.href = "/login?register=true"}
             >
               Gå med nu

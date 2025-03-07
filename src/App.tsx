@@ -252,7 +252,7 @@ const App = () => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select('"Role"')
+        .select('"role"')
         .eq("id", currentUserId)
         .single();
 
@@ -262,7 +262,7 @@ const App = () => {
         return;
       }
 
-      setIsAdmin(data.Role === "Admin");
+      setIsAdmin(data.role === "Admin");
     };
 
     fetchUserRole();

@@ -148,7 +148,7 @@ export function GroupDialog({
     }
   };
 
-  // Upload icon file to Supabase Storage.
+  // Upload icon file to Supabase Storage using getPublicUrl for a persistent URL.
   const handleIconUpload = async (file: File) => {
     try {
       const fileExt = file.name.split(".").pop();
@@ -157,11 +157,13 @@ export function GroupDialog({
         .from("group_icons")
         .upload(fileName, file);
       if (error) throw error;
-      const { data: urlData, error: urlError } = await supabase.storage
+      // Use getPublicUrl to always get a persistent URL.
+      const { data: publicUrlData, error: publicUrlError } = supabase
+        .storage
         .from("group_icons")
-        .createSignedUrl(fileName, 60 * 60 * 24 * 7); // URL valid for 7 days
-      if (urlError) throw urlError;
-      setIconUrl(urlData.signedUrl);
+        .getPublicUrl(fileName);
+      if (publicUrlError) throw publicUrlError;
+      setIconUrl(publicUrlData.publicUrl);
     } catch (err: any) {
       toast({
         title: "Fel",
@@ -256,24 +258,25 @@ export function GroupDialog({
                 </h3>
                 {filteredLatestGroups && filteredLatestGroups.length > 0 ? (
                   <div className="space-y-2 mt-2">
-                    {filteredLatestGroups.map((group: any) => (
-                      <div
-                        key={group.id}
-                        className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
-                        onClick={() => {
-                          // Open confirmation dialog before joining
-                          setGroupToJoin(group);
-                          setIsConfirmOpen(true);
-                        }}
-                      >
-                        <div className="font-medium">{group.name}</div>
-                        {group.description && (
-                          <p className="text-xs text-gray-500">
-                            {group.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    {filteredLatestGroups.map((group: any) =>
+                      group && group.name ? (
+                        <div
+                          key={group.id}
+                          className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
+                          onClick={() => {
+                            setGroupToJoin(group);
+                            setIsConfirmOpen(true);
+                          }}
+                        >
+                          <div className="font-medium">{group.name}</div>
+                          {group.description && (
+                            <p className="text-xs text-gray-500">
+                              {group.description}
+                            </p>
+                          )}
+                        </div>
+                      ) : null
+                    )}
                   </div>
                 ) : (
                   <p className="text-xs text-gray-500">
@@ -285,20 +288,22 @@ export function GroupDialog({
                 <h3 className="text-sm font-semibold">Inbjudningar</h3>
                 {invitations && invitations.length > 0 ? (
                   <div className="space-y-2 mt-2">
-                    {invitations.map((group: any) => (
-                      <div
-                        key={group.id}
-                        className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleAcceptInvitation(group)}
-                      >
-                        <div className="font-medium">{group.name}</div>
-                        {group.description && (
-                          <p className="text-xs text-gray-500">
-                            {group.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    {invitations.map((group: any) =>
+                      group && group.name ? (
+                        <div
+                          key={group.id}
+                          className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
+                          onClick={() => handleAcceptInvitation(group)}
+                        >
+                          <div className="font-medium">{group.name}</div>
+                          {group.description && (
+                            <p className="text-xs text-gray-500">
+                              {group.description}
+                            </p>
+                          )}
+                        </div>
+                      ) : null
+                    )}
                   </div>
                 ) : (
                   <p className="text-xs text-gray-500">

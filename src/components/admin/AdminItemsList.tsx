@@ -362,15 +362,9 @@ export function AdminItemsList({
                         id={account.id}
                         name={account.full_name}
                         avatarUrl={account.avatar_url}
-                        created_at={account.created_at}
+                        created_at={account.last_seen}
                         size="small"
                       />
-                      <button
-                        onClick={() => deleteAccount(account.id)}
-                        className="absolute top-2 right-2 text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
                     </div>
                   ))}
                 </div>

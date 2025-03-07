@@ -185,17 +185,17 @@ export default function Resurser() {
                       disabled={page === 1}
                       onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                     >
-                      Previous
+                      Föregående
                     </Button>
                     <span>
-                      Page {page} of {totalPages}
+                      Sida {page} av {totalPages}
                     </span>
                     <Button
                       variant="outline"
                       disabled={page === totalPages}
                       onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
                     >
-                      Next
+                      Nästa
                     </Button>
                   </div>
                 </>

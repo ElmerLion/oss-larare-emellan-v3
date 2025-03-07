@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { interestsOptions } from "@/types/interestsOptions";
+import AllowedUsers from "./AllowedUsers";
 
 export function AdminCreate(): JSX.Element {
   const queryClient = useQueryClient();
@@ -140,7 +141,7 @@ export function AdminCreate(): JSX.Element {
       <AppSidebar />
       {/* Content offset from sidebar */}
       <main className="pl-72 p-4">
-        <h1 className="text-2xl font-bold mb-4">Admin Skapa</h1>
+        <h1 className="text-2xl font-bold mb-4">Skapa och Ändra</h1>
 
         {/* Hot Topic Creation Card */}
         <div className="mb-8">
@@ -249,6 +250,7 @@ export function AdminCreate(): JSX.Element {
             </Button>
           </form>
         </div>
+        <AllowedUsers />
       </main>
     </div>
   );

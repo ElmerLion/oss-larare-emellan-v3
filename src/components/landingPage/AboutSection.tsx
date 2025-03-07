@@ -11,7 +11,7 @@ export function AboutSection() {
 
   return (
     <Element name="about" id="about">
-      <section className="py-20 bg-gradient-to-r from-sage-50 to-white relative z-0 overflow-hidden">
+          <section className="py-20 bg-gradient-to-r from-sage-50 to-white relative z-0 overflow-hidden bg-gradient-to-r from-green-50 via-sage-50 to-green-100 bg-[length:300%_300%] animate-bgMove">
         {/* Background Blobs */}
         <div className="absolute inset-0 -z-10">
           <svg
@@ -22,7 +22,7 @@ export function AboutSection() {
             <path
               d="M50,-50C60,-30,80,-20,90,-5C100,10,90,30,70,40C50,50,20,60,5,50C-10,40,-20,20,-40,10C-60,-5,-50,-30,-40,-50C-30,-70,-10,-80,10,-80C30,-80,40,-70,50,-50Z"
               transform="translate(100 100)"
-              fill="var(--ole-green)"
+              fill="var(--secondary2)"
             />
           </svg>
           <svg
@@ -33,7 +33,8 @@ export function AboutSection() {
             <path
               d="M40,-50C55,-40,75,-25,75,-5C75,15,55,35,40,50C25,65,5,75,-15,70C-35,65,-55,45,-55,25C-55,5,-35,-15,-20,-35C-5,-55,15,-65,40,-50Z"
               transform="translate(100 100)"
-              fill="var(--ole-green)"
+              fill="var(--secondary)"
+
             />
           </svg>
         </div>
@@ -70,8 +71,9 @@ export function AboutSection() {
           {/* Call-to-Action */}
           <div className="flex justify-center mt-12">
             <Button
+              variant="primary"
               size="lg"
-              className="bg-[color:var(--ole-green)] border-[color:var(--hover-green)] hover:bg-[color:var(--hover-green)] text-white text-lg px-8 btn-animated"
+              className="text-lg px-8 btn-animated"
               onClick={() => window.location.href = "/login?register=true"}
             >
               Gå med nu

@@ -77,11 +77,11 @@ export function Footer() {
           <div>
             <h3 className="text-gray-800 font-medium mb-4">Kontakt</h3>
             <a
-              href="mailto:osslarareemellan@gmail.com"
+                          href="mailto:info@osslarareemellan.se"
               className="flex items-center gap-2 text-gray-600 hover:text-[color:var(--ole-green)] text-sm"
             >
               <Mail className="h-5 w-5" />
-              <span>osslarareemellan@gmail.com</span>
+                          <span>info@osslarareemellan.se</span>
             </a>
           </div>
 

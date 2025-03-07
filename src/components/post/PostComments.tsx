@@ -233,7 +233,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
   return (
     <div className="space-y-4">
       {/* Render top-level comments and their replies */}
-      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'sm:max-h-[110px]'} overflow-hidden -mb-4`}>
+      <div className={`space-y-4 transition-all duration-300 ease-in-out ${showAllComments ? 'max-h-[1000px]' : 'sm:max-h-[200px]'} overflow-hidden -mb-4`}>
         {topLevelComments.map((commentItem) => {
           const timeAgo = formatDistanceToNow(new Date(commentItem.created_at), { addSuffix: true });
           const replies = getReplies(commentItem.id);
@@ -251,7 +251,7 @@ export function PostComments({ postId, totalComments, showCommentForm = false }:
                   size="small"
                 />
                 <div className="mt-3">
-                  <p className="mx-4 sm:mx-10 text-sm text-gray-700">{commentItem.content}</p>
+                          <p className="whitespace-pre-wrap mx-4 sm:mx-10 text-sm text-gray-700">{commentItem.content}</p>
                 </div>
                 {/* If this comment is top-level, show Reply button */}
                 { !commentItem.parent_id && (

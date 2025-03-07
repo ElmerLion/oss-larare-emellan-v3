@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import MiniProfile from "@/components/profile/MiniProfile";
@@ -26,9 +26,16 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
     };
   }, []);
 
-  const { data: discussions } = useQuery({
+  const LIMIT = 20;
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
     queryKey: ["discussions"],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 0 }) => {
       const { data, error } = await supabase
         .from("discussions")
         .select(`
@@ -37,6 +44,7 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
           description,
           creator_id,
           tags,
+          created_at,
           creator:profiles(
             id,
             full_name,
@@ -57,49 +65,37 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
             )
           )
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(pageParam, pageParam + LIMIT - 1);
       if (error) throw error;
-      return data || [];
+      return {
+        discussions: data || [],
+        nextPage: data && data.length === LIMIT ? pageParam + LIMIT : undefined,
+      };
     },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
   });
 
-  // Delete discussion by slug
-  const deleteDiscussion = async (discussionSlug: string) => {
-    console.log("Deleting discussion:", discussionSlug);
-    const { error } = await supabase
-      .from("discussions")
-      .delete()
-      .eq("slug", discussionSlug);
-    if (error) {
-      toast.error("Ett problem uppstod. Försök igen.");
-      console.error("Error deleting discussion:", error);
-    } else {
-      toast.success("Samtalet har raderats.");
-      setMenuOpen(null);
-      queryClient.invalidateQueries(["discussions"]);
-    }
-  };
+  // Combine all pages into one list of discussions.
+  const allDiscussions = data?.pages.flatMap((page) => page.discussions) || [];
 
   // Identify the hot topic discussion (if any) and separate the rest.
-    let hotDiscussion: any = null;
-    let remainingDiscussions: any[] = [];
-    if (discussions && discussions.length > 0) {
-      // Filter all discussions that include "Veckans Hot Topic"
-      const hotTopics = discussions.filter((d: any) =>
-        d.tags?.includes("Veckans Hot Topic")
-      );
-      // Sort hot topics by created_at descending (most recent first)
-      if (hotTopics.length > 0) {
-        hotDiscussion = hotTopics.sort(
-          (a: any, b: any) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0];
-      }
-      // Remove the hotDiscussion from the rest of the discussions.
-      remainingDiscussions = discussions.filter(
-        (d: any) => d.slug !== hotDiscussion?.slug
-      );
+  let hotDiscussion: any = null;
+  let remainingDiscussions: any[] = [];
+  if (allDiscussions && allDiscussions.length > 0) {
+    const hotTopics = allDiscussions.filter((d: any) =>
+      d.tags?.includes("Veckans Hot Topic")
+    );
+    if (hotTopics.length > 0) {
+      hotDiscussion = hotTopics.sort(
+        (a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )[0];
     }
+    remainingDiscussions = allDiscussions.filter(
+      (d: any) => d.slug !== hotDiscussion?.slug
+    );
+  }
 
   // Helper to render a discussion card; accepts an extraClass for special styling.
   const renderDiscussionCard = (discussion: any, extraClass = "") => {
@@ -180,7 +176,7 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
           {discussion.question}{" "}
           {extraClass && <span role="img" aria-label="hot">🔥</span>}
         </a>
-        <p className="text-gray-700 mt-2">{discussion.description}</p>
+            <p className="text-gray-700 mt-2 whitespace-pre-wrap">{discussion.description}</p>
         {discussion.tags?.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {discussion.tags.map((tag: string, index: number) => (
@@ -213,7 +209,7 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
                 size="small"
               />
               <div className="mt-4">
-                <p className="text-gray-700 line-clamp-2">
+                            <p className="whitespace-pre-wrap text-gray-700 line-clamp-2">
                   {latestAnswer.content}
                 </p>
               </div>
@@ -254,18 +250,35 @@ const DiscussionsList = ({ currentUserId }: DiscussionsListProps) => {
     );
   };
 
+  // Delete discussion by slug
+  const deleteDiscussion = async (discussionSlug: string) => {
+    console.log("Deleting discussion:", discussionSlug);
+    const { error } = await supabase
+      .from("discussions")
+      .delete()
+      .eq("slug", discussionSlug);
+    if (error) {
+      toast.error("Ett problem uppstod. Försök igen.");
+      console.error("Error deleting discussion:", error);
+    } else {
+      toast.success("Samtalet har raderats.");
+      setMenuOpen(null);
+      queryClient.invalidateQueries(["discussions"]);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {hotDiscussion && (
-        <>
-          {renderDiscussionCard(
-            hotDiscussion,
-            "border-2 border-yellow-400" // extra styling for hot topic
-          )}
-        </>
-      )}
+      {hotDiscussion && renderDiscussionCard(hotDiscussion, "border-2 border-yellow-400")}
       {remainingDiscussions.map((discussion: any) =>
         renderDiscussionCard(discussion)
+      )}
+      {hasNextPage && (
+        <div className="text-center">
+          <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+            {isFetchingNextPage ? "Laddar..." : "Ladda fler samtal"}
+          </Button>
+        </div>
       )}
     </div>
   );

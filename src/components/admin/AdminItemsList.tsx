@@ -365,12 +365,6 @@ export function AdminItemsList({
                         created_at={account.last_seen}
                         size="small"
                       />
-                      <button
-                        onClick={() => deleteAccount(account.id)}
-                        className="absolute top-2 right-2 text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
                     </div>
                   ))}
                 </div>

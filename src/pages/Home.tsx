@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
-import { Feed } from "@/components/Feed";
-import { ProfileCard } from "@/components/ProfileCard";
-import LatestDiscussions from "@/components/LatestDiscussions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import HomeStats from "@/components/home/HomeStats";
 import RecommendedResources from "@/components/resources/RecommendedResources";
+import LatestActivity from "@/components/LatestActivity";
+import { ProfileCard } from "@/components/ProfileCard";
 
-const Home = () => {
-    const [firstName, setFirstName] = useState("");
+interface HomeStatsData {
+    activeTeachers: number;
+    newTeachers: number;
+    sharedMaterials: number;
+    totalDownloads: number;
+}
 
-    const { data: stats } = useQuery({
+const Home: React.FC = () => {
+    const [firstName, setFirstName] = useState<string>("");
+
+    useQuery<HomeStatsData>({
         queryKey: ["home-stats"],
         queryFn: async () => {
             const [
@@ -28,7 +34,9 @@ const Home = () => {
                         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
                     ),
                 supabase.from("resources").select("*", { count: "exact", head: true }),
-                supabase.from("resource_downloads").select("*", { count: "exact", head: true }),
+                supabase
+                    .from("resource_downloads")
+                    .select("*", { count: "exact", head: true }),
             ]);
 
             return {
@@ -40,10 +48,12 @@ const Home = () => {
         },
     });
 
-    // Fetch the current user's first name
+    // Fetch the current user's first name.
     useEffect(() => {
         const fetchUserFirstName = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
             if (user) {
                 const { data: profile, error } = await supabase
                     .from("profiles")
@@ -59,10 +69,12 @@ const Home = () => {
         fetchUserFirstName();
     }, []);
 
-    // Update last_seen on home page load
+    // Update last_seen on home page load.
     useEffect(() => {
         const updateLastSeen = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
             if (user) {
                 await supabase
                     .from("profiles")
@@ -90,18 +102,13 @@ const Home = () => {
                         <HomeStats />
                         <RecommendedResources />
 
-                        {/* LatestDiscussions is shown inline when the sidebar is hidden (i.e. below xl) */}
-                        <div className="xl:hidden">
-                            <LatestDiscussions />
-                        </div>
-
-                        <Feed />
+                        {/* LatestActivity shows the most recent discussions and resources */}
+                        <LatestActivity />
                     </div>
 
                     {/* Sidebar Column: Only visible on xl and above */}
                     <div className="hidden xl:block space-y-6">
                         <ProfileCard />
-                        <LatestDiscussions />
                     </div>
                 </div>
             </main>

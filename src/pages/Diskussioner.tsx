@@ -87,6 +87,7 @@ const Diskussioner = () => {
         description: newDescription,
         slug,
         creator_id: user.user.id,
+        created_at: new Date(),
         tags: tags,
       });
 

@@ -10,11 +10,10 @@ const HomeStats = () => {
     const { data: stats } = useQuery({
         queryKey: ["home-stats"],
         queryFn: async () => {
-            // Query for the counts:
+            // Query for active teachers, new teachers and resource downloads:
             const [
                 { count: activeTeachers },
                 { count: newTeachers },
-                { count: sharedMaterials },
                 { data: resourcesData },
             ] = await Promise.all([
                 supabase.from("profiles").select("*", { count: "exact", head: true }),
@@ -25,7 +24,6 @@ const HomeStats = () => {
                         "created_at",
                         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
                     ),
-                supabase.from("resources").select("*", { count: "exact", head: true }),
                 supabase.from("resources").select("downloads"),
             ]);
 
@@ -36,14 +34,55 @@ const HomeStats = () => {
                     0
                 ) || 0;
 
+            // Get recommended resources count based on the current user
+            let recommendedResourcesCount = 0;
+            const { data: userData } = await supabase.auth.getUser();
+            const user = userData?.user;
+            if (user) {
+                const { data: profile, error: profileError } = await supabase
+                    .from("profiles")
+                    .select("subjects, education_level")
+                    .eq("id", user.id)
+                    .single();
+                if (!profileError && profile && profile.subjects && profile.subjects.length > 0) {
+                    let query = supabase
+                        .from("resources")
+                        .select("*", { count: "exact", head: true })
+                        .in("subject", profile.subjects);
+                    if (profile.education_level === "Gymnasiet") {
+                        query = query.eq("grade", "Gymnasiet");
+                    } else if (profile.education_level === "Grundskola") {
+                        const grundskolaGrades = [
+                            "Årskurs 1",
+                            "Årskurs 2",
+                            "Årskurs 3",
+                            "Årskurs 4",
+                            "Årskurs 5",
+                            "Årskurs 6",
+                            "Årskurs 7",
+                            "Årskurs 8",
+                            "Årskurs 9",
+                        ];
+                        query = query.in("grade", grundskolaGrades);
+                    }
+                    const { count, error: recommendedError } = await query;
+                    if (recommendedError) {
+                        console.error("Error fetching recommended resources count:", recommendedError);
+                    } else {
+                        recommendedResourcesCount = count || 0;
+                    }
+                }
+            }
+
             return {
                 activeTeachers: activeTeachers || 0,
                 newTeachers: newTeachers || 0,
-                sharedMaterials: sharedMaterials || 0,
+                recommendedResources: recommendedResourcesCount,
                 totalDownloads,
             };
         },
     });
+
 
     // State for controlling the user list popup
     const [isUserListOpen, setIsUserListOpen] = useState(false);
@@ -219,7 +258,7 @@ const HomeStats = () => {
                         <div className="flex flex-col items-center mb-3">
                             <FileText className="w-4 h-4 text-[var(--secondary2)]" />
                             <div className="text-3xl font-semibold text-[var(--secondary2)]">
-                                {stats?.sharedMaterials || 0}
+                                {stats?.recommendedResources || 0}
                             </div>
                         </div>
                         <div className="text-sm text-gray-500 text-center hidden sm:block">

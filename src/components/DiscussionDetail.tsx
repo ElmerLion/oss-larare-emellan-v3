@@ -8,12 +8,41 @@ import { ProfileCard } from "@/components/ProfileCard";
 import LatestDiscussions from "@/components/LatestDiscussions";
 import MiniProfile from "@/components/profile/MiniProfile";
 import { formatDistanceToNow } from "date-fns";
+import { MoreVertical, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const DiscussionDetail = () => {
   const { slug } = useParams();
   const queryClient = useQueryClient();
   const [newAnswer, setNewAnswer] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [answerMenuOpen, setAnswerMenuOpen] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handleDocumentClick = () => {
+            setAnswerMenuOpen(null);
+        };
+        document.addEventListener("click", handleDocumentClick);
+        return () => {
+            document.removeEventListener("click", handleDocumentClick);
+        };
+    }, []);
+
+    // Delete answer function
+    const deleteAnswer = async (answerId: string) => {
+        const { error } = await supabase
+            .from("answers")
+            .delete()
+            .eq("id", answerId);
+        if (error) {
+            toast.error("Ett problem uppstod. Försök igen.");
+            console.error("Error deleting answer:", error);
+        } else {
+            toast.success("Svaret har raderats.");
+            setAnswerMenuOpen(null);
+            queryClient.invalidateQueries(["discussion", slug]);
+        }
+    };
 
   // Fetch current user ID
   useEffect(() => {
@@ -128,18 +157,22 @@ const DiscussionDetail = () => {
                       <p className="text-gray-700 mb-4 whitespace-pre-wrap">{discussion?.description}</p>
 
             {/* Display tags if available */}
-            {discussion?.tags?.length > 0 && (
-              <div className="mb-8 flex flex-wrap gap-2">
-                {discussion.tags.map((tag: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-[var(--secondary2)] text-white rounded-full text-xs"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+                      {discussion?.tags?.length > 0 && (
+                          <div className="mb-8 flex flex-wrap gap-2">
+                              {discussion.tags.map((tag: string, index: number) => (
+                                  <span
+                                      key={index}
+                                      className={`px-3 py-1 rounded-full text-xs ${tag === "Veckans Hot Topic"
+                                              ? "bg-yellow-400 text-black"
+                                              : "bg-[var(--secondary2)] text-white"
+                                          }`}
+                                  >
+                                      {tag}
+                                  </span>
+                              ))}
+                          </div>
+                      )}
+
 
             {/* Discussion creator */}
             {discussion?.creator && (
@@ -179,34 +212,65 @@ const DiscussionDetail = () => {
             </form>
 
             {/* Answers Section */}
-            {discussion.answers.length > 0 ? (
-              discussion.answers.map((answer) => (
-                <div
-                  key={answer.id}
-                  className="bg-white p-4 mb-4 rounded-md border border-gray-200 flex flex-col gap-4"
-                >
-                  {/* Mini Profile */}
-                  <div className="flex items-start gap-4">
-                    <MiniProfile
-                      id={answer.user_id}
-                      name={answer.user?.full_name || "Okänd användare"}
-                      avatarUrl={answer.user?.avatar_url}
-                      title={answer.user?.title}
-                      school={answer.user?.school}
-                      created_at={answer.created_at}
-                      size="medium"
-                    />
-                  </div>
+                      {discussion.answers.length > 0 ? (
+                          discussion.answers.map((answer) => (
+                              <div
+                                  key={answer.id}
+                                  className="relative bg-white p-4 mb-4 rounded-md border border-gray-200 flex flex-col gap-4"
+                              >
+                                  {answer.user_id === currentUserId && (
+                                      <div className="absolute top-3 right-3" onClick={(e) => e.stopPropagation()}>
+                                          <button
+                                              onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setAnswerMenuOpen(answer.id);
+                                              }}
+                                              className="text-gray-400 hover:text-gray-600"
+                                          >
+                                              <MoreVertical className="w-5 h-5" />
+                                          </button>
+                                          {answerMenuOpen === answer.id && (
+                                              <div
+                                                  className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-[170px]"
+                                                  onClick={(e) => e.stopPropagation()}
+                                              >
+                                                  <button
+                                                      onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          deleteAnswer(answer.id);
+                                                      }}
+                                                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                                  >
+                                                      <Trash2 className="mr-2 mb-1 h-4 w-4 inline-block" />
+                                                      Ta bort svar
+                                                  </button>
+                                              </div>
+                                          )}
+                                      </div>
+                                  )}
+                                  {/* Mini Profile */}
+                                  <div className="flex items-start gap-4">
+                                      <MiniProfile
+                                          id={answer.user_id}
+                                          name={answer.user?.full_name || "Okänd användare"}
+                                          avatarUrl={answer.user?.avatar_url}
+                                          title={answer.user?.title}
+                                          school={answer.user?.school}
+                                          created_at={answer.created_at}
+                                          size="medium"
+                                      />
+                                  </div>
 
-                  {/* Answer Content */}
-                  <div className="mt-2">
-                          <p className="whitespace-pre-wrap text-gray-700">{answer.content}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
-            )}
+                                  {/* Answer Content */}
+                                  <div className="mt-2">
+                                      <p className="whitespace-pre-wrap text-gray-700">{answer.content}</p>
+                                  </div>
+                              </div>
+                          ))
+                      ) : (
+                          <p className="text-gray-500">Inga svar ännu. Var först att svara!</p>
+                      )}
+
           </div>
 
           {/* Sidebar: Only show on large screens */}

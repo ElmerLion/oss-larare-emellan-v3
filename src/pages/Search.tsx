@@ -40,7 +40,7 @@ export default function Search() {
           <div className="xl:col-span-2">
             <h1 className="text-3xl font-bold mb-4">Sökresultat för "{query}"</h1>
             <div className="mb-4 flex flex-wrap gap-4 border-b pb-2">
-              {["Resurser", "Kontakter", "Diskussioner", "Grupper"].map((tab) => (
+              {["Resurser", "Kontakter", "Samtal"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}

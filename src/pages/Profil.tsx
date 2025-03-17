@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import type { Profile } from "@/types/profile";
 import { Header } from "@/components/Header";
+import { UserListPopup } from "@/components/home/UserListPopup";
 
 export default function Profil() {
   const { id: profileId } = useParams();
@@ -25,7 +26,9 @@ export default function Profil() {
   });
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [contactsCount, setContactsCount] = useState(0);
+    const [contactsCount, setContactsCount] = useState(0);
+    const [contacts, setContacts] = useState<ExtendedProfile[]>([]);
+    const [showContactsPopup, setShowContactsPopup] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -68,7 +71,41 @@ export default function Profil() {
     } finally {
       setIsLoading(false);
     }
-  };
+    };
+
+    const fetchContacts = async () => {
+        if (!profileId) return;
+        // First, fetch the contact IDs for the given profile
+        const { data: contactsData, error: contactsError } = await supabase
+            .from("user_contacts")
+            .select("contact_id")
+            .eq("user_id", profileId);
+        if (contactsError) {
+            console.error("Error fetching contacts:", contactsError);
+            return;
+        }
+        const contactIds = contactsData?.map((contact) => contact.contact_id) || [];
+        if (contactIds.length === 0) {
+            setContacts([]);
+            return;
+        }
+        // Next, fetch the profiles for those contact IDs
+        const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select("*")
+            .in("id", contactIds);
+        if (profilesError) {
+            console.error("Error fetching profiles:", profilesError);
+        } else if (profilesData) {
+            setContacts(profilesData);
+        }
+    };
+
+
+    const handleContactsClick = async () => {
+        await fetchContacts();
+        setShowContactsPopup(true);
+    };
 
   const fetchContactsCount = async () => {
     if (!profileId) return;
@@ -144,7 +181,8 @@ export default function Profil() {
                     reviews={54}
                     imageUrl={profileData.avatar_url}
                     onProfileUpdate={fetchProfile}
-                    isCurrentUser={isCurrentUser}
+                                      isCurrentUser={isCurrentUser}
+                                      onContactsClick={handleContactsClick}
                   />
                   <AboutSection userId={profileId} onProfileUpdate={fetchProfile} />
                   <ProfileInterests
@@ -164,7 +202,13 @@ export default function Profil() {
             </div>
           </div>
         </main>
-      </div>
+          </div>
+          <UserListPopup
+              open={showContactsPopup}
+              onOpenChange={setShowContactsPopup}
+              title="Mina Kontakter"
+              users={contacts}
+          />
     </div>
   );
 }

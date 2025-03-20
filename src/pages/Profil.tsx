@@ -206,9 +206,10 @@ export default function Profil() {
           <UserListPopup
               open={showContactsPopup}
               onOpenChange={setShowContactsPopup}
-              title="Mina Kontakter"
+              title={`${profileData.full_name} kontakter`}
               users={contacts}
           />
+
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet";
 import { LandingPageHeader } from "@/components/landingPage/LandingPageHeader";
 import { Button } from "@/components/ui/button";
+import { PersonaSection } from "@/components/landingPage/PersonaSection";
 
 export default function OmOss() {
     return (
@@ -28,8 +29,7 @@ export default function OmOss() {
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 800 800"
                     >
-                        {/* Left Edge Blob */}
-                        {/* Right Edge Blob */}
+                        {/* SVG paths go here */}
                         <path
                             d="M700 500 C770 430, 870 430, 870 550 C870 670, 770 720, 700 670 C630 620, 630 550, 700 500 Z"
                             fill="#b97375"
@@ -48,8 +48,6 @@ export default function OmOss() {
                             opacity="1"
                             transform="translate(420 -220)"
                         />
-
-                        {/* Left Edge Blob */}
                         <path
                             d="M120 80 C100 60, 80 120, 120 140 C160 160, 180 120, 160 100 C140 80, 140 80, 120 80 Z"
                             fill="#1b7895"
@@ -91,6 +89,11 @@ export default function OmOss() {
                             </p>
                         </div>
                     </section>
+
+                    {/* Team Section */}
+                    <PersonaSection
+                        disableReadMore={true}
+                    />
 
                     {/* About Us Section */}
                     <section className="py-20 bg-white">

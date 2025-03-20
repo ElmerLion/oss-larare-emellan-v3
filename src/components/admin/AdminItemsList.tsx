@@ -353,20 +353,22 @@ export function AdminItemsList({
             {accounts.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 gap-4">
-                  {accounts.map((account: any) => (
-                    <div
-                      key={account.id}
-                      className="bg-white rounded-lg shadow p-4 hover:shadow-md transition relative"
-                    >
-                      <MiniProfile
-                        id={account.id}
-                        name={account.full_name}
-                        avatarUrl={account.avatar_url}
-                        created_at={account.last_seen}
-                        size="small"
-                      />
-                    </div>
-                  ))}
+                                  {accounts.map((account: any) => (
+                                      <div
+                                          key={account.id}
+                                          className="bg-white rounded-lg shadow p-4 hover:shadow-md transition relative"
+                                      >
+                                          <MiniProfile
+                                              id={account.id}
+                                              name={account.full_name}
+                                              avatarUrl={account.avatar_url}
+                                              created_at={account.last_seen}
+                                              size="small"
+                                          />
+                                          <p className="text-sm text-gray-500 mt-2">{account.email}</p>
+                                      </div>
+                                  ))}
+
                 </div>
                 {hasNextAccountsPage && (
                   <div className="mt-4 flex justify-center">

@@ -146,7 +146,7 @@ export function AdminOverview(): JSX.Element {
             const limit = 5;
             const { data, error } = await supabase
                 .from("profiles")
-                .select("id, full_name, avatar_url, last_seen")
+                .select("id, full_name, avatar_url, last_seen, email")
                 .order("last_seen", { ascending: false })
                 .range(pageParam, pageParam + limit - 1);
             if (error) throw error;

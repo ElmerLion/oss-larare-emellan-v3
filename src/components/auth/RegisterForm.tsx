@@ -20,72 +20,81 @@ export default function RegisterForm({ toggleMode, nextStep, data, updateData }:
   const [acceptPolicy, setAcceptPolicy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    if (!acceptPolicy) {
-      toast.error("Du måste acceptera integritetspolicyn för att fortsätta.");
-      return;
-    }
-    if (data.password !== data.confirmPassword) {
-      toast.error("Lösenorden matchar inte");
-      return;
-    }
-
-    // Normalize email by trimming and converting to lowercase.
-    const normalizedEmail = data.email.toLowerCase();
-
-    console.log(normalizedEmail);
-    console.log(data.email);
-    // Check if the email is allowed
-    const { data: allowedUser, error: allowedError } = await supabase
-      .from("allowed_users")
-      .select("email")
-      .eq("email", normalizedEmail)
-      .maybeSingle();
-
-    console.log(allowedUser);
-    console.log(allowedError);
-    if (allowedError) {
-      console.error("Error checking allowed users:", allowedError);
-      toast.error("Ett fel uppstod, försök igen senare.");
-      return;
-    }
-
-    if (!allowedUser) {
-      toast.error("Du har inte tillåtelse att skapa ett konto. Om du tror att något är fel, vänligen maila oss.");
-      return;
-    }
-
-    try {
-      // Use the normalized email in the sign-up call
-      const { error } = await supabase.auth.signUp({ email: normalizedEmail, password: data.password });
-      if (error) {
-        if (
-          error.code === "23505" ||
-          (error.message && error.message.toLowerCase().includes("already"))
-        ) {
-          toast.error("Kontot finns redan");
-          return;
+        if (!acceptPolicy) {
+            toast.error("Du måste acceptera integritetspolicyn för att fortsätta.");
+            return;
         }
-        throw error;
-      }
-      const sessionResult = await supabase.auth.getSession();
-      if (!sessionResult.data.session?.user?.id) {
-        toast.error("Ett fel uppstod. Försök igen senare.");
-        return;
-      }
-      toast.success("Registrering lyckades! Fortsätt med att lägga till dina profiluppgifter.");
-      nextStep();
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      toast.error(
-        error.message === "Duplicate key"
-          ? "Kontot finns redan"
-          : "Ett fel uppstod, försök igen senare"
-      );
-    }
-  };
+        if (data.password !== data.confirmPassword) {
+            toast.error("Lösenorden matchar inte");
+            return;
+        }
+
+        // Normalize email by trimming and converting to lowercase.
+        const normalizedEmail = data.email.toLowerCase();
+
+        // Check if the email is allowed
+        const { data: allowedUser, error: allowedError } = await supabase
+            .from("allowed_users")
+            .select("email")
+            .eq("email", normalizedEmail)
+            .maybeSingle();
+
+        if (allowedError) {
+            console.error("Error checking allowed users:", allowedError);
+            toast.error("Ett fel uppstod, försök igen senare.");
+            return;
+        }
+
+        if (!allowedUser) {
+            toast.error("Du har inte tillåtelse att skapa ett konto. Om du tror att något är fel, vänligen maila oss.");
+            return;
+        }
+
+        try {
+            // Use the normalized email in the sign-up call
+            const { error } = await supabase.auth.signUp({ email: normalizedEmail, password: data.password });
+            if (error) {
+                if (
+                    error.code === "23505" ||
+                    (error.message && error.message.toLowerCase().includes("already"))
+                ) {
+                    toast.error("Kontot finns redan");
+                    return;
+                }
+                throw error;
+            }
+            // Get the current session to retrieve the user id
+            const sessionResult = await supabase.auth.getSession();
+            const userId = sessionResult.data.session?.user?.id;
+            if (!userId) {
+                toast.error("Ett fel uppstod. Försök igen senare.");
+                return;
+            }
+            // Update the profiles table with the email
+            const { error: profileUpdateError } = await supabase
+                .from("profiles")
+                .update({ email: normalizedEmail })
+                .eq("id", userId);
+            if (profileUpdateError) {
+                console.error("Error updating profile with email:", profileUpdateError);
+                toast.error("Kunde inte uppdatera profilen med e-post.");
+                return;
+            }
+            toast.success("Registrering lyckades! Fortsätt med att lägga till dina profiluppgifter.");
+            nextStep();
+        } catch (error: any) {
+            console.error("Auth error:", error);
+            toast.error(
+                error.message === "Duplicate key"
+                    ? "Kontot finns redan"
+                    : "Ett fel uppstod, försök igen senare"
+            );
+        }
+    };
+
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm">

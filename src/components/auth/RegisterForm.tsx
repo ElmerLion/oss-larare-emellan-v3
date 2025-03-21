@@ -19,17 +19,21 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
     const [acceptPolicy, setAcceptPolicy] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMessage(null);
+        setIsSubmitting(true);
 
         if (!acceptPolicy) {
             setErrorMessage("Du måste acceptera integritetspolicyn för att fortsätta.");
+            setIsSubmitting(false);
             return;
         }
         if (data.password !== data.confirmPassword) {
             setErrorMessage("Lösenorden matchar inte.");
+            setIsSubmitting(false);
             return;
         }
 
@@ -46,6 +50,7 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
         if (allowedError) {
             console.error("Error checking allowed users:", allowedError);
             setErrorMessage("Ett fel uppstod, försök igen senare.");
+            setIsSubmitting(false);
             return;
         }
 
@@ -53,6 +58,7 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
             setErrorMessage(
                 "Du har inte tillåtelse att skapa ett konto. Om du tror att något är fel, vänligen maila oss."
             );
+            setIsSubmitting(false);
             return;
         }
 
@@ -65,16 +71,19 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
             if (error) {
                 if (error.name === "AuthInvalidEmailError") {
                     setErrorMessage("Ogiltig e-postadress.");
+                    setIsSubmitting(false);
                     return;
                 }
                 if (error.name === "AuthWeakPasswordError") {
                     setErrorMessage(
                         `Lösenordet uppfyller inte kraven: Minst 6 karaktärer, behöver innehålla bokstäver och nummer.`
                     );
+                    setIsSubmitting(false);
                     return;
                 }
                 if (error.name === "AuthTooManyRequestsError") {
                     setErrorMessage("För många förfrågningar. Vänta en stund och försök igen.");
+                    setIsSubmitting(false);
                     return;
                 }
                 if (
@@ -82,17 +91,18 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
                     (error.message && error.message.toLowerCase().includes("already"))
                 ) {
                     setErrorMessage("Kontot finns redan. Testa att logga in istället.");
+                    setIsSubmitting(false);
                     return;
                 }
                 setErrorMessage(error.message || "Ett fel uppstod, försök igen senare.");
-                console.log(error.message);
+                setIsSubmitting(false);
                 return;
             }
             // Use the user returned from the signUp call instead of getSession()
             const userId = signUpData.user?.id;
             if (!userId) {
                 setErrorMessage("Ett fel uppstod. Försök igen senare.");
-                console.log(error.message);
+                setIsSubmitting(false);
                 return;
             }
             // Update the profiles table with the email
@@ -103,6 +113,7 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
             if (profileUpdateError) {
                 console.error("Error updating profile with email:", profileUpdateError);
                 setErrorMessage("Kunde inte uppdatera profilen med e-post.");
+                setIsSubmitting(false);
                 return;
             }
             toast.success("Registrering lyckades! Kontrollera din e-post för att bekräfta ditt konto.");
@@ -110,10 +121,9 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
         } catch (error: any) {
             console.error("Auth error:", error);
             setErrorMessage(error.message || "Ett fel uppstod, försök igen senare.");
+            setIsSubmitting(false);
         }
     };
-
-
 
     return (
         <>
@@ -192,6 +202,7 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
                     </div>
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
                         className="w-full bg-[var(--ole-green)] border-[var(--hover-green)] hover:bg-[var(--hover-green)]"
                     >
                         Registrera

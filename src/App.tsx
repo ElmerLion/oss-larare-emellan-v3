@@ -13,6 +13,8 @@ import {
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
+
+// Import Pages
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -29,6 +31,8 @@ import Funktioner from "./pages/Funktioner";
 import Contact from "@/pages/Contact";
 import Search from "@/pages/Search";
 import InstructionManual from "./pages/InstructionManual";
+import ConfirmEmail from "./pages/ConfirmEmail";
+import CompleteRegistration from "./pages/CompleteRegistration";
 
 // Import Admin Pages
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -40,6 +44,8 @@ import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import MainLayout from "@/layouts/MainLayout";
 
 const queryClient = new QueryClient();
+
+
 
 // A simple component to protect admin routes
 const AdminProtected = ({
@@ -59,14 +65,20 @@ const AppRoutes = ({
     isAuthenticated,
     currentUserId,
     isAdmin,
+    needsSetup,
 }: {
     isAuthenticated: boolean;
     currentUserId: string | null;
-    isAdmin: boolean;
+        isAdmin: boolean;
+        needsSetup: boolean;
 }) => {
     const location = useLocation();
     // Check if the URL has the register query parameter
     const isRegisteringRoute = location.search.includes("register=true");
+
+    if (isAuthenticated && needsSetup && location.pathname !== "/complete-registration") {
+        return <Navigate to="/complete-registration" replace />;
+    }
 
     return (
         <Routes>
@@ -81,6 +93,10 @@ const AppRoutes = ({
                 path="/"
                 element={isAuthenticated ? <Navigate to="/home" replace /> : <Index />}
             />
+            <Route path="/confirm-email" element={<ConfirmEmail />} />
+            <Route path="/complete-registration" element={<CompleteRegistration />} />
+
+
 
             {/* Authenticated Routes Wrapped in MainLayout */}
             <Route element={<MainLayout isAuthenticated={isAuthenticated} />}>
@@ -184,31 +200,53 @@ const App = () => {
         return () => subscription.unsubscribe();
     }, []);
 
-    // Fetch user's role to check if they are Admin
+    // In App.tsx, inside the App component:
+    const [needsSetup, setNeedsSetup] = useState<boolean>(false);
+
     useEffect(() => {
-        const fetchUserRole = async () => {
+        const fetchUserRoleAndSetup = async () => {
             if (!currentUserId) {
                 setIsAdmin(false);
+                setNeedsSetup(false);
                 return;
             }
-
+            // Get the current session to check email confirmation status.
+            const { data: session } = await supabase.auth.getSession();
+            console.log("Session:", session);
+            if (!session?.session) {
+                setNeedsSetup(false);
+                return;
+            }
+            const user = session.session.user;
+            console.log("User confirmed_at:", user.confirmed_at);
+            // Only proceed if the email is confirmed
+            if (!user.confirmed_at) {
+                // Email not confirmed: do nothing (or you could show a notice)
+                setNeedsSetup(false);
+                return;
+            }
+            // Email is confirmed – now fetch the profile data.
             const { data, error } = await supabase
                 .from("profiles")
-                .select('"role"')
+                .select('"role", is_setup')
                 .eq("id", currentUserId)
                 .single();
-
             if (error) {
                 console.error("Error fetching user role", error);
                 setIsAdmin(false);
+                setNeedsSetup(false);
                 return;
             }
-
             setIsAdmin(data.role === "Admin");
+            // If is_setup is false then the user hasn't completed setup.
+            setNeedsSetup(!data.is_setup);
         };
 
-        fetchUserRole();
+        fetchUserRoleAndSetup();
     }, [currentUserId]);
+
+
+
 
     if (isAuthenticated === null) {
         return null; // or a loading spinner
@@ -226,6 +264,7 @@ const App = () => {
                                 isAuthenticated={isAuthenticated}
                                 currentUserId={currentUserId}
                                 isAdmin={isAdmin}
+                                needsSetup={needsSetup}
                             />
                         </div>
                         <Footer />

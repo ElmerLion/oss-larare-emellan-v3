@@ -1,70 +1,68 @@
-﻿// MultiStepRegister.tsx
-import { useState } from "react";
-import RegisterForm from "./RegisterForm"; // Stage 1: Email/Password
-import RegisterProfileForm from "./RegisterProfileForm"; // Stage 2: Extra profile details
-import RegisterInterestsForm from "./RegisterInterestsForm"; // Stage 3: Interests
+﻿import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import RegisterProfileForm from "./RegisterProfileForm"; // Stage 1: Profile details
+import RegisterInterestsForm from "./RegisterInterestsForm"; // Stage 2: Interests
 
 interface MultiStepRegisterProps {
-  toggleMode: () => void;
-  onComplete: () => void;
+    toggleMode: () => void;
+    onComplete: () => void;
 }
 
 export default function MultiStepRegister({ toggleMode, onComplete }: MultiStepRegisterProps) {
-  // Manage which step you're on
-  const [step, setStep] = useState(1);
+    // Now we only have 2 steps.
+    const [step, setStep] = useState(1);
 
-  // Hold all user registration data with default values
-  const [registrationData, setRegistrationData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    // Stage 2 fields:
-    fullName: "",
-    school: "",
-    jobTitle: "",
-    city: "",
-  });
+    // Hold all user registration data (excluding email/password)
+    const [registrationData, setRegistrationData] = useState({
+        fullName: "",
+        school: "",
+        jobTitle: "",
+        city: "",
+    });
 
-  // Function to update registration data
-  const updateData = (newData: Partial<typeof registrationData>) => {
-    setRegistrationData((prev) => ({ ...prev, ...newData }));
-  };
+    // Function to update registration data
+    const updateData = (newData: Partial<typeof registrationData>) => {
+        setRegistrationData((prev) => ({ ...prev, ...newData }));
+    };
 
-  // Functions to navigate between steps
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
+    // Navigation functions between steps
+    const nextStep = () => setStep((prev) => prev + 1);
+    const prevStep = () => setStep((prev) => prev - 1);
+
+    // Logout function to prevent user from getting stuck
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        window.location.href = "/login";
+    };
 
     return (
-        <>
-            <div className="bg-yellow-100 text-yellow-800 p-4 text-center">
-                Du kan just nu inte registrera dig då vi håller på att ändra systemet.
+        <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm mt-16 mb-16">
+            {/* Description at the top */}
+            <p className="mb-4 text-center text-gray-700">
+                Vänligen fyll i dina uppgifter för att slutföra din registrering.
+            </p>
+            {step === 1 && (
+                <RegisterProfileForm
+                    data={registrationData}
+                    updateData={updateData}
+                    nextStep={nextStep}
+                    toggleMode={toggleMode}
+                />
+            )}
+            {step === 2 && (
+                <RegisterInterestsForm
+                    registrationData={registrationData}
+                    onComplete={onComplete}
+                    prevStep={prevStep}
+                />
+            )}
+            {/* Logout button at the bottom with a border */}
+            <div className="mt-8">
+                <Button onClick={handleLogout} variant="secondary" size="sm" className="w-full border border-gray-300">
+                    Logga ut
+                </Button>
             </div>
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm mt-16">
-
-      {step === 1 && (
-        <RegisterForm
-          data={registrationData}
-          updateData={updateData}
-          nextStep={nextStep}
-          toggleMode={toggleMode}
-        />
-      )}
-      {step === 2 && (
-        <RegisterProfileForm
-          data={registrationData}
-          updateData={updateData}
-          nextStep={nextStep}
-          prevStep={prevStep}
-        />
-      )}
-      {step === 3 && (
-        <RegisterInterestsForm
-          registrationData={registrationData}
-          onComplete={onComplete}
-          prevStep={prevStep}
-        />
-      )}
-            </div>
-    </>
-  );
+        </div>
+    );
 }

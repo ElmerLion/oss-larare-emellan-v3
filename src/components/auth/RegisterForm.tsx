@@ -85,12 +85,14 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
                     return;
                 }
                 setErrorMessage(error.message || "Ett fel uppstod, försök igen senare.");
+                console.log(error.message);
                 return;
             }
             // Use the user returned from the signUp call instead of getSession()
             const userId = signUpData.user?.id;
             if (!userId) {
                 setErrorMessage("Ett fel uppstod. Försök igen senare.");
+                console.log(error.message);
                 return;
             }
             // Update the profiles table with the email

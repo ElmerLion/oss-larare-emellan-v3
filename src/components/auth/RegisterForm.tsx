@@ -129,10 +129,6 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
         <>
             <div className="h-20"></div>
             <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm">
-                {/* Warning Banner */}
-                <div className="bg-yellow-100 text-yellow-800 p-4 mb-4 text-center">
-                    Du kan just nu inte registrera dig då vi håller på att ändra systemet.
-                </div>
                 <h1 className="text-2xl font-semibold mb-6 text-center">Skapa konto</h1>
                 {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4">

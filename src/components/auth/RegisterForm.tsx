@@ -96,8 +96,10 @@ export default function RegisterForm({ toggleMode, nextStep, data, updateData }:
     };
 
 
-  return (
+    return (
+        <>
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm">
+
       <h1 className="text-2xl font-semibold mb-6 text-center">Skapa konto</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -177,5 +179,6 @@ export default function RegisterForm({ toggleMode, nextStep, data, updateData }:
         </button>
       </div>
     </div>
+    </>
   );
 }

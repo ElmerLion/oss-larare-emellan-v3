@@ -28,9 +28,6 @@ export default function Login() {
             <LandingPageHeader />
             {/* Warning Banner */}
             <div className="pt-16">
-                <div className="bg-yellow-100 text-yellow-800 p-4 text-center">
-                    Du kan just nu inte logga in eller registrera dig då vi håller på att ändra systemet.
-                </div>
                 {isRegistering ? (
                     // Render the MultiStepRegister which handles all registration stages.
                     <MultiStepRegister toggleMode={toggleMode} onComplete={() => navigate("/home")} />

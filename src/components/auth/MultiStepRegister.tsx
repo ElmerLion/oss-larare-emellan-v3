@@ -1,4 +1,4 @@
-// MultiStepRegister.tsx
+﻿// MultiStepRegister.tsx
 import { useState } from "react";
 import RegisterForm from "./RegisterForm"; // Stage 1: Email/Password
 import RegisterProfileForm from "./RegisterProfileForm"; // Stage 2: Extra profile details
@@ -34,8 +34,13 @@ export default function MultiStepRegister({ toggleMode, onComplete }: MultiStepR
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm">
+    return (
+        <>
+            <div className="bg-yellow-100 text-yellow-800 p-4 text-center">
+                Du kan just nu inte registrera dig då vi håller på att ändra systemet.
+            </div>
+      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm mt-16">
+
       {step === 1 && (
         <RegisterForm
           data={registrationData}
@@ -59,6 +64,7 @@ export default function MultiStepRegister({ toggleMode, onComplete }: MultiStepR
           prevStep={prevStep}
         />
       )}
-    </div>
+            </div>
+    </>
   );
 }

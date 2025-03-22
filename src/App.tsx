@@ -99,7 +99,15 @@ const AppRoutes = ({
 
 
             {/* Authenticated Routes Wrapped in MainLayout */}
-            <Route element={<MainLayout isAuthenticated={isAuthenticated} />}>
+            <Route
+                element={
+                    isAuthenticated ? (
+                        <MainLayout isAuthenticated={isAuthenticated} />
+                    ) : (
+                        <Navigate to="/login" replace />
+                    )
+                }
+            >
                 <Route path="/home" element={<Home />} />
                 <Route path="/meddelanden" element={<Kontakter />} />
                 <Route path="/resurser" element={<Resurser />} />

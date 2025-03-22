@@ -37,7 +37,7 @@ export default function MultiStepRegister({ toggleMode, onComplete }: MultiStepR
     };
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm mt-16 mb-16">
+        <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-sm mt-16 mb-16 sm:max-w-4xl md:max-w-5xl lg:max-w-6xl">
             {/* Description at the top */}
             <p className="mb-4 text-center text-gray-700">
                 Vänligen fyll i dina uppgifter för att slutföra din registrering.
@@ -59,10 +59,11 @@ export default function MultiStepRegister({ toggleMode, onComplete }: MultiStepR
             )}
             {/* Logout button at the bottom with a border */}
             <div className="mt-8">
-                <Button onClick={handleLogout} variant="secondary" size="sm" className="w-full border border-gray-300">
+                <Button onClick={handleLogout} size="sm" className="w-xl bg-[#fa878d] hover:bg-[#fc6068]">
                     Logga ut
                 </Button>
             </div>
         </div>
     );
+
 }

@@ -55,7 +55,8 @@ export default function RegisterInterestsForm({ onComplete }: RegisterInterestsF
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-16 p-6 bg-white rounded-lg shadow-sm">
+        // Updated container classes: full width with responsive max-widths on larger screens.
+        <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-sm sm:max-w-4xl md:max-w-5xl lg:max-w-6xl">
             <h2 className="text-2xl font-semibold mb-6 text-center">Välj dina ämnen och intressen</h2>
             {/* Education Level Selection */}
             <div className="mb-4">

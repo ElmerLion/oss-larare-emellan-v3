@@ -37,7 +37,7 @@ export function PersonaSection({ disableReadMore = false }) {
                         transition={{ duration: 0.8 }}
                         className="text-4xl font-bold text-center mb-12"
                     >
-                        Möt vårt team
+                        Möt teamet bakom OLE
                     </motion.h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {teamMembers.map((member, index) => (

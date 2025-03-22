@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import LandingPageHeader from "@/components/landingPage/LandingPageHeader";
 import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
@@ -36,6 +37,20 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <Helmet>
+                <title>
+                    Login | Oss Lärare Emellan - Gemenskap för Sveriges lärare
+                </title>
+                <meta
+                    name="description"
+                    content="Logga in till Oss Lärare Emellan, din plattform för att nätverka med lärare, dela resurser och få inspiration för en bättre undervisning."
+                />
+                <meta
+                    name="keywords"
+                    content="login, inloggning, lärare, community, utbildning, registrera, Sverige"
+                />
+                <link rel="canonical" href="https://www.osslarareemellan.se/login" />
+            </Helmet>
             <LandingPageHeader />
             {/* Warning Banner */}
             <div className="pt-16">

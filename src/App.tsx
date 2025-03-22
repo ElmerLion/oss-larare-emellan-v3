@@ -28,7 +28,7 @@ import Diskussioner from "./pages/Diskussioner";
 import DiscussionDetail from "@/components/DiscussionDetail";
 import Installningar from "./pages/Installningar";
 import Funktioner from "./pages/Funktioner";
-import Contact from "@/pages/Contact";
+import ContactUs from "@/pages/ContactUs";
 import Search from "@/pages/Search";
 import InstructionManual from "./pages/InstructionManual";
 import ConfirmEmail from "./pages/ConfirmEmail";
@@ -161,7 +161,7 @@ const AppRoutes = ({
             {/* Public Informational Pages */}
             <Route path="/omoss" element={<OmOss />} />
             <Route path="/integritetspolicy" element={<IntegritetsPolicy />} />
-            <Route path="/kontakt" element={<Contact />} />
+            <Route path="/kontakt" element={<ContactUs />} />
             <Route path="/funktioner" element={<Funktioner />} />
 
             <Route

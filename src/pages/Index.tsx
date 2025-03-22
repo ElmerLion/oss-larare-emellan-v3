@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+ï»¿import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/Footer";
@@ -18,14 +18,14 @@ const Index = () => {
     return (
         <>
             <Helmet>
-                <title>Oss Lärare Emellan | Gemenskap för Sveriges lärare</title>
+                <title>Oss LÃ¤rare Emellan | Gemenskap fÃ¶r Sveriges lÃ¤rare</title>
                 <meta
                     name="description"
-                    content="Välkommen till Oss Lärare Emellan – din portal för att upptäcka resurser, nätverka med kollegor och få inspiration för en bättre undervisning. Utforska vårt community idag."
+                    content="VÃ¤lkommen till Oss LÃ¤rare Emellan â€“ din portal fÃ¶r att upptÃ¤cka resurser, nÃ¤tverka med kollegor och fÃ¥ inspiration fÃ¶r en bÃ¤ttre undervisning. Utforska vÃ¥rt community idag."
                 />
                 <meta
                     name="keywords"
-                    content="lärare, utbildning, undervisning, community, Sverige, resurser, nätverk"
+                    content="lÃ¤rare, utbildning, undervisning, community, Sverige, resurser, nÃ¤tverk"
                 />
                 <link rel="canonical" href="https://www.osslarareemellan.se" />
             </Helmet>

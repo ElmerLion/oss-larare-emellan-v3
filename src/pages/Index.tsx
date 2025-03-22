@@ -46,7 +46,6 @@ const Index = () => {
                 <PersonaSection />
 
                 {/* Testimonials Section */}
-                <TestimonialsSection />
 
                 {/* CTA Section */}
                 <CTASection />

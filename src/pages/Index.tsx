@@ -28,6 +28,17 @@ const Index = () => {
                     content="lärare, utbildning, undervisning, community, Sverige, resurser, nätverk"
                 />
                 <link rel="canonical" href="https://www.osslarareemellan.se" />
+                <script type="application/ld+json">
+                     {`
+                      {
+                        "@context": "https://schema.org",
+                        "@type": "WebSite",
+                        "name": "Oss Lärare Emellan",
+                        "alternateName": "OLE",
+                        "url": "https://www.osslarareemellan.se"
+                      }
+                    `}
+                </script>
             </Helmet>
 
             <div className="min-h-screen bg-gradient-to-b from-sage-50 to-white flex flex-col relative cursor-default">

@@ -15,7 +15,18 @@ export default function Contact() {
                     name="keywords"
                     content="kontakt, lärare, community, utbildning, Sverige"
                 />
-                <link rel="canonical" href="https://www.osslarareemellan.se/kontakta" />
+                <link rel="canonical" href="https://www.osslarareemellan.se/kontakt" />
+                <script type="application/ld+json">
+                    {`
+        {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": "Kontakta Oss",
+            "description": "Har du frågor eller idéer? Kontakta Oss Lärare Emellan via e-post eller LinkedIn.",
+            "url": "https://www.osslarareemellan.se/kontakt"
+        }
+        `}
+                </script>
             </Helmet>
 
             <div className="relative min-h-screen">

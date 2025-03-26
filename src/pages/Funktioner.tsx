@@ -53,8 +53,19 @@ export default function FeatureSection() {
                 />
                 <link
                     rel="canonical"
-                    href="https://www.osslarareemellan.se/feature"
+                    href="https://www.osslarareemellan.se/funktioner"
                 />
+                <script type="application/ld+json">
+                    {`
+                      {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "Hur funkar Oss Lärare Emellan?",
+                        "description": "En genomgång av hur plattformen fungerar: dela resurser, nätverka och delta i samtal.",
+                        "url": "https://www.osslarareemellan.se/feature"
+                      }
+                    `}
+                </script>
             </Helmet>
 
             <div className="mt-16">

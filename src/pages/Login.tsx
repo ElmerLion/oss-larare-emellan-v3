@@ -50,6 +50,17 @@ export default function Login() {
                     content="login, inloggning, lärare, community, utbildning, registrera, Sverige"
                 />
                 <link rel="canonical" href="https://www.osslarareemellan.se/login" />
+                <script type="application/ld+json">
+                    {`
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Login / Registrera",
+            "description": "Logga in eller skapa ett konto på Oss Lärare Emellan – plattformen för att dela resurser, bygga nätverk och få inspiration inom undervisning.",
+            "url": "https://www.osslarareemellan.se/login"
+        }
+        `}
+                </script>
             </Helmet>
             <LandingPageHeader />
             {/* Warning Banner */}

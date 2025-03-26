@@ -17,6 +17,17 @@ export default function OmOss() {
                     content="lärare, utbildning, gemenskap, samarbete, undervisning, inspiration, Sverige"
                 />
                 <link rel="canonical" href="https://www.osslarareemellan.se/omoss" />
+                <script type="application/ld+json">
+                    {`
+        {
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": "Om Oss",
+            "description": "Lär dig mer om Oss Lärare Emellan, en plattform skapad för att förena och stärka Sveriges lärare genom delning av resurser, samarbete och inspiration.",
+            "url": "https://www.osslarareemellan.se/omoss"
+        }
+        `}
+                </script>
             </Helmet>
 
             <div>

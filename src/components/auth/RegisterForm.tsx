@@ -56,7 +56,7 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
 
         if (!allowedUser) {
             setErrorMessage(
-                "Du har inte tillåtelse att skapa ett konto. Om du tror att något är fel, vänligen maila oss."
+                "Du har inte tillåtelse att skapa ett konto. Om du vill prova tjänsten, vänligen registrera dig som beta-testare."
             );
             setIsSubmitting(false);
             return;
@@ -129,7 +129,11 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
         <>
             <div className="h-20"></div>
             <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm">
-                <h1 className="text-2xl font-semibold mb-6 text-center">Skapa konto</h1>
+                <h1 className="text-2xl font-semibold mb-2 text-center">Skapa konto</h1>
+                {/* Disclaimer */}
+                <p className="text-gray-500 text-center mb-4 text-sm">
+                    OBS: Endast utvalda användare kan skapa ett konto. Om du vill prova tjänsten, vänligen registrera dig som beta-testare.
+                </p>
                 {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">

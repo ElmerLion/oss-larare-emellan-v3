@@ -1,8 +1,10 @@
-import { Helmet } from "react-helmet";
+﻿import { Helmet } from "react-helmet";
 import { LandingPageHeader } from "@/components/landingPage/LandingPageHeader";
 import { Button } from "@/components/ui/button";
 import { PersonaSection } from "@/components/landingPage/PersonaSection";
 import { CTASection } from "@/components/landingPage/CTASection";
+import { LinkedInBanner } from "@/components/landingPage/LinkedInBanner";
+
 
 export default function OmOss() {
     return (
@@ -61,8 +63,9 @@ export default function OmOss() {
                     {/* Team Section */}
                     <PersonaSection
                         disableReadMore={true}
+                        showContactAtCursor={true}
                     />
-
+                    
                     {/* About Us Section */}
                     <section className="py-20 bg-white">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,7 +100,7 @@ export default function OmOss() {
                     </section>
 
                     {/* Call to Action */}
-                    <CTASection />
+                    <LinkedInBanner />
                 </main>
             </div>
         </>

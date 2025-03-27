@@ -13,6 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 // Import Pages
 import Index from "./pages/Index";
@@ -82,6 +83,7 @@ const AppRoutes = ({
 
     return (
         <Routes>
+            
             {/* Public Routes */}
             <Route
                 path="/login"
@@ -267,6 +269,7 @@ const App = () => {
                     <Toaster />
                     <Sonner />
                     <BrowserRouter>
+                        <ScrollToTop />
                         <div className="flex-grow">
                             <AppRoutes
                                 isAuthenticated={isAuthenticated}

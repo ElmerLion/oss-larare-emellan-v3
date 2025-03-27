@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { interestsOptions } from "@/types/interestsOptions";
 import AllowedUsers from "./AllowedUsers";
+import { BetaTestersList } from "./BetaTestersList";
 import { useBroadcast } from "@/hooks/useBroadcast";
 
 export function AdminCreate(): JSX.Element {
@@ -338,6 +339,7 @@ export function AdminCreate(): JSX.Element {
                 </div>
 
                 <AllowedUsers />
+                <BetaTestersList />
             </main>
         </div>
     );

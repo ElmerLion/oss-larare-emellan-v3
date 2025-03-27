@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Link as ScrollLink, Element } from "react-scroll";
+import { Link } from "react-router-dom"; 
 import { FeatureSection } from "@/components/landingPage/FeatureSection";
 import { TestimonialsSection } from "@/components/landingPage/TestimonialsSection";
 import { AboutSection } from "@/components/landingPage/AboutSection";
@@ -54,7 +55,9 @@ const Index = () => {
                 {/* Features Section */}
                 <FeatureSection />
 
-                <PersonaSection />
+                <Link to="/omoss">
+                    <PersonaSection />
+                </Link>
 
                 {/* Testimonials Section */}
 

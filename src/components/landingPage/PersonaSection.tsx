@@ -11,17 +11,17 @@ export function PersonaSection({ disableReadMore = false }) {
     const teamMembers = [
         {
             name: "Emmie",
-            description: "Projektledare",
+            description: "Jag ser till att alla projekt rullar på smidigt och organiserat, med fokus på att hålla rätt kurs mot våra mål.",
             image: "/Images/Emmie.png",
         },
         {
             name: "Elmer",
-            description: "Utvecklare",
+            description: "Det är jag som programmerar och bygger upp OLEs hemsida, att utveckla kreativa lösningar som driver vårt arbete framåt är min specialitet.",
             image: "/Images/Elmer.png",
         },
         {
             name: "Amanda",
-            description: "Designer",
+            description: "Med ett öga för detaljer skapar jag OLEs designlösningar som gör vår plattform tilltalande och användarvänlig.",
             image: "/Images/Amanda2.png",
         },
     ];

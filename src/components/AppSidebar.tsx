@@ -9,8 +9,9 @@ import {
     UserPlus,
     Library,
     MessageSquare,
-    Menu, // For the hamburger button
+    Menu,
     CircleHelp,
+    FlaskConical, // Icon for beta testing
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, Link, useNavigate } from "react-router-dom";
@@ -20,11 +21,12 @@ import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { FeedbackDialog } from "@/components/settings/FeedbackDialog";
 
+// 1. Add a new menu item at the top for Beta Testning
 const menuItems = [
+    { icon: FlaskConical, label: "Läs här - Testning", path: "/betatestning" },
     { icon: Home, label: "Hem", path: "/home" },
     { icon: User, label: "Profil", path: "/profil" },
     { icon: Users, label: "Forum", path: "/forum" },
-    // { icon: MessageSquare, label: "Meddelanden", path: "/meddelanden" },
     { icon: Book, label: "Resurser", path: "/resurser" },
     { icon: Library, label: "Mitt Bibliotek", path: "/mitt-bibliotek" },
     { icon: Settings, label: "Inställningar", path: "/installningar" },
@@ -48,14 +50,19 @@ export function AppSidebar({ offset = 0 }: AppSidebarProps) {
             setSession(session);
         });
 
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-        });
+        const { data: subscription } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setSession(session);
+            }
+        );
 
-        return () => subscription.unsubscribe();
+        return () => {
+            if (subscription && typeof subscription.unsubscribe === "function") {
+                subscription.unsubscribe();
+            }
+        };
     }, []);
+
 
     // Fetch unread messages count and subscribe to changes.
     useEffect(() => {

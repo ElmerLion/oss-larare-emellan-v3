@@ -34,6 +34,7 @@ import Search from "@/pages/Search";
 import InstructionManual from "./pages/InstructionManual";
 import ConfirmEmail from "./pages/ConfirmEmail";
 import CompleteRegistration from "./pages/CompleteRegistration";
+import BetaTestingPage from "./pages/BetaTestingPage";
 
 // Import Admin Pages
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -124,6 +125,7 @@ const AppRoutes = ({
                 />
                 <Route path="/installningar" element={<Installningar />} />
                 <Route path="/instruktionsmanual" element={<InstructionManual />} />
+                <Route path="/betatestning" element={<BetaTestingPage />} />
 
                 
             </Route>

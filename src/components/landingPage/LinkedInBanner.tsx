@@ -10,7 +10,7 @@ export function LinkedInBanner(): JSX.Element {
                     Följ oss på LinkedIn för att ta del av våra senaste nyheter, uppdateringar och följ vår resa.
                 </p>
                 <a
-                    href="https://www.linkedin.com/company/yourcompany"
+                    href="https://www.linkedin.com/company/oss-l%C3%A4rare-emellan/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-blue-800 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors"

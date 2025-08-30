@@ -51,15 +51,15 @@ export default function RegisterForm({ toggleMode, data, updateData }: RegisterF
             console.error("Error checking allowed users:", allowedError);
             setErrorMessage("Ett fel uppstod, försök igen senare.");
             setIsSubmitting(false);
-            return;
+            // return;
         }
 
         if (!allowedUser) {
-            setErrorMessage(
-                "Du har inte tillåtelse att skapa ett konto. Om du vill prova tjänsten, vänligen registrera dig som beta-testare."
-            );
+            //setErrorMessage(
+                //"Du har inte tillåtelse att skapa ett konto. Om du vill prova tjänsten, vänligen registrera dig som beta-testare."
+            //);
             setIsSubmitting(false);
-            return;
+            // return;
         }
 
         try {
